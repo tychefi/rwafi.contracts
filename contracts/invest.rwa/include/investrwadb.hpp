@@ -17,129 +17,112 @@ using std::string;
 static constexpr eosio::name active_perm        {"active"_n};
 static constexpr symbol SYS_SYMBOL              = SYMBOL("flon", 8);
 static constexpr name SYS_BANK                  { "flon.token"_n };
+
 static constexpr uint32_t MIN_SINGLE_REDPACK    = 100;
-static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
-
-#ifndef DAY_SECONDS_FOR_TEST
-static constexpr uint64_t DAY_SECONDS           = 24 * 60 * 60;
-#else
-#warning "DAY_SECONDS_FOR_TEST should be used only for test!!!"
-static constexpr uint64_t DAY_SECONDS           = DAY_SECONDS_FOR_TEST;
-#endif//DAY_SECONDS_FOR_TEST
-
+static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
+static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
+static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
 static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t    EXPIRY_HOURS        = 12;
+static constexpr uint8_t  EXPIRY_HOURS          = 12;
 
 namespace wasm { namespace db {
 
-#define TG_TBL [[eosio::table, eosio::contract("did.redpack")]]
-#define TG_TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
+#define TBL [[eosio::table, eosio::contract("did.redpack")]]
+#define TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
 
-struct TG_TBL_NAME("global") global_t {
-    name            admin;
-    uint16_t        expire_hours;   //discarded
-    uint16_t        data_failure_hours;
-    bool            did_supported;
-
-    EOSLIB_SERIALIZE( global_t, (admin)(expire_hours)(data_failure_hours)(did_supported) )
-};
-typedef eosio::singleton< "global"_n, global_t > global_singleton;
-
-struct TG_TBL_NAME("global2") global_t2
-{
-    name                                     did_contract;
-    uint64_t                                 did_id;
-    extended_asset                           fee;
-    
-    EOSLIB_SERIALIZE(global_t2, (did_contract)(did_id)(fee))
-};
-typedef eosio::singleton<"global2"_n, global_t2> global_singleton2;
-
-namespace redpack_status {
-    static constexpr eosio::name CREATED        = "created"_n;
-    static constexpr eosio::name FINISHED       = "finished"_n;
-    static constexpr eosio::name CANCELLED      = "cancelled"_n;
-};
-
-uint128_t get_unionid( const name& rec, uint64_t packid ) {
+inline uint128_t get_unionid( const name& rec, uint64_t packid ) {
      return ( (uint128_t) rec.value << 64 ) | packid;
 }
 
-struct TG_TBL redpack_t {
-    name            code;
-    name            sender;
-    string          pw_hash;
-    asset           total_quantity;
-    uint64_t        receiver_count;
-    asset           remain_quantity;
-    uint64_t        remain_count         = 0;
-    asset           fee;
-    name            status;
-    uint16_t        type;  //0 random,1 mean fixed, 10: DID random, 11: DID fixed
-    time_point      created_at;
-    time_point      updated_at;
+struct TBL_NAME("global") global_t {
+    name            admin;
+    uint64_t        last_plan_id = 0;
 
-    uint64_t primary_key() const { return code.value; }
+    EOSLIB_SERIALIZE( global_t, (admin)(last_plan_id) )
+};
+typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
+// whitlisted investment tokens
+//
+struct TG_TBL allow_token_t {               //scope: _self
+    symbol          token_symbol;           //PK: token symbol
+    name            token_contract;         //token issuing contract
+    bool            onshelf = true;
+
+    uint64_t primary_key() const { return token_symbol.raw(); }
+
+    allow_token_t(){}
+    allow_token_t( const symbole& symb ): token_symbol(symb){}
+
+    typedef eosio::multi_index<"allowtokens"_n, allow_token_t,
+    > idx_t;
+
+    EOSLIB_SERIALIZE( allow_token_t, (token_symbol)(token_contract)(onshelf) )
+};
+
+// fundraising plan status
+namespace PlanStatus {
+    static constexpr eosio::name PENDING        = "pending"_n;  // 待开始募资
+    static constexpr eosio::name ACTIVE         = "active"_n;   // 募资成功
+    static constexpr eosio::name CLOSED         = "closed"_n;   // 已达硬顶 (不可投)
+    static constexpr eosio::name SUCCESS        = "success"_n;  // 募资成功
+    static constexpr eosio::name FAILED         = "failed"_n;   // 募资失败 (处理退款)
+    static constexpr eosio::name COMPLETED      = "completed"_n;// 已完成（回报发完）
+    static constexpr eosio::name CANCELLED      = "cancelled"_n;// 已取消
+    static constexpr eosio::name PENDING_PLEDGE = "pendingpldge"_n;//
+};
+
+
+struct TBL fundplan_t {                             //scope: _self
+    uint64_t            id;                         //PK: 募资计划ID
+    string              title;                      //plan title: <=64 chars
+    name                creator;                    //plan owner
+
+    // === 募资目标 ===
+    name                goal_asset_contract;        //goal asset issuing contract (FRC20)
+    asset               goal_quantity;              //goal quantity to raise (FRC20)
+    time_point          created_at;                 //create time
+
+    // === 投资凭证 ===
+    name                receipt_asset_contract;     //receipt issuing contract (FRC20)
+
+    // === 软顶 & 硬顶 ===
+    uint8_t             soft_cap_percent;           // 软顶比例：最低成功门槛（如 60 → 60%）
+    uint8_t             hard_cap_percent;           // 硬顶比例：最高募资上限（如 100 → 100%，120 → 允许超募）
+
+    // === 时间控制 ===
+    time_point_sec      start_time;                 // 募资开始时间
+    time_point_sec      end_time;                   // 募资截止时间
+
+    // === 回报分配期限（新增）===
+    uint16_t            return_years;               // 回报年限：8~10 年
+    time_point          return_end_time;            // 回报结束时间（自动计算）
+
+    // === 投资担保机制 ===
+    double              guaranteed_yield_apr = 0.05; // 兜底年化收益率（5% → 0.05）
+
+    // === 实时状态 ===
+    asset               total_raised_funds;        // 已募集数量
+    asset               total_issued_receipts;     // 已发凭证数量
+    name                status = PlanStatus::PENDING; //募资计划状态
+    
+    uint64_t primary_key() const { return id; }
     // uint64_t by_updatedid() const { return ((uint64_t)updated_at.sec_since_epoch() << 32) | (code.value & 0x00000000FFFFFFFF); }
-    // uint64_t by_sender() const { return sender.value; }
-
-    redpack_t(){}
-    redpack_t( const name& c ): code(c){}
-
-    typedef eosio::multi_index<"redpacks"_n, redpack_t
-        // indexed_by<"updatedid"_n,  const_mem_fun<redpack_t, uint64_t, &redpack_t::by_updatedid> >,
-        // indexed_by<"senderid"_n,  const_mem_fun<redpack_t, uint64_t, &redpack_t::by_sender> >
+    // uint64_t by_creator() const { return creator.value; }
+    fundplan_t(){}
+    fundplan_t( const name& c ): code(c){}
+    typedef eosio::multi_index<"fundplans"_n, fundplan_t
+        // indexed_by<"updatedid"_n,  const_mem_fun<fundplan_t, uint64_t, &fundplan_t::by_updatedid> >,
+        // indexed_by<"creatorid"_n,  const_mem_fun<fundplan_t, uint64_t, &fundplan_t::by_creator> >
     > idx_t;
 
-    EOSLIB_SERIALIZE( redpack_t, (code)(sender)(pw_hash)(total_quantity)(receiver_count)(remain_quantity)
-                                 (remain_count)(fee)(status)(type)(created_at)(updated_at) )
-};
-
-struct TG_TBL claim_t {
-    uint64_t        id;
-    name            red_pack_code;
-    name            sender;                     //plan owner
-    name            receiver;                      //plan title: <=64 chars
-    asset           quantity;             //asset issuing contract (ARC20)
-    time_point      claimed_at;                 //update time: last updated at
-    uint64_t primary_key() const { return id; }
-    uint128_t by_unionid() const { return get_unionid(receiver, red_pack_code.value); }
-    // uint64_t by_claimedid() const { return ((uint64_t)claimed_at.sec_since_epoch() << 32) | (id & 0x00000000FFFFFFFF); }
-    // uint64_t by_sender() const { return sender.value; }
-    // uint64_t by_receiver() const { return receiver.value; }
-    // uint64_t by_packid() const { return red_pack_code.value; }
-
-    typedef eosio::multi_index<"claims"_n, claim_t,
-        indexed_by<"unionid"_n,  const_mem_fun<claim_t, uint128_t, &claim_t::by_unionid> >
-        // indexed_by<"claimedid"_n,  const_mem_fun<claim_t, uint64_t, &claim_t::by_claimedid> >,
-        // indexed_by<"packid"_n,  const_mem_fun<claim_t, uint64_t, &claim_t::by_packid> >,
-        // indexed_by<"senderid"_n,  const_mem_fun<claim_t, uint64_t, &claim_t::by_sender> >,
-        // indexed_by<"receiverid"_n,  const_mem_fun<claim_t, uint64_t, &claim_t::by_receiver> >
-    > idx_t;
-
-    EOSLIB_SERIALIZE( claim_t, (id)(red_pack_code)(sender)(receiver)(quantity)(claimed_at) )
-};
-
-struct TG_TBL tokenlist_t {
-    uint64_t        id;
-    symbol          sym;
-    name            contract;
-    time_point_sec  expired_time;
-
-    uint64_t primary_key() const { return id; }
-
-    uint128_t by_symcontract() const { return get_unionid(contract, sym.raw()); }
-    uint64_t  by_sym() const { return sym.raw(); }
-    tokenlist_t(){}
-    tokenlist_t( const uint64_t& i ): id(i){}
-
-    typedef eosio::multi_index<"tokenlist"_n, tokenlist_t,
-        indexed_by<"symcontract"_n,  const_mem_fun<tokenlist_t, uint128_t, &tokenlist_t::by_symcontract> >,
-        indexed_by<"sym"_n,  const_mem_fun<tokenlist_t, uint64_t, &tokenlist_t::by_sym> >
-    > idx_t;
-
-    EOSLIB_SERIALIZE( tokenlist_t, (id)(sym)(contract)(expired_time) )
+    EOS_LIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)
+        (created_at)(receipt_asset_contract)
+        (soft_cap_percent)(hard_cap_percent)(start_time)(end_time)
+        (return_years)(return_end_time)(guaranteed_yield_apr)
+        (total_raised_funds)(total_issued_receipts)(status)
+    )
+ 
 };
 
 } }

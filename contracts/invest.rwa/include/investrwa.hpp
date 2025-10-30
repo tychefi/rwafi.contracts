@@ -1,4 +1,4 @@
-#include "redpackdb.hpp"
+#include "investrwadb.hpp"
 #include <wasm_db.hpp>
 
 using namespace std;
@@ -24,15 +24,15 @@ enum class err: uint8_t {
    VAILD_TIME_INVALID   = 13,
    MIN_UNIT_INVALID     = 14,
    RED_PACK_EXIST       = 15,
-   DID_NOT_AUTH         = 16,
+   NO_AUTH              = 16,
    UNDER_MAINTENANCE    = 17,
    NONE_DELETED         = 19,
    IN_THE_WHITELIST     = 20,
    NON_RENEWAL          = 21,
-   DID_PACK_SYMBOL_ERR  = 31
+   INVALID_STATUS       = 31
 };
 
-enum class redpack_type: uint8_t {
+enum class investrwa_type: uint8_t {
    RANDOM       = 0,
    MEAN         = 1,
    DID_RANDOM   = 10,
@@ -40,57 +40,56 @@ enum class redpack_type: uint8_t {
 
 };
 
-class [[eosio::contract("did.redpack")]] redpack: public eosio::contract {
+class [[eosio::contract("investrwa")]] investrwa: public eosio::contract {
 private:
     dbc                 _db;
     global_singleton    _global;
     global_t            _gstate;
-    global_singleton2   _global2;
-    global_t2           _gstate2;
 
 public:
     using contract::contract;
 
-    redpack(eosio::name receiver, eosio::name code, datastream<const char*> ds):
+    investrwa(eosio::name receiver, eosio::name code, datastream<const char*> ds):
         _db(_self),
         contract(receiver, code, ds),
-        _global(_self, _self.value),
-        _global2(_self, _self.value)
+        _global(_self, _self.value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
-        _gstate2 = _global2.exists() ? _global2.get() : global_t2{};
     }
 
-    ~redpack() {
+    ~investrwa() {
         _global.set(_gstate, get_self());
         _global2.set(_gstate2, get_self());
     }
 
-    ACTION setfee(const extended_asset& fee);
+    ACTION addtoken(const name& contract, const symbol& sym, const time_point_sec& expired_time);
+    ACTION deltoken( const symbol& sym );
+    ACTION onshelf( const symbol& sym, const bool& onshelf );
 
-    ACTION whitelist(const name& contract, const symbol& sym, const time_point_sec& expired_time);
-    ACTION deltoken( const uint64_t& token_id );
+    ACTION createplan( const name& creator,
+                       const string& title,
+                       const name& goal_asset_contract,
+                       const asset& goal_quantity,
+                       const name& receipt_asset_contract,
+                       const asset& receipt_quantity_per_unit,
+                       const uint8_t& invest_unit_size,
+                       const uint8_t& soft_cap_percent,
+                       const uint8_t& hard_cap_percent,
+                       const time_point& start_time,
+                       const time_point& end_time,
+                       const uint16_t& return_years,
+                       const double& guaranteed_yield_apr );
 
-    [[eosio::on_notify("flon.token::transfer")]]
-    void on_atoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
+    ACTION cancelplan( const name& creator, const uint64_t& plan_id );
 
-    [[eosio::on_notify("flon.mtoken::transfer")]]
-    void on_mtoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo );
+    // Invest with some allowed token
+    [[eosio::on_notify("*::transfer")]]
+    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    [[eosio::on_notify("mdao.token::transfer")]]
-    void on_dtoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("cnyg.token::transfer")]] 
-    void on_cnygtoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("tyche.token::transfer")]] 
-    void on_tychetoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("airc.token::transfer")]] 
-    void on_armstoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
+    ACTION refund( const name& investor, const uint64_t& plan_id );
 
 
-    ACTION claimredpack( const name& claimer, const name& code, const string& pwhash );
+    ACTION claiminvestrwa( const name& claimer, const name& code, const string& pwhash );
     ACTION cancel( const name& code );
     ACTION delclaims( const uint64_t& max_rows );
 
@@ -102,15 +101,14 @@ public:
         _gstate.admin = admin;
         _gstate.expire_hours = hours;
         _gstate.did_supported = did_supported;
-        _gstate2.did_id = did_id;
-        _gstate2.did_contract = did_contract;
     }
 
 private:
-    void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
+    void _on_invest_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
+    void _on_refund_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
     // asset _calc_fee(const asset& fee, const uint64_t count);
-    asset _calc_red_amt(const redpack_t& redpack);
+    asset _calc_red_amt(const investrwa_t& investrwa);
     uint64_t rand(asset max_quantity,  uint16_t min_unit);
 
-}; //contract redpack
+}; //contract investrwa
