@@ -1,4 +1,4 @@
-#include "redpackdb.hpp"
+#include "guarantyrwadb.hpp"
 #include <wasm_db.hpp>
 
 using namespace std;
@@ -32,7 +32,7 @@ enum class err: uint8_t {
    DID_PACK_SYMBOL_ERR  = 31
 };
 
-enum class redpack_type: uint8_t {
+enum class guarantyrwa_type: uint8_t {
    RANDOM       = 0,
    MEAN         = 1,
    DID_RANDOM   = 10,
@@ -40,33 +40,26 @@ enum class redpack_type: uint8_t {
 
 };
 
-class [[eosio::contract("did.redpack")]] redpack: public eosio::contract {
+class [[eosio::contract("guarantyrwa")]] guarantyrwa: public eosio::contract {
 private:
     dbc                 _db;
     global_singleton    _global;
     global_t            _gstate;
-    global_singleton2   _global2;
-    global_t2           _gstate2;
 
 public:
     using contract::contract;
 
-    redpack(eosio::name receiver, eosio::name code, datastream<const char*> ds):
+    guarantyrwa(eosio::name receiver, eosio::name code, datastream<const char*> ds):
         _db(_self),
         contract(receiver, code, ds),
-        _global(_self, _self.value),
-        _global2(_self, _self.value)
+        _global(_self, _self.value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
-        _gstate2 = _global2.exists() ? _global2.get() : global_t2{};
     }
 
-    ~redpack() {
+    ~guarantyrwa() {
         _global.set(_gstate, get_self());
-        _global2.set(_gstate2, get_self());
     }
-
-    ACTION setfee(const extended_asset& fee);
 
     ACTION whitelist(const name& contract, const symbol& sym, const time_point_sec& expired_time);
     ACTION deltoken( const uint64_t& token_id );
@@ -90,7 +83,7 @@ public:
     void on_armstoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
 
-    ACTION claimredpack( const name& claimer, const name& code, const string& pwhash );
+    ACTION claimguarantyrwa( const name& claimer, const name& code, const string& pwhash );
     ACTION cancel( const name& code );
     ACTION delclaims( const uint64_t& max_rows );
 
@@ -110,7 +103,7 @@ private:
     void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
     // asset _calc_fee(const asset& fee, const uint64_t count);
-    asset _calc_red_amt(const redpack_t& redpack);
+    asset _calc_red_amt(const guarantyrwa_t& guarantyrwa);
     uint64_t rand(asset max_quantity,  uint16_t min_unit);
 
-}; //contract redpack
+}; //contract guarantyrwa

@@ -1,7 +1,6 @@
 
 #include <flon.token.hpp>
 #include "investrwa.hpp"
-#include <did.ntoken/did.ntoken.db.hpp>
 #include "utils.hpp"
 #include <algorithm>
 #include <chrono>
@@ -170,8 +169,8 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
     }
 }
 
-void investrwa::refund( const name& investor, const uint64_t& plan_id ) {
-    require_auth( investor );
+void investrwa::refund( const name& submitter, const name& investor, const uint64_t& plan_id ) {
+    require_auth( submitter );
 
     auto plan = fundplan_t( plan_id );
     CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
