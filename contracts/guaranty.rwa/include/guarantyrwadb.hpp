@@ -32,28 +32,16 @@ static constexpr uint8_t    EXPIRY_HOURS        = 12;
 
 namespace wasm { namespace db {
 
-#define TG_TBL [[eosio::table, eosio::contract("did.redpack")]]
-#define TG_TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
+#define TBL [[eosio::table, eosio::contract("guarantyrwa")]]
+#define TBL_NAME(name) [[eosio::table(name), eosio::contract("guarantyrwa")]]
 
-struct TG_TBL_NAME("global") global_t {
+struct TBL_NAME("global") global_t {
     name            admin;
-    uint16_t        expire_hours;   //discarded
-    uint16_t        data_failure_hours;
-    bool            did_supported;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(expire_hours)(data_failure_hours)(did_supported) )
+    EOSLIB_SERIALIZE( global_t, (admin) )
 };
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
-struct TG_TBL_NAME("global2") global_t2
-{
-    name                                     did_contract;
-    uint64_t                                 did_id;
-    extended_asset                           fee;
-    
-    EOSLIB_SERIALIZE(global_t2, (did_contract)(did_id)(fee))
-};
-typedef eosio::singleton<"global2"_n, global_t2> global_singleton2;
 
 namespace redpack_status {
     static constexpr eosio::name CREATED        = "created"_n;
@@ -65,17 +53,11 @@ uint128_t get_unionid( const name& rec, uint64_t packid ) {
      return ( (uint128_t) rec.value << 64 ) | packid;
 }
 
-struct TG_TBL redpack_t {
-    name            code;
-    name            sender;
-    string          pw_hash;
-    asset           total_quantity;
-    uint64_t        receiver_count;
-    asset           remain_quantity;
-    uint64_t        remain_count         = 0;
-    asset           fee;
+struct TBL guaranty_t {                            //scope: guanrantor
+    uint64_t        plan_id;
+    name            guarantor;
+    asset           total_staked_fund;
     name            status;
-    uint16_t        type;  //0 random,1 mean fixed, 10: DID random, 11: DID fixed
     time_point      created_at;
     time_point      updated_at;
 
@@ -96,7 +78,7 @@ struct TG_TBL redpack_t {
                                  (remain_count)(fee)(status)(type)(created_at)(updated_at) )
 };
 
-struct TG_TBL claim_t {
+struct TBL claim_t {
     uint64_t        id;
     name            red_pack_code;
     name            sender;                     //plan owner
@@ -121,7 +103,7 @@ struct TG_TBL claim_t {
     EOSLIB_SERIALIZE( claim_t, (id)(red_pack_code)(sender)(receiver)(quantity)(claimed_at) )
 };
 
-struct TG_TBL tokenlist_t {
+struct TBL tokenlist_t {
     uint64_t        id;
     symbol          sym;
     name            contract;
