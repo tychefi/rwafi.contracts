@@ -1,5 +1,6 @@
 #include "investrwadb.hpp"
 #include <wasm_db.hpp>
+#include "flon.token.hpp"
 
 using namespace std;
 using namespace wasm::db;
@@ -86,7 +87,7 @@ public:
     [[eosio::on_notify("*::transfer")]]
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    ACTION refund( const name& investor, const uint64_t& plan_id );
+    ACTION refund( const name& investor, const uint64_t& plan_id ); //refund with receipt token staked in stake contract
 
 
     ACTION claiminvestrwa( const name& claimer, const name& code, const string& pwhash );
@@ -103,12 +104,19 @@ public:
         _gstate.did_supported = did_supported;
     }
 
-private:
-    void _on_invest_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-    void _on_refund_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
+private:    
+    void _process_refund( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
+    void _process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
+    void _update_plan_status( fundplan_t& plan );
 
-    // asset _calc_fee(const asset& fee, const uint64_t count);
-    asset _calc_red_amt(const investrwa_t& investrwa);
-    uint64_t rand(asset max_quantity,  uint16_t min_unit);
+    asset _get_balance(const name& token_contract, const name& owner, const symbol& sym) {
+        using accounts_table = eosio::multi_index<"accounts"_n, eosio::asset>;
+        accounts_table act_tbl(token_contract, owner.value);
+        auto itr = act_tbl.find(sym.code().raw());
+        if ( acnt_itr == account_tbl.end() ) {
+            return asset(0, sym);
+        }
+        return acnt_itr->balance;
+    }
 
 }; //contract investrwa

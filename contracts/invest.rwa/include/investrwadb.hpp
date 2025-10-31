@@ -36,9 +36,12 @@ inline uint128_t get_unionid( const name& rec, uint64_t packid ) {
 
 struct TBL_NAME("global") global_t {
     name            admin;
-    uint64_t        last_plan_id = 0;
+    name            stake_contract      = "stake.rwa"_n;
+    name            yield_contract      = "yield.rwa"_n;
+    name            guanranty_contract  = "guanranty.rwa"_n;
+    uint64_t        last_plan_id        = 0;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(last_plan_id) )
+    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
 };
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
@@ -85,6 +88,7 @@ struct TBL fundplan_t {                             //scope: _self
 
     // === 投资凭证 ===
     name                receipt_asset_contract;     //receipt issuing contract (FRC20)
+    symbol              receipt_symbol;             //receipt symbol (1:1 ratio with invest unit)       
 
     // === 软顶 & 硬顶 ===
     uint8_t             soft_cap_percent;           // 软顶比例：最低成功门槛（如 60 → 60%）
@@ -117,7 +121,7 @@ struct TBL fundplan_t {                             //scope: _self
     > idx_t;
 
     EOS_LIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)
-        (created_at)(receipt_asset_contract)
+        (created_at)(receipt_asset_contract)(receipt_symbol)
         (soft_cap_percent)(hard_cap_percent)(start_time)(end_time)
         (return_years)(return_end_time)(guaranteed_yield_apr)
         (total_raised_funds)(total_issued_receipts)(status)
