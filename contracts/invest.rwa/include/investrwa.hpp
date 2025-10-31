@@ -109,14 +109,8 @@ private:
     void _process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
 
-    asset _get_balance(const name& token_contract, const name& owner, const symbol& sym) {
-        using accounts_table = eosio::multi_index<"accounts"_n, eosio::asset>;
-        accounts_table act_tbl(token_contract, owner.value);
-        auto itr = act_tbl.find(sym.code().raw());
-        if ( acnt_itr == account_tbl.end() ) {
-            return asset(0, sym);
-        }
-        return acnt_itr->balance;
-    }
+    asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
+    asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );
+    asset _get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id );
 
 }; //contract investrwa

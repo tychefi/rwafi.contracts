@@ -32,10 +32,10 @@ static constexpr uint8_t    EXPIRY_HOURS        = 12;
 
 namespace wasm { namespace db {
 
-#define TG_TBL [[eosio::table, eosio::contract("did.redpack")]]
-#define TG_TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
+#define TBL [[eosio::table, eosio::contract("did.redpack")]]
+#define TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
 
-struct TG_TBL_NAME("global") global_t {
+struct TBL_NAME("global") global_t {
     name            admin;
     uint16_t        expire_hours;   //discarded
     uint16_t        data_failure_hours;
@@ -45,7 +45,7 @@ struct TG_TBL_NAME("global") global_t {
 };
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
-struct TG_TBL_NAME("global2") global_t2
+struct TBL_NAME("global2") global_t2
 {
     name                                     did_contract;
     uint64_t                                 did_id;
@@ -65,7 +65,17 @@ uint128_t get_unionid( const name& rec, uint64_t packid ) {
      return ( (uint128_t) rec.value << 64 ) | packid;
 }
 
-struct TG_TBL redpack_t {
+//stake of collateral fund tokens
+struct TBL collateral_stake_t {        //scope: account
+    uint64_t plan_id;
+    asset    balance;
+
+    uint64_t primary_key()const { return plan_id; }
+
+    typedef eosio::multi_index< "colstakes"_n, account > stakes;
+};
+
+struct TBL redpack_t {
     name            code;
     name            sender;
     string          pw_hash;
@@ -96,7 +106,7 @@ struct TG_TBL redpack_t {
                                  (remain_count)(fee)(status)(type)(created_at)(updated_at) )
 };
 
-struct TG_TBL claim_t {
+struct TBL claim_t {
     uint64_t        id;
     name            red_pack_code;
     name            sender;                     //plan owner
@@ -121,7 +131,7 @@ struct TG_TBL claim_t {
     EOSLIB_SERIALIZE( claim_t, (id)(red_pack_code)(sender)(receiver)(quantity)(claimed_at) )
 };
 
-struct TG_TBL tokenlist_t {
+struct TBL tokenlist_t {
     uint64_t        id;
     symbol          sym;
     name            contract;

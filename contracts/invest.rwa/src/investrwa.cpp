@@ -34,6 +34,89 @@ inline int64_t get_precision(const asset &a) {
     return get_precision(a.symbol);
 }
 
+// ------------------- Internal functions ------------------------------------------------------
+asset investrwa::_get_balance(const name& token_contract, const name& owner, const symbol& sym) {
+    using accounts_table = eosio::multi_index<"accounts"_n, eosio::asset>;
+    accounts_table act_tbl(token_contract, owner.value);
+    auto itr = act_tbl.find(sym.code().raw());
+    if ( acnt_itr == account_tbl.end() ) {
+        return asset(0, sym);
+    }
+    return acnt_itr->balance;
+}
+
+asset investrwa::_get_investor_stake_balance( const name& investor, const uint64_t& plan_id ) {
+    auto stakes =  yield_stake_t::stakes(_gstate.yield_contract, owner.value);
+    CHECKC( _db.get( stakes ), err::RECORD_NO_FOUND, "no yield token balance for plan: " + to_string( plan_id ))
+    return stakes.balance;
+}
+
+asset investrwa::_get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id ) {
+    auto stakes =  collateral_stake_t::stakes(_gstate.stake_contract, guanrantor.value);
+    CHECKC( _db.get( stakes ), err::RECORD_NO_FOUND, "no collateral token balance for plan: " + to_string( plan_id ))
+    return stakes.balance;
+}
+
+void investrwa::_process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan ) {
+    CHECKC( plan.start_time > time_point(current_time_point()), err::INVALID_STATUS, "investments not started yet" )
+    CHECKC( plan.status == PlanStatus::ACTIVE, err::INVALID_STATUS, "investments only allowed when plan is active" )
+
+    // process investment: stake immediately
+    TRANSFER_OUT( plan.goal_asset_contract, _gstate.stake_contract, quantity, string("stake:") + to_string( plan.id ) + ":" + from.to_string() )
+    
+    // issue receipt
+    auto receipt_quantity = asset( quantity.amount, plan.receipt_symbol );
+    ISSUE_RECEIPT( plan.receipt_asset_contract, from, receipt_quantity, string("plan:") + to_string( plan.id ))
+
+    // update plan status
+    plan.total_raised_funds         += quantity;
+    plan.total_issued_receipts      += receipt_quantity;
+
+    _update_plan_status( plan );
+
+    _dbc.set( plan, _self );
+}
+
+void investrwa::_process_refund( const name& from, const name& to, const asset& quantity, const string& memo, const fundplan_t& plan ) {
+    // process refund: ocassionally to use
+    // check if plan is in REFUNDABLE status
+    auto plan = fundplan_t( plan_id );
+    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
+    CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
+
+    auto fund_balance = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
+    CHECKC( fund_balance.amount >= quantity.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
+    auto fund_quantity = asset( quantity.amount, plan.goal_quantity.symbol );
+    TRANSFER_OUT( plan.goal_asset_contract, from, fund_quantity, string("refund for plan:") + to_string( plan.id ) )
+    BURN_RECEIPT( plan.receipt_asset_contract, _self, quantity, string("refund for plan:") + to_string( plan.id ) )
+
+    plan.total_raised_funds         -= fund_quantity;
+    plan.total_issued_receipts      -= quantity;
+    _db.set( plan, _self );
+}
+
+void investrwa::_update_plan_status( fundplan_t& plan ) {
+    auto now = time_point_sec( current_time_point() );
+
+    if ( now >= plan.start_time && now <= plan.end_time ) {
+        plan.status = PlanStatus::ACTIVE;
+
+        if ( plan.total_raised_funds.amount >= plan.goal_quantity.amount * plan.hard_cap_percent / 100 ) {
+            plan.status = PlanStatus::CLOSED;
+        }
+    } else if ( now > plan.end_time ) {
+        // check if soft cap met
+        int64_t soft_cap_amount = plan.goal_quantity.amount * plan.soft_cap_percent / 100;
+        if ( plan.total_raised_funds.amount >= soft_cap_amount ) {
+            plan.status = PlanStatus::SUCCESS;
+        } else {
+            plan.status = PlanStatus::FAILED;
+        }
+    }
+}
+
+// -------------------- actions  -------------------------------------------------------------
+
 void investrwa::addtoken(const name& contract, const symbol& sym ) {
     check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
     
@@ -87,44 +170,6 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
     }
 }
 
-void investrwa::_process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan ) {
-    CHECKC( plan.start_time > time_point(current_time_point()), err::INVALID_STATUS, "investments not started yet" )
-    CHECKC( plan.status == PlanStatus::ACTIVE, err::INVALID_STATUS, "investments only allowed when plan is active" )
-
-    // process investment: stake immediately
-    TRANSFER_OUT( plan.goal_asset_contract, _gstate.stake_contract, quantity, string("stake:") + to_string( plan.id ) + ":" + from.to_string() )
-    
-    // issue receipt
-    auto receipt_quantity = asset( quantity.amount, plan.receipt_symbol );
-    ISSUE_RECEIPT( plan.receipt_asset_contract, from, receipt_quantity, string("plan:") + to_string( plan.id ))
-
-    // update plan status
-    plan.total_raised_funds         += quantity;
-    plan.total_issued_receipts      += receipt_quantity;
-
-    _update_plan_status( plan );
-
-    _dbc.set( plan, _self );
-}
-
-void investrwa::_process_refund( const name& from, const name& to, const asset& quantity, const string& memo, const fundplan_t& plan ) {
-    // process refund
-    // check if plan is in REFUNDABLE status
-    auto plan = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
-    CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
-
-    auto fund_balance = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
-    CHECKC( fund_balance.amount >= quantity.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
-    auto fund_quantity = asset( quantity.amount, plan.goal_quantity.symbol );
-    TRANSFER_OUT( plan.goal_asset_contract, from, fund_quantity, string("refund for plan:") + to_string( plan.id ) )
-    BURN_RECEIPT( plan.receipt_asset_contract, _self, quantity, string("refund for plan:") + to_string( plan.id ) )
-
-    plan.total_raised_funds         -= fund_quantity;
-    plan.total_issued_receipts      -= quantity;
-    _db.set( plan, _self );
-}
-
 void investrwa::refund( const name& investor, const uint64_t& plan_id ) {
     require_auth( investor );
 
@@ -132,11 +177,11 @@ void investrwa::refund( const name& investor, const uint64_t& plan_id ) {
     CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
-    auto receipt_balance = _get_balance( plan.receipt_asset_contract, investor, plan.receipt_symbol );
+    auto yield_balance = _get_balance( plan.receipt_asset_contract, _gstate.yield_contract, plan.receipt_symbol );
     CHECKC( receipt_balance.amount > 0, err::QUANTITY_NOT_ENOUGH, "no receipt token balance for refund" )
     auto receipt_quantity = asset( receipt_balance.amount, plan.receipt_symbol );
 
-    auto fund_balance = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
+    auto fund_balance = _get_investor_stake_balance( investor, plan_id );
     CHECKC( fund_balance.amount >= receipt_quantity.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
     auto fund_quantity = asset( receipt_quantity.amount, plan.goal_quantity.symbol );
 
@@ -149,25 +194,7 @@ void investrwa::refund( const name& investor, const uint64_t& plan_id ) {
     plan.total_issued_receipts      -= receipt_quantity;
     _db.set( plan, _self );
 }
-void investrwa::_update_plan_status( fundplan_t& plan ) {
-    auto now = time_point_sec( current_time_point() );
 
-    if ( now >= plan.start_time && now <= plan.end_time ) {
-        plan.status = PlanStatus::ACTIVE;
-
-        if ( plan.total_raised_funds.amount >= plan.goal_quantity.amount * plan.hard_cap_percent / 100 ) {
-            plan.status = PlanStatus::CLOSED;
-        }
-    } else if ( now > plan.end_time ) {
-        // check if soft cap met
-        int64_t soft_cap_amount = plan.goal_quantity.amount * plan.soft_cap_percent / 100;
-        if ( plan.total_raised_funds.amount >= soft_cap_amount ) {
-            plan.status = PlanStatus::SUCCESS;
-        } else {
-            plan.status = PlanStatus::FAILED;
-        }
-    }
-}
 
 void investrwa::createplan( const name& creator,
                              const string& title,
