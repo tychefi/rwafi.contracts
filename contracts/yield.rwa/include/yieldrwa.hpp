@@ -63,12 +63,12 @@ public:
 
 
     [[eosio::on_notify("*::transfer")]]
-    void on_atoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
+    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
     ACTION init()
 
 private:
-    void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
+    void _perform_distribution( const asset& total );
 
 
 }; //contract yieldrwa
