@@ -23,17 +23,18 @@ static constexpr eosio::name active_permission{"active"_n};
 #define BURN_RECEIPT(bank, from, quantity, memo) \
     { action(permission_level{get_self(), "active"_n }, bank, "burn"_n, std::make_tuple( from, quantity, memo )).send(); }
 
-#define BURN_RECEIPT_IN_STAKE(plan.receipt_asset_contract, _gstate.yield_contract, stake_balance, string("refundburn:")) \
+#define REFUND_BURN_RECEIPT(bank, from, quantity, memo) \
+    { action(permission_level{get_self(), "active"_n }, bank, "refundburn"_n, std::make_tuple( from, quantity, memo )).send(); }
 
-inline int64_t get_precision(const symbol &s) {
-    int64_t digit = s.precision();
-    CHECKC(digit >= 0 && digit <= 18, err::SYMBOL_MISMATCH, "precision digit " + std::to_string(digit) + " should be in range[0,18]");
-    return calc_precision(digit);
-}
+// inline int64_t get_precision(const symbol &s) {
+//     int64_t digit = s.precision();
+//     CHECKC(digit >= 0 && digit <= 18, err::SYMBOL_MISMATCH, "precision digit " + std::to_string(digit) + " should be in range[0,18]");
+//     return calc_precision(digit);
+// }
 
-inline int64_t get_precision(const asset &a) {
-    return get_precision(a.symbol);
-}
+// inline int64_t get_precision(const asset &a) {
+//     return get_precision(a.symbol);
+// }
 
 // ------------------- Internal functions ------------------------------------------------------
 asset investrwa::_get_balance(const name& token_contract, const name& owner, const symbol& sym) {
@@ -174,20 +175,20 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
 void investrwa::refund( const name& submitter, const name& investor, const uint64_t& plan_id ) {
     require_auth( submitter );
 
-    auto plan               = fundplan_t( plan_id );
+    auto plan                       = fundplan_t( plan_id );
     CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
-    auto fund_balance_total = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
-    auto stake_balance      = _get_investor_stake_balance( investor, plan_id );
+    auto fund_balance_total         = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
+    auto stake_balance              = _get_investor_stake_balance( investor, plan_id );
 
     CHECKC( fund_balance_total.amount >= stake_balance.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
-    auto fund_quantity      = asset( stake_balance.amount, plan.goal_quantity.symbol );
+    auto fund_quantity              = asset( stake_balance.amount, plan.goal_quantity.symbol );
 
     // transfer out fund
     TRANSFER_OUT( plan.goal_asset_contract, investor, fund_quantity, string("refund for plan:") + to_string( plan.id ) )
     // burn receipt
-    BURN_RECEIPT_IN_STAKE( plan.receipt_asset_contract, _gstate.yield_contract, stake_balance, string("refundburn:") + to_string( plan.id ) + ":" + investor.to_string() )
+    REFUND_BURN_RECEIPT( plan.receipt_asset_contract, _gstate.stake_contract, stake_balance, string("refund:") + to_string( plan.id ) + ":" + investor.to_string() )
 
     plan.total_raised_funds         -= fund_quantity;
     plan.total_issued_receipts      -= stake_balance;
