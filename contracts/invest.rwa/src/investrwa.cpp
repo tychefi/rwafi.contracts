@@ -23,6 +23,8 @@ static constexpr eosio::name active_permission{"active"_n};
 #define BURN_RECEIPT(bank, from, quantity, memo) \
     { action(permission_level{get_self(), "active"_n }, bank, "burn"_n, std::make_tuple( from, quantity, memo )).send(); }
 
+#define BURN_RECEIPT_IN_STAKE(plan.receipt_asset_contract, _gstate.yield_contract, stake_balance, string("refundburn:")) \
+
 inline int64_t get_precision(const symbol &s) {
     int64_t digit = s.precision();
     CHECKC(digit >= 0 && digit <= 18, err::SYMBOL_MISMATCH, "precision digit " + std::to_string(digit) + " should be in range[0,18]");
@@ -45,9 +47,9 @@ asset investrwa::_get_balance(const name& token_contract, const name& owner, con
 }
 
 asset investrwa::_get_investor_stake_balance( const name& investor, const uint64_t& plan_id ) {
-    auto stakes =  yield_stake_t::stakes(_gstate.yield_contract, owner.value);
-    CHECKC( _db.get( stakes ), err::RECORD_NO_FOUND, "no yield token balance for plan: " + to_string( plan_id ))
-    return stakes.balance;
+    auto stake =  yield_stake_t::stakes(_gstate.yield_contract, owner.value);
+    CHECKC( _db.get( stake ), err::RECORD_NO_FOUND, "no yield token balance for plan: " + to_string( plan_id ))
+    return stake.balance;
 }
 
 asset investrwa::_get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id ) {
@@ -98,18 +100,18 @@ void investrwa::_update_plan_status( fundplan_t& plan ) {
     auto now = time_point_sec( current_time_point() );
 
     if ( now >= plan.start_time && now <= plan.end_time ) {
-        plan.status = PlanStatus::ACTIVE;
+        plan.status                 = PlanStatus::ACTIVE;
 
         if ( plan.total_raised_funds.amount >= plan.goal_quantity.amount * plan.hard_cap_percent / 100 ) {
-            plan.status = PlanStatus::CLOSED;
+            plan.status             = PlanStatus::CLOSED;
         }
     } else if ( now > plan.end_time ) {
         // check if soft cap met
-        int64_t soft_cap_amount = plan.goal_quantity.amount * plan.soft_cap_percent / 100;
+        int64_t soft_cap_amount     = plan.goal_quantity.amount * plan.soft_cap_percent / 100;
         if ( plan.total_raised_funds.amount >= soft_cap_amount ) {
-            plan.status = PlanStatus::SUCCESS;
+            plan.status             = PlanStatus::SUCCESS;
         } else {
-            plan.status = PlanStatus::FAILED;
+            plan.status             = PlanStatus::FAILED;
         }
     }
 }
@@ -172,25 +174,23 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
 void investrwa::refund( const name& submitter, const name& investor, const uint64_t& plan_id ) {
     require_auth( submitter );
 
-    auto plan = fundplan_t( plan_id );
+    auto plan               = fundplan_t( plan_id );
     CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
-    auto yield_balance = _get_balance( plan.receipt_asset_contract, _gstate.yield_contract, plan.receipt_symbol );
-    CHECKC( receipt_balance.amount > 0, err::QUANTITY_NOT_ENOUGH, "no receipt token balance for refund" )
-    auto receipt_quantity = asset( receipt_balance.amount, plan.receipt_symbol );
+    auto fund_balance_total = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
+    auto stake_balance      = _get_investor_stake_balance( investor, plan_id );
 
-    auto fund_balance = _get_investor_stake_balance( investor, plan_id );
-    CHECKC( fund_balance.amount >= receipt_quantity.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
-    auto fund_quantity = asset( receipt_quantity.amount, plan.goal_quantity.symbol );
+    CHECKC( fund_balance_total.amount >= stake_balance.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
+    auto fund_quantity      = asset( stake_balance.amount, plan.goal_quantity.symbol );
 
     // transfer out fund
     TRANSFER_OUT( plan.goal_asset_contract, investor, fund_quantity, string("refund for plan:") + to_string( plan.id ) )
     // burn receipt
-    BURN_RECEIPT( plan.receipt_asset_contract, investor, receipt_quantity, string("refund for plan:") + to_string( plan.id ) )
+    BURN_RECEIPT_IN_STAKE( plan.receipt_asset_contract, _gstate.yield_contract, stake_balance, string("refundburn:") + to_string( plan.id ) + ":" + investor.to_string() )
 
     plan.total_raised_funds         -= fund_quantity;
-    plan.total_issued_receipts      -= receipt_quantity;
+    plan.total_issued_receipts      -= stake_balance;
     _db.set( plan, _self );
 }
 
