@@ -87,7 +87,7 @@ void investrwa::_process_refund( const name& from, const name& to, const asset& 
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
     auto fund_balance = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
-    CHECKC( fund_balance.amount >= quantity.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
+    CHECKC( fund_balance.amount >= quantity.amount, err::QUANTITY_INSUFFICIENT, "contract fund balance not enough for refund" )
     auto fund_quantity = asset( quantity.amount, plan.goal_quantity.symbol );
     TRANSFER_OUT( plan.goal_asset_contract, from, fund_quantity, string("refund for plan:") + to_string( plan.id ) )
     BURN_RECEIPT( plan.receipt_asset_contract, _self, quantity, string("refund for plan:") + to_string( plan.id ) )
@@ -182,7 +182,7 @@ void investrwa::refund( const name& submitter, const name& investor, const uint6
     auto fund_balance_total         = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
     auto stake_balance              = _get_investor_stake_balance( investor, plan_id );
 
-    CHECKC( fund_balance_total.amount >= stake_balance.amount, err::QUANTITY_NOT_ENOUGH, "contract fund balance not enough for refund" )
+    CHECKC( fund_balance_total.amount >= stake_balance.amount, err::QUANTITY_INSUFFICIENT, "contract fund balance not enough for refund" )
     auto fund_quantity              = asset( stake_balance.amount, plan.goal_quantity.symbol );
 
     // transfer out fund

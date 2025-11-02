@@ -70,16 +70,16 @@ void guarantyrwa::_token_transfer( const name& from, const name& to, const asset
             CHECKC( symb == "flon" || symb == "MUSDT" || symb == "MUSDC" || symb == "TYCHE", err::DID_PACK_SYMBOL_ERR, "DID guarantyrwa tokens can only be flon|MUSDT|MUSDC|TYCHE" )
 
             // auto min_quant = ( symb == "flon" ) ? 1 : 10;
-            // CHECKC( quantity.amount / get_precision(quantity) >= min_quant, err::QUANTITY_NOT_ENOUGH, "Minimal total " + to_string(min_quant) + symb + " required" )
+            // CHECKC( quantity.amount / get_precision(quantity) >= min_quant, err::QUANTITY_INSUFFICIENT, "Minimal total " + to_string(min_quant) + symb + " required" )
 
         } else {
-            CHECKC( quantity.amount / count >= 100, err::QUANTITY_NOT_ENOUGH,  "Minimal unit 100 " + symb + " required" )
+            CHECKC( quantity.amount / count >= 100, err::QUANTITY_INSUFFICIENT,  "Minimal unit 100 " + symb + " required" )
         }
 
         // CHECKC( symb == "flon" || symb == "MUSDT" || symb == "MUSDC", err::DID_PACK_SYMBOL_ERR, "guarantyrwa can only be flon|MUSDT|MUSDC" )
         // CHECKC( count <= 200, err::INVALID_FORMAT, "guarantyrwa count cannot be greater than 200" )
         // auto min_quant = ( symb == "flon" ) ? 1 : 10;
-        // CHECKC( quantity.amount / get_precision(quantity) >= min_quant, err::QUANTITY_NOT_ENOUGH, "Minimal total " + to_string(min_quant) + symb + " required" )
+        // CHECKC( quantity.amount / get_precision(quantity) >= min_quant, err::QUANTITY_INSUFFICIENT, "Minimal total " + to_string(min_quant) + symb + " required" )
 
 
         guarantyrwa_t::idx_t guarantyrwas(_self, _self.value);
@@ -101,7 +101,7 @@ void guarantyrwa::_token_transfer( const name& from, const name& to, const asset
     } else if (parts.size() == 2) {  //pay fees of issuing the guarantyrwa out
         name receiver_contract = get_first_receiver();
         extended_asset extended_quantity = extended_asset(quantity, receiver_contract); 
-        CHECKC(extended_quantity >= _gstate2.fee, err::QUANTITY_NOT_ENOUGH, "insufficient payment for fees");
+        CHECKC(extended_quantity >= _gstate2.fee, err::QUANTITY_INSUFFICIENT, "insufficient payment for fees");
 
         symbol redpcak_symbol= symbol_from_string(parts[0]);
         name contract = name(parts[1]);

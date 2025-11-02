@@ -26,7 +26,7 @@ void yieldrwa::_perform_distribution(const name& bank, const asset& total) {
     // 转移到stake.rwa
     TRANSFER_OUT( bank, cfg.stake_rwa, amt_stake, string("Stake RWA allocation") )
 
-    // 转移到flon.swap（回购燃烧）
+    // 转移到flon.swap（回购燃烧）TODO: must conform to swap memo format!!
     TRANSFER_OUT( bank, cfg.flon_swap, amt_swap, string("AMM Swap buyback & burn") )
 
     // 转移到担保人池
@@ -38,6 +38,14 @@ void yieldrwa::on_transfer( const name& from, const name& to, const asset& quant
     if (from == _self || to != _self) return; // 只处理转入本合约的转账
     CHECKC( quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive" )
 
+    //memo format: plan:xxx
+    auto parts = split(memo, ":");
+    CHECK( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" );
+    auto plan_id = (uint64_t) stoi(string(parts[1]));
+    // auto plan = fundplan_t( plan_id );
+
     auto bank = get_first_contract();
     _perform_distribution( bank, quantity );
+
+    _log_yield( plan_id, quantity )
 }

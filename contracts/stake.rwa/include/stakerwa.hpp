@@ -11,7 +11,7 @@ enum class err: uint8_t {
    INVALID_FORMAT       = 0,
    TYPE_INVALID         = 1,
    FEE_NOT_FOUND        = 2,
-   QUANTITY_NOT_ENOUGH  = 3,
+   QUANTITY_INSUFFICIENT  = 3,
    NOT_POSITIVE         = 4,
    SYMBOL_MISMATCH      = 5,
    EXPIRED              = 6,

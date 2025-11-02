@@ -10,8 +10,7 @@ using namespace wasm::db;
 enum class err: uint8_t {
    INVALID_FORMAT       = 0,
    TYPE_INVALID         = 1,
-   FEE_NOT_FOUND        = 2,
-   QUANTITY_NOT_ENOUGH  = 3,
+   QUANTITY_INSUFFICIENT= 3,
    NOT_POSITIVE         = 4,
    SYMBOL_MISMATCH      = 5,
    EXPIRED              = 6,
@@ -20,16 +19,12 @@ enum class err: uint8_t {
    NOT_REPEAT_RECEIVE   = 9,
    NOT_EXPIRED          = 10,
    ACCOUNT_INVALID      = 11,
-   FEE_NOT_POSITIVE     = 12,
    VAILD_TIME_INVALID   = 13,
    MIN_UNIT_INVALID     = 14,
-   RED_PACK_EXIST       = 15,
-   DID_NOT_AUTH         = 16,
    UNDER_MAINTENANCE    = 17,
    NONE_DELETED         = 19,
    IN_THE_WHITELIST     = 20,
    NON_RENEWAL          = 21,
-   DID_PACK_SYMBOL_ERR  = 31
 };
 
 enum class yieldrwa_type: uint8_t {

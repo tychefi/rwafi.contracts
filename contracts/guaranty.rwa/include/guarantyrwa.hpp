@@ -10,35 +10,22 @@ using namespace wasm::db;
 enum class err: uint8_t {
    INVALID_FORMAT       = 0,
    TYPE_INVALID         = 1,
-   FEE_NOT_FOUND        = 2,
-   QUANTITY_NOT_ENOUGH  = 3,
+   QUANTITY_INSUFFICIENT= 3,
    NOT_POSITIVE         = 4,
    SYMBOL_MISMATCH      = 5,
    EXPIRED              = 6,
-   PWHASH_INVALID       = 7,
    RECORD_NO_FOUND      = 8,
    NOT_REPEAT_RECEIVE   = 9,
    NOT_EXPIRED          = 10,
    ACCOUNT_INVALID      = 11,
-   FEE_NOT_POSITIVE     = 12,
    VAILD_TIME_INVALID   = 13,
    MIN_UNIT_INVALID     = 14,
-   RED_PACK_EXIST       = 15,
-   DID_NOT_AUTH         = 16,
    UNDER_MAINTENANCE    = 17,
    NONE_DELETED         = 19,
    IN_THE_WHITELIST     = 20,
    NON_RENEWAL          = 21,
-   DID_PACK_SYMBOL_ERR  = 31
 };
 
-enum class guarantyrwa_type: uint8_t {
-   RANDOM       = 0,
-   MEAN         = 1,
-   DID_RANDOM   = 10,
-   DID_MEAN     = 11
-
-};
 
 class [[eosio::contract("guarantyrwa")]] guarantyrwa: public eosio::contract {
 private:
@@ -61,31 +48,8 @@ public:
         _global.set(_gstate, get_self());
     }
 
-    ACTION whitelist(const name& contract, const symbol& sym, const time_point_sec& expired_time);
-    ACTION deltoken( const uint64_t& token_id );
-
     [[eosio::on_notify("flon.token::transfer")]]
-    void on_atoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
-
-    [[eosio::on_notify("flon.mtoken::transfer")]]
-    void on_mtoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("mdao.token::transfer")]]
-    void on_dtoken_transfer(const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("cnyg.token::transfer")]] 
-    void on_cnygtoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("tyche.token::transfer")]] 
-    void on_tychetoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-
-    [[eosio::on_notify("airc.token::transfer")]] 
-    void on_armstoken_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-
-
-    ACTION claimguarantyrwa( const name& claimer, const name& code, const string& pwhash );
-    ACTION cancel( const name& code );
-    ACTION delclaims( const uint64_t& max_rows );
+    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
     ACTION init(const name& admin, const uint16_t& hours, const bool& did_supported, const uint64_t& did_id, const name& did_contract) {
         require_auth( _self );
