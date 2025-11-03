@@ -36,8 +36,8 @@ static constexpr name AMM_SWAP_DEX              { "flon.swap"_n };
 
 namespace wasm { namespace db {
 
-#define TBL [[eosio::table, eosio::contract("did.redpack")]]
-#define TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
+#define TBL [[eosio::table, eosio::contract("yieldrwa")]]
+#define TBL_NAME(name) [[eosio::table(name), eosio::contract("yieldrwa")]]
 
 struct TBL_NAME("global") global_t {
     name                admin;

@@ -27,13 +27,6 @@ enum class err: uint8_t {
    NON_RENEWAL          = 21,
 };
 
-enum class yieldrwa_type: uint8_t {
-   RANDOM       = 0,
-   MEAN         = 1,
-   DID_RANDOM   = 10,
-   DID_MEAN     = 11
-
-};
 
 class [[eosio::contract("yieldrwa")]] yieldrwa: public eosio::contract {
 private:
@@ -60,10 +53,12 @@ public:
     [[eosio::on_notify("*::transfer")]]
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    ACTION init()
+    ACTION init( const name& admin );
+    ACTION updateconfig( const name& key, const uint8_t& value );
 
 private:
     void _perform_distribution( const asset& total );
+    void _log_yield( const uint64_t& plan_id, const asset& quantity );
 
 
 }; //contract yieldrwa

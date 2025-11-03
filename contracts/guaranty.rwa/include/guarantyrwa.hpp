@@ -51,23 +51,16 @@ public:
     [[eosio::on_notify("flon.token::transfer")]]
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    ACTION init(const name& admin, const uint16_t& hours, const bool& did_supported, const uint64_t& did_id, const name& did_contract) {
+    ACTION init(const name& admin ) {
         require_auth( _self );
         CHECKC( is_account(admin), err::ACCOUNT_INVALID, "account invalid" );
-        CHECKC( hours > 0, err::VAILD_TIME_INVALID, "valid time must be positive" );
-
+       
         _gstate.admin = admin;
-        _gstate.expire_hours = hours;
-        _gstate.did_supported = did_supported;
-        _gstate2.did_id = did_id;
-        _gstate2.did_contract = did_contract;
     }
 
 private:
     void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
-    // asset _calc_fee(const asset& fee, const uint64_t count);
-    asset _calc_red_amt(const guarantyrwa_t& guarantyrwa);
-    uint64_t rand(asset max_quantity,  uint16_t min_unit);
+
 
 }; //contract guarantyrwa
