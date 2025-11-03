@@ -102,25 +102,22 @@ void yieldrwa::updateconfig( const name& key, const uint8_t& value ) {
 
 void yieldrwa::_log_yield( const uint64_t& plan_id, const asset& quantity ) {
     uint32_t year = year_from_unix_seconds( current_time_point().sec_since_epoch() );
-    auto yeah_no = year;
+    auto yieldlog = yield_log_t( year );
+    auto lastyieldlog = yield_log_t( year - 1 );
 
-    auto yieldlog_tbl = _db.get_table< yield_log_t >( _self, plan_id );
-    auto idx = yieldlog_tbl.get_index<"byyear"_n>();
-    auto itr = idx.find( year );
-    if ( itr == idx.end() ) {
-        yieldlog_tbl.emplace( get_self(), [&]( auto& row ) {
-            row.id                     = yieldlog_tbl.available_primary_key();
-            row.year                   = year;
-            row.yeah_no                = yeah_no;
-            row.yeah_total_quantity    = quantity;
-            row.plan_total_quantity    = quantity;
-            row.created_at             = time_point_sec( current_time_point() );
-        });
+    auto last_year_found = _db.get( plan_id, lastyieldlog );
+
+    if ( _db.get( plan_id, yieldlog ) ) {
+        yieldlog.year_no                = last_year_found ? (lastyieldlog.year_no + 1) : 1;
+        yieldlog.year_total_quantity    = quantity;
+        yieldlog.plan_total_quantity    = quantity;
+        yieldlog.created_at             = time_point_sec( current_time_point() );
+
     } else {
-        idx.modify( itr, get_self(), [&]( auto& row ) {
-            row.yeah_total_quantity    += quantity;
-            row.plan_total_quantity    += quantity;
-            row.updated_at             = time_point_sec( current_time_point() );
-        });
+        yieldlog.year_total_quantity    += quantity;
+        yieldlog.plan_total_quantity    += quantity;
+        yieldlog.updated_at             = time_point_sec( current_time_point() );
     }
+
+    _db.set( yieldlog );
 }

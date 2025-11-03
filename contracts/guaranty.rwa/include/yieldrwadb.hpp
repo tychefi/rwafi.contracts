@@ -54,8 +54,8 @@ typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 
 
-TBL yield_log_t {                   //scope: plan_id
-    uint64_t        year;           //PK
+TBL yield_log_t {                       //scope: plan_id
+    uint64_t        year;               //PK
     uint64_t        year_no = 0;
     asset           year_total_quantity;
     asset           plan_total_quantity;
@@ -65,7 +65,7 @@ TBL yield_log_t {                   //scope: plan_id
     uint64_t primary_key() const { return id; }
 
     yield_log_t(){}
-    yield_log_t( const uint64_t& y ): year(y){}
+    yield_log_t( const name& c ): code(c){}
 
     typedef eosio::multi_index<"yieldlogs"_n, yield_log_t
         // indexed_by<"updatedid"_n,  const_mem_fun<redpack_t, uint64_t, &redpack_t::by_updatedid> >,

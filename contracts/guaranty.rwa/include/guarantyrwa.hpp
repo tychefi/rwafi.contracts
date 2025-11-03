@@ -54,13 +54,13 @@ public:
     ACTION init(const name& admin ) {
         require_auth( _self );
         CHECKC( is_account(admin), err::ACCOUNT_INVALID, "account invalid" );
-       
+
         _gstate.admin = admin;
     }
 
 private:
-    void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-
+    // void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
+    asset _calculate_yield_due( const uint64_t& plan_id );
 
 
 }; //contract guarantyrwa
