@@ -71,7 +71,7 @@ public:
     }
 
     ACTION guarantpay( const name& submitter, const uint64_t& plan_id );
-    ACTION withdraw(const name& guarantor, const uint64_t& plan_id, const asset& quantity);
+    ACTION withdraw(const name& guarantor, const uint64_t& plan_id );
 
 
 private:

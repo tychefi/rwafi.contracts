@@ -178,15 +178,18 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
     _db.set( plan_id, payment );
 }
 
-void guarantyrwa::withdraw(const name& guarantor, const uint64_t& plan_id, const asset& quantity) {
-    require_auth( guarantor );
 
-    CHECKC( quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive" )
+void guarantyrwa::withdraw( const name& guarantor, const uint64_t& plan_id ) {
+    require_auth( guarantor );
 
     // check plan exists
     auto plan = fundplan_t( plan_id );
     CHECKC( _db_invest.get( plan ), err::RECORD_NOT_FOUND, "plan not found: " + to_string( plan_id ) )
 
+    //TODO: only allow withdraw when plan is completed?
+    asset quantity = asset(0, plan.goal_quantity.symbol); //withdraw all for now
+    CHECKC( quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive" )
+    
     // symbol must match plan's asset
     CHECKC( quantity.symbol == plan.goal_quantity.symbol, err::SYMBOL_MISMATCH, "token symbol mismatch" )
 
