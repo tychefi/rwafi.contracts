@@ -109,7 +109,7 @@ TBL fundplan_t {                                    //scope: _self
 
     typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
 
-    EOS_LIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(created_at)
+    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(created_at)
                                         (receipt_asset_contract)(receipt_symbol)
                                         (soft_cap_percent)(hard_cap_percent)
                                         (start_time)(end_time)

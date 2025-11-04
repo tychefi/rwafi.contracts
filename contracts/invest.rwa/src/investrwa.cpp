@@ -1,7 +1,6 @@
 
 #include <flon.token.hpp>
 #include "investrwa.hpp"
-#include "utils.hpp"
 #include <algorithm>
 #include <chrono>
 #include <eosio/transaction.hpp>

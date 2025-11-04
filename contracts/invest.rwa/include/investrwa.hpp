@@ -60,7 +60,6 @@ public:
 
     ~investrwa() {
         _global.set(_gstate, get_self());
-        _global2.set(_gstate2, get_self());
     }
 
     ACTION addtoken(const name& contract, const symbol& sym, const time_point_sec& expired_time);
@@ -94,14 +93,11 @@ public:
     ACTION cancel( const name& code );
     ACTION delclaims( const uint64_t& max_rows );
 
-    ACTION init(const name& admin, const uint16_t& hours, const bool& did_supported, const uint64_t& did_id, const name& did_contract) {
+    ACTION init(const name& admin) {
         require_auth( _self );
         CHECKC( is_account(admin), err::ACCOUNT_INVALID, "account invalid" );
-        CHECKC( hours > 0, err::VAILD_TIME_INVALID, "valid time must be positive" );
 
         _gstate.admin = admin;
-        _gstate.expire_hours = hours;
-        _gstate.did_supported = did_supported;
     }
 
 private:    

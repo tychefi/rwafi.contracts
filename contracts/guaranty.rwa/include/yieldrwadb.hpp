@@ -14,9 +14,6 @@ using std::string;
 // using namespace wasm;
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 
-static constexpr eosio::name active_perm        {"active"_n};
-static constexpr symbol SYS_SYMBOL              = SYMBOL("flon", 8);
-static constexpr name SYS_BANK                  { "flon.token"_n };
 static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
 
 #ifndef DAY_SECONDS_FOR_TEST

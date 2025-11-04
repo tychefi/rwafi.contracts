@@ -59,7 +59,7 @@ TBL yield_log_t {                   //scope: plan_id
     time_point_sec  created_at;
     time_point_sec  updated_at;
 
-    uint64_t primary_key() const { return id; }
+    uint64_t primary_key() const { return year; }
 
     yield_log_t(){}
     yield_log_t( const uint64_t& y ): year(y){}

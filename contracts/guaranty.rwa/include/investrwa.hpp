@@ -8,39 +8,6 @@ using namespace wasm::db;
 #define CHECKC(exp, code, msg) \
    { if (!(exp)) eosio::check(false, string("[[") + to_string((int)code) + string("]] ") + msg); }
 
-enum class err: uint8_t {
-   INVALID_FORMAT       = 0,
-   TYPE_INVALID         = 1,
-   FEE_NOT_FOUND        = 2,
-   QUANTITY_INSUFFICIENT  = 3,
-   NOT_POSITIVE         = 4,
-   SYMBOL_MISMATCH      = 5,
-   EXPIRED              = 6,
-   PWHASH_INVALID       = 7,
-   RECORD_NOT_FOUND      = 8,
-   NOT_REPEAT_RECEIVE   = 9,
-   NOT_EXPIRED          = 10,
-   ACCOUNT_INVALID      = 11,
-   FEE_NOT_POSITIVE     = 12,
-   VAILD_TIME_INVALID   = 13,
-   MIN_UNIT_INVALID     = 14,
-   RED_PACK_EXIST       = 15,
-   NO_AUTH              = 16,
-   UNDER_MAINTENANCE    = 17,
-   NONE_DELETED         = 19,
-   IN_THE_WHITELIST     = 20,
-   NON_RENEWAL          = 21,
-   INVALID_STATUS       = 31
-};
-
-enum class investrwa_type: uint8_t {
-   RANDOM       = 0,
-   MEAN         = 1,
-   DID_RANDOM   = 10,
-   DID_MEAN     = 11
-
-};
-
 class [[eosio::contract("investrwa")]] investrwa: public eosio::contract {
 private:
     dbc                 _db;
@@ -60,7 +27,6 @@ public:
 
     ~investrwa() {
         _global.set(_gstate, get_self());
-        _global2.set(_gstate2, get_self());
     }
 
     ACTION addtoken(const name& contract, const symbol& sym, const time_point_sec& expired_time);

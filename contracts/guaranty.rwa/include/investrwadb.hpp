@@ -13,8 +13,8 @@ using std::string;
 
 namespace wasm { namespace db {
 
-#define TBL [[eosio::table, eosio::contract("investrwa")]]
-#define NTBL(name) [[eosio::table(name), eosio::contract("investrwa")]]
+#define TBL struct [[eosio::table, eosio::contract("investrwa")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("investrwa")]]
 
 // struct NTBL("global") global_t {
 //     name            admin;
@@ -29,7 +29,7 @@ namespace wasm { namespace db {
 
 // whitlisted investment tokens
 //
-struct TBL allow_token_t {               //scope: _self
+TBL allow_token_t {               //scope: _self
     symbol          token_symbol;           //PK: token symbol
     name            token_contract;         //token issuing contract
     bool            onshelf = true;
@@ -57,7 +57,7 @@ namespace PlanStatus {
 };
 
 
-struct TBL fundplan_t {                             //scope: _self
+TBL fundplan_t {                             //scope: _self
     uint64_t            id;                         //PK: 募资计划ID
     string              title;                      //plan title: <=64 chars
     name                creator;                    //plan owner
@@ -95,13 +95,13 @@ struct TBL fundplan_t {                             //scope: _self
     // uint64_t by_updatedid() const { return ((uint64_t)updated_at.sec_since_epoch() << 32) | (code.value & 0x00000000FFFFFFFF); }
     // uint64_t by_creator() const { return creator.value; }
     fundplan_t(){}
-    fundplan_t( const name& c ): code(c){}
+    fundplan_t( const uint64_t& i ): id(i){}
     typedef eosio::multi_index<"fundplans"_n, fundplan_t
         // indexed_by<"updatedid"_n,  const_mem_fun<fundplan_t, uint64_t, &fundplan_t::by_updatedid> >,
         // indexed_by<"creatorid"_n,  const_mem_fun<fundplan_t, uint64_t, &fundplan_t::by_creator> >
     > idx_t;
 
-    EOS_LIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)
+    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)
         (created_at)(receipt_asset_contract)(receipt_symbol)
         (soft_cap_percent)(hard_cap_percent)(start_time)(end_time)
         (return_years)(return_end_time)(guaranteed_yield_apr)
