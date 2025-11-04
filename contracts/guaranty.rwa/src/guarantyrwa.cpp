@@ -17,18 +17,6 @@ using std::chrono::system_clock;
 using namespace wasm;
 using namespace eosio;
 
-static constexpr eosio::name active_permission{"active"_n};
-
-// transfer out from contract self
-inline void transfer_out(const name& bank, const name& from, const name& to, const asset& quantity, const string& memo) {
-    action(
-        permission_level{ from, active_permission },
-        bank,
-        "transfer"_n,
-        std::make_tuple(from, to, quantity, memo)
-    ).send();
-}
-
 // inline int64_t get_precision(const symbol &s) {
 //     int64_t digit = s.precision();
 //     CHECKC(digit >= 0 && digit <= 18, err::SYMBOL_MISMATCH, "precision digit " + std::to_string(digit) + " should be in range[0,18]");
@@ -177,7 +165,7 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
     auto bank = plan.goal_asset_contract;
     auto to = _invest_gstate.stake_contract;
     auto memo = string("Guaranty pay yield for RWA plan: ") + std::to_string(plan_id);
-    transfer_out( bank, _self, to, yield_due, memo );
+    transfer_out( bank, to, yield_due, memo );
 
     auto year = year_from_unix_seconds( current_time_point().sec_since_epoch() );
     auto payment = plan_payment_t( year );
@@ -205,12 +193,12 @@ void guarantyrwa::withdraw(const name& guarantor, const uint64_t& plan_id, const
     // stats exist and have enough available funds
     auto stats = guaranty_stats_t( plan_id );
     CHECKC( _db.get( stats ), err::RECORD_NOT_FOUND, "guaranty stats not found for plan: " + to_string( plan_id ) )
-    CHECKC( stats.available_guarantee_funds.amount >= quantity.amount, err::QUANTITY_INSUFFICIENT, "insufficient available guaranty funds" )
+    CHECKC( stats.available_guarantee_funds >= quantity, err::QUANTITY_INSUFFICIENT, "insufficient available guaranty funds" )
 
     // guarantor stake record exists and has enough total_funds
     auto stake = guarantor_stake_t( plan_id );
     CHECKC( _db.get( guarantor.value, stake ), err::RECORD_NOT_FOUND, "guarantor stake not found for: " + guarantor.to_string() )
-    CHECKC( stake.total_funds.amount >= quantity.amount, err::QUANTITY_INSUFFICIENT, "guarantor stake insufficient" )
+    CHECKC( stake.total_funds >= quantity, err::QUANTITY_INSUFFICIENT, "guarantor stake insufficient" )
 
     // deduct amounts and update DB
     stats.available_guarantee_funds -= quantity;
@@ -225,5 +213,5 @@ void guarantyrwa::withdraw(const name& guarantor, const uint64_t& plan_id, const
     // transfer out to guarantor
     auto bank = plan.goal_asset_contract;
     auto memo = string("Withdraw guaranty funds for RWA plan: ") + std::to_string( plan_id );
-    transfer_out( bank, _self, guarantor, quantity, memo );
+    transfer_out( bank, guarantor, quantity, memo );
 }

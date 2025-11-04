@@ -9,6 +9,8 @@ using namespace wasm::db;
 #define CHECKC(exp, code, msg) \
    { if (!(exp)) eosio::check(false, string("[[") + to_string((int)code) + string("]] ") + msg); }
 
+static constexpr eosio::name active_permission{"active"_n};
+
 enum class err: uint8_t {
    INVALID_FORMAT       = 0,
    TYPE_INVALID         = 1,
@@ -71,8 +73,18 @@ public:
     ACTION guarantpay( const name& submitter, const uint64_t& plan_id );
     ACTION withdraw(const name& guarantor, const uint64_t& plan_id, const asset& quantity);
 
+
 private:
     void _calculate_yield_due( const fundplan_t& plan, asset& due );
 
+    // transfer out from contract self
+    inline void transfer_out(const name& bank, const name& to, const asset& quantity, const string& memo) {
+        action(
+            permission_level{ _self, active_permission },
+            bank,
+            "transfer"_n,
+            std::make_tuple(_self, to, quantity, memo)
+        ).send();
+    }
 
 }; //contract guarantyrwa
