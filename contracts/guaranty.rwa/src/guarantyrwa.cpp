@@ -171,4 +171,14 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
     auto to = _invest_gstate.stake_contract;
     auto memo = string("Guaranty pay yield for RWA plan: ") + std::to_string(plan_id);
     TRANSFER_OUT( bank, to, yield_due, memo )
+
+    auto year = year_from_unix_seconds( current_time_point().sec_since_epoch() );
+    auto payment = plan_payment_t( year );
+    if ( !_db.get( plan_id, payment ) ) {
+        payment.total_paid = yield_due;
+
+    } else {
+        payment.total_paid += yield_due;
+    }
+    _db.set( plan_id, payment );
 }

@@ -66,7 +66,7 @@ TBL guarantor_stake_t {                     // scope: guanrantor
 
 TBL plan_payment_t {                        // scope: plan_id
     uint64_t        year;                   // PK, paid in this year, but for the last year's due
-    asset           total_amount;
+    asset           total_paid;          // total amount paid in this year for the last year, out of the guanranty funds
     time_point      created_at;
 
     uint64_t primary_key() const { return year; }
@@ -76,7 +76,7 @@ TBL plan_payment_t {                        // scope: plan_id
 
     typedef eosio::multi_index<"payments"_n, plan_payment_t > idx_t;
 
-    EOSLIB_SERIALIZE( plan_payment_t, (year)(total_amount)(created_at) )
+    EOSLIB_SERIALIZE( plan_payment_t, (year)(total_paid)(created_at) )
 };
 
 } }
