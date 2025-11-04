@@ -92,7 +92,7 @@ TBL fundplan_t {                                    //scope: _self
 
     // === 回报分配期限（新增）===
     uint16_t            return_years;               // 回报年限：8~10 年
-    time_point          return_end_time;            // 回报结束时间（自动计算）
+    time_point_sec      return_end_time;            // 回报结束时间（自动计算）
 
     // === 投资担保机制 ===
     double              guaranteed_yield_apr = 0.05; // 兜底年化收益率（5% → 0.05）

@@ -17,8 +17,8 @@ enum class err: uint8_t {
    SYMBOL_MISMATCH      = 5,
    EXPIRED              = 6,
    PWHASH_INVALID       = 7,
-   RECORD_NOT_FOUND      = 8,
-   NOT_REPEAT_RECEIVE   = 9,
+   RECORD_NOT_FOUND     = 8,
+   RECORD_EXISTS        = 9,
    NOT_EXPIRED          = 10,
    ACCOUNT_INVALID      = 11,
    FEE_NOT_POSITIVE     = 12,
@@ -91,11 +91,6 @@ public:
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
     ACTION refund( const name& submitter, const name& investor, const uint64_t& plan_id );
-
-
-    ACTION claiminvestrwa( const name& claimer, const name& code, const string& pwhash );
-    ACTION cancel( const name& code );
-    ACTION delclaims( const uint64_t& max_rows );
 
     ACTION init(const name& admin) {
         require_auth( _self );

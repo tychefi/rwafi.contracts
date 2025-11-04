@@ -222,28 +222,26 @@ void investrwa::createplan( const name& creator,
     CHECKC( return_years >= 0, err::INVALID_FORMAT, "return years must be positive" );
     CHECKC( guaranteed_yield_apr >= 0.0, err::INVALID_FORMAT, "guaranteed yield apr must be non-negative" );
 
-    dbc::idx_t<fundplan_t> fundplan_tbl( _self, _self.value );
+    auto fundplan = fundplan_t( ++ _gstate.last_plan_id );
+    CHECKC( !_db.get( fundplan ), err::RECORD_EXISTS, "fund plan already exists: " + to_string( fundplan.id ) )
 
-    fundplan_tbl.emplace( get_self(), [&]( auto& fp ) {
-        fp.id                          = ++ _gstate.last_plan_id;
-        fp.title                       = title;
-        fp.creator                     = creator;
-        fp.goal_asset_contract         = goal_asset_contract;
-        fp.goal_quantity               = goal_quantity;
-        fp.created_at                  = time_point(current_time_point());
-        fp.receipt_asset_contract      = receipt_asset_contract;
-        fp.receipt_quantity_per_unit   = receipt_quantity_per_unit;
-        fp.invest_unit_size            = invest_unit_size;
-        fp.soft_cap_percent            = soft_cap_percent;
-        fp.hard_cap_percent            = hard_cap_percent;
-        fp.start_time                  = start_time;
-        fp.end_time                    = end_time;
-        fp.return_years                = return_years;
-        fp.return_end_time             = time_point( start_time.sec_since_epoch() + return_years * seconds_per_year );
-        fp.guaranteed_yield_apr        = guaranteed_yield_apr;
-        fp.total_raised_funds          = asset(0, goal_quantity.symbol);
-        fp.total_issued_receipts       = asset(0, receipt_quantity_per_unit.symbol);
-    } );
+    fundplan.title                       = title;
+    fundplan.creator                     = creator;
+    fundplan.goal_asset_contract         = goal_asset_contract;
+    fundplan.goal_quantity               = goal_quantity;
+    fundplan.created_at                  = time_point(current_time_point());
+    fundplan.receipt_asset_contract      = receipt_asset_contract;
+    fundplan.soft_cap_percent            = soft_cap_percent;
+    fundplan.hard_cap_percent            = hard_cap_percent;
+    fundplan.start_time                  = start_time;
+    fundplan.end_time                    = end_time;
+    fundplan.return_years                = return_years;
+    fundplan.return_end_time             = time_point_sec( start_time.sec_since_epoch() + return_years * seconds_per_year );
+    fundplan.guaranteed_yield_apr        = guaranteed_yield_apr;
+    fundplan.total_raised_funds          = asset(0, goal_quantity.symbol);
+    fundplan.total_issued_receipts       = asset(0, receipt_quantity_per_unit.symbol);
+
+    _db.set( fundplan);
 }
 
 void investrwa::cancelplan( const name& creator, const uint64_t& plan_id ) {
