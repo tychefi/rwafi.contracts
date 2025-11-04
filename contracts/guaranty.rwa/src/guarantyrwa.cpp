@@ -4,8 +4,8 @@
 #include "investrwa.hpp"
 #include "investrwadb.hpp"
 #include "yieldrwadb.hpp"
+#include "wasm_db.hpp"
 
-#include "utils.hpp"
 #include <algorithm>
 #include <chrono>
 #include <eosio/transaction.hpp>
@@ -69,20 +69,16 @@ static uint64_t days_in_year(uint64_t year) {
 }
 //--------------------------
 
-void guarantyrwa::_calculate_yield_due( const uint64_t& plan_id, asset& due ) {
-    // get plan yield distriubtion of last year from yield
-    uint32_t last_yeah = year_from_unix_seconds( current_time_point().sec_since_epoch() ) - 1;
-
-    uint32_t year = year_from_unix_seconds( current_time_point().sec_since_epoch() );
-    auto yieldlog = yield_log_t( year );
-    if ( !_db.get( plan_id, yieldlog ) ) return;
-
-    auto plan = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "plan not found: " + to_string( plan_id ) )
+void guarantyrwa::_calculate_yield_due( const fundplan_t& plan, asset& due ) {
+    uint32_t last_year = year_from_unix_seconds( current_time_point().sec_since_epoch() ) - 1;
+    auto lastyieldlog = yield_log_t( last_year );
+    CHECKC( _db_yield.get( plan_id, lastyieldlog ), err::RECORD_NOT_FOUND, "yield log not found for plan: " + to_string( plan_id ) + " on last year: " + to_string( last_year ) )
 
     auto min_year_total = plan.guaranteed_yield_apr * goal_quantity / 100;
-    if ( yield_log.year_total_quantity >= min_year_total ) return;
-    due = min_year_total - yield_log.year_total_quantity;
+    if ( lastyieldlog.year_total_quantity >= min_year_total ) return;
+    due = min_year_total - lastyieldlog.year_total_quantity;
+
+    CHECKC( due.amount > 0, err::NOT_POSITIVE, "no yield due for plan: " + to_string( plan_id ) + " on last year: " + to_string( last_year ) )
 }
 
 // --------------------------
@@ -100,38 +96,36 @@ void guarantyrwa::on_transfer( const name& from, const name& to, const asset& qu
     auto plan = guaranty_t( plan_id );
 
     // update guaranty stats
-    auto stats_tbl = _db.get_table< guaranty_stats_t >( _self, _self.value );
-    auto stats_itr = stats_tbl.find( plan_id );
-    if ( stats_itr == stats_tbl.end() ) {
-        stats_tbl.emplace( get_self(), [&]( auto& row ) {
-            row.plan_id                 = plan_id;
-            row.total_guarantee_funds   = quantity;
-            row.created_at              = time_point_sec( current_time_point() );
-            row.updated_at              = time_point_sec( current_time_point() );
-        });
+    auto now = time_point_sec( current_time_point() );
+    auto guaranty_stats = guaranty_stats_t( plan_id );
+    if ( !_db.get( guaranty_stats ) ) {
+        guaranty_stats.plan_id                     = plan_id;
+        guaranty_stats.total_guarantee_funds       = quantity;
+        guaranty_stats.available_guarantee_funds   = quantity;
+        guaranty_stats.used_guarantee_funds        = asset{0, quantity.symbol};
+        guaranty_stats.created_at                  = now;
+        guaranty_stats.updated_at                  = now;
+
     } else {
-        stats_tbl.modify( stats_itr, get_self(), [&]( auto& row ) {
-            row.total_guarantee_funds   += quantity;
-            row.updated_at              = time_point_sec( current_time_point() );
-        });
+        guaranty_stats.total_guarantee_funds       += quantity;
+        guaranty_stats.available_guarantee_funds   += quantity;
+        guaranty_stats.updated_at                  = now;
     }
+    _db.set( guaranty_stats );
 
     // update guaranty record
-    auto guaranty_tbl = _db.get_table< guaranty_t >( _self, from.value );
-    auto guaranty_itr = guaranty_tbl.find( plan_id );
-    if ( guaranty_itr == guaranty_tbl.end() ) {
-        guaranty_tbl.emplace( get_self(), [&]( auto& row ) {
-            row.plan_id                 = plan_id;
-            row.total_guarantee_funds   = quantity;
-            row.created_at              = time_point_sec( current_time_point() );
-            row.updated_at              = time_point_sec( current_time_point() );
-        });
+    auto guaranty_log = guaranty_t( plan_id )
+    if ( !_db.get( guaranty_log, from.value ) ) {
+        guaranty_log.plan_id                        = plan_id;
+        guaranty_log.total_guarantee_funds          = quantity;
+        guaranty_log.created_at                     = now;
+        guaranty_log.updated_at                     = now;
+
     } else {
-        guaranty_tbl.modify( guaranty_itr, get_self(), [&]( auto& row ) {
-            row.total_guarantee_funds   += quantity;
-            row.updated_at              = time_point_sec( current_time_point() );
-        });
+        guaranty_log.total_guarantee_funds          += quantity;
+        guaranty_log.updated_at                     = now;
     }
+    _db.set( guaranty_log, from.value );
 
 }
 
@@ -141,30 +135,33 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
     require_auth( submitter );
 
     //check plan
-    auto plan = plan_t( plan_id );
-    CHECKC( plan.status == PlanStatus::ACTIVE, err::RECORD_NO_FOUND, "plan not active" )
+    auto plan = fundplan_t( plan_id );
+    CHECKC( _db_invest.get( plan ), err::RECORD_NOT_FOUND, "plan not found: " + to_string( plan_id ) )
+    CHECKC( plan.status == PlanStatus::SUCCESS, err::STATUS_ERROR, "plan not in SUCCESS mode" )
 
-    //check yield due
-    auto yield_due = _calculate_yield_due( plan_id );
-    CHECKC( yield_due.amount > 0, err::NOT_POSITIVE, "no yield due" )
-
+    //check yield due in last year
+    auto yield_due = asset(0, plan.goal_quantity.symbol);
+    _calculate_yield_due( plan, yield_due );
+    
     //check guaranty stats
-    auto stats_tbl = _db.get_table< guaranty_stats_t >( _self, _self.value );
-    auto stats_itr = stats_tbl.find( plan_id );
-    CHECKC( stats_itr != stats_tbl.end(), err::RECORD_NO_FOUND, "guaranty stats not found" )
-    CHECKC( stats_itr->total_guarantee_funds.amount >= yield_due.amount, err::QUANTITY_INSUFFICIENT, "insufficient guaranty funds" )
-    //deduct guaranty stats
-    stats_tbl.modify( stats_itr, get_self(), [&]( auto& row ) {
-        row.total_guarantee_funds   -= yield_due;
-        row.updated_at              = time_point_sec( current_time_point() );
-    });
+    auto stats = guaranty_stats_t( plan_id );
+    CHECKC( _db.get( stats ), err::RECORD_NOT_FOUND, "guaranty stats not found for plan: " + to_string( plan_id ) )
+    CHECKC( stats.available_guarantee_funds > 0, err::QUANTITY_INSUFFICIENT, "insufficient guaranty funds" )
+
+    if ( stats.available_guarantee_funds < yield_due ) {
+        yield_due = stats.available_guarantee_funds;
+    }
+
+    //deduct in guaranty stats
+    stats.available_guarantee_funds -= yield_due;
+    stats.used_guarantee_funds      += yield_due;
+    stats.updated_at                = time_point_sec( current_time_point() );
+    _db.set( stats );
 
     //distribute yield to investors via stake.rwa
     //transfer out from guaranty.rwa to stake.rwa
     auto bank = plan.goal_asset_contract;
     auto to = plan.stake_contract;
     auto memo = string("Guaranty pay yield for RWA plan: ") + std::to_string(plan_id);
-
     TRANSFER_OUT( bank, to, yield_due, memo )
-
 }

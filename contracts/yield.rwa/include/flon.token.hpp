@@ -21,8 +21,10 @@ namespace eosiosystem {
     {	token::transfer_action act{ bank, { {_self, active_perm} } };\
 			act.send( _self, to, quantity , memo );}
          
+
 namespace flon {
 
+   using namespace eosio;
    using std::string;
 
    /**

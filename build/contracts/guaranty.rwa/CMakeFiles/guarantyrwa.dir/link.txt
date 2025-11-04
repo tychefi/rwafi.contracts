@@ -1,0 +1,1 @@
+/Users/richardchen/work/flon/flon-cdt/build/bin/cdt-ld -L/usr/local/opt/openssl@1.1/lib CMakeFiles/guarantyrwa.dir/src/guarantyrwa.cpp.obj -o guarantyrwa.wasm

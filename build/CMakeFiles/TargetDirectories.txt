@@ -1,0 +1,8 @@
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/update_version.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/contracts_project.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/edit_cache.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/rebuild_cache.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/list_install_components.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/install.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/install/local.dir
+/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/install/strip.dir

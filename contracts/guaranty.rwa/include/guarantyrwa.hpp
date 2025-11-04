@@ -14,7 +14,8 @@ enum class err: uint8_t {
    NOT_POSITIVE         = 4,
    SYMBOL_MISMATCH      = 5,
    EXPIRED              = 6,
-   RECORD_NO_FOUND      = 8,
+   STATUS_ERROR         = 7,
+   RECORD_NOT_FOUND      = 8,
    NOT_REPEAT_RECEIVE   = 9,
    NOT_EXPIRED          = 10,
    ACCOUNT_INVALID      = 11,
@@ -30,6 +31,8 @@ enum class err: uint8_t {
 class [[eosio::contract("guarantyrwa")]] guarantyrwa: public eosio::contract {
 private:
     dbc                 _db;
+    dbc                 _db_invest;
+    dbc                 _db_yield;
     global_singleton    _global;
     global_t            _gstate;
 
@@ -38,10 +41,15 @@ public:
 
     guarantyrwa(eosio::name receiver, eosio::name code, datastream<const char*> ds):
         _db(_self),
+        _db_invest(_self),
+        _db_yield(_self),
         contract(receiver, code, ds),
         _global(_self, _self.value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
+        
+        _db_invest = dbc( _gstate.invest_contract );
+        _db_yield = dbc( _gstate.yield_contract );
     }
 
     ~guarantyrwa() {

@@ -1,0 +1,1 @@
+/Users/richardchen/work/flon/flon-cdt/build/bin/cdt-ld -L/usr/local/opt/openssl@1.1/lib CMakeFiles/investrwa.dir/src/investrwa.cpp.obj -o investrwa.wasm

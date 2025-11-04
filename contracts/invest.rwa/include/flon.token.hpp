@@ -24,7 +24,7 @@ namespace eosiosystem {
 namespace flon {
 
    using std::string;
-
+   using namespace eosio;
    /**
     * flon.token contract defines the structures and actions that allow users to create, issue, and manage
     * tokens on eosio based blockchains.

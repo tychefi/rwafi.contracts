@@ -1,3 +1,7 @@
+if("${GIT_REPOS_DIR}" STREQUAL "")
+   set(GIT_REPOS_DIR ${CMAKE_SOURCE_DIR})
+endif()
+
 find_package(Git)
 if(GIT_FOUND)
    execute_process(
@@ -6,17 +10,20 @@ if(GIT_FOUND)
       ERROR_VARIABLE err
       OUTPUT_STRIP_TRAILING_WHITESPACE
       RESULT_VARIABLE VERSION_COMMIT_RESULT
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      WORKING_DIRECTORY ${GIT_REPOS_DIR}
    )
    if(${VERSION_COMMIT_RESULT} EQUAL "0")
       set(VERSION_FULL "${VERSION_FULL}-${VERSION_COMMIT_ID}")
-      execute_process(
-         COMMAND ${GIT_EXECUTABLE} diff --quiet
-         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-         RESULT_VARIABLE VERSION_DIRTY
-         ERROR_QUIET
-         OUTPUT_STRIP_TRAILING_WHITESPACE )
-      if(${VERSION_DIRTY})
+
+      # Work out if the repository is dirty
+      execute_process(COMMAND ${GIT_EXECUTABLE} update-index -q --refresh
+          OUTPUT_QUIET
+          ERROR_QUIET)
+      execute_process(COMMAND ${GIT_EXECUTABLE} diff-index --name-only HEAD --
+          OUTPUT_VARIABLE GIT_DIFF_INDEX
+          ERROR_QUIET)
+      string(COMPARE NOTEQUAL "${GIT_DIFF_INDEX}" "" GIT_DIRTY)
+      if (${GIT_DIRTY})
          set(VERSION_FULL "${VERSION_FULL}-dirty")
       endif()
 
@@ -25,4 +32,4 @@ if(GIT_FOUND)
    endif()
 endif()
 
-configure_file( ${SRC_DIR}/ContractVersion.cmake.in ${DEST_DIR}/ContractVersion.cmake @ONLY )
+configure_file( "${SRC_VERSION_FILE}" "${DEST_VERSION_FILE}" @ONLY )

@@ -1,0 +1,2410 @@
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineSystem.cmake:12 (find_program)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_UNAME"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "uname"
+    candidate_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/uname"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/uname"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/uname"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/uname"
+      - "/Users/richardchen/amax/0.5/bin/uname"
+      - "/usr/local/opt/openssl@1.1/bin/uname"
+      - "/Users/richardchen/.jenv/shims/uname"
+      - "/Users/richardchen/.jenv/bin/uname"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/uname"
+      - "/opt/local/bin/uname"
+      - "/opt/local/sbin/uname"
+      - "/usr/local/bin/uname"
+      - "/System/Cryptexes/App/usr/bin/uname"
+    found: "/usr/bin/uname"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineSystem.cmake:212 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The system is: Darwin - 22.1.0 - x86_64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeUnixFindMake.cmake:5 (find_program)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_MAKE_PROGRAM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gmake"
+      - "make"
+      - "smake"
+    candidate_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/gmake"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/gmake"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/gmake"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/gmake"
+      - "/Users/richardchen/amax/0.5/bin/gmake"
+      - "/usr/local/opt/openssl@1.1/bin/gmake"
+      - "/Users/richardchen/.jenv/shims/gmake"
+      - "/Users/richardchen/.jenv/bin/gmake"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/gmake"
+      - "/opt/local/bin/gmake"
+      - "/opt/local/sbin/gmake"
+      - "/usr/local/bin/gmake"
+      - "/System/Cryptexes/App/usr/bin/gmake"
+      - "/usr/bin/gmake"
+      - "/bin/gmake"
+      - "/usr/sbin/gmake"
+      - "/sbin/gmake"
+      - "/Library/Apple/usr/bin/gmake"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/gmake"
+      - "/Users/richardchen/.cargo/bin/gmake"
+      - "/Users/richardchen/work/flutter/bin/gmake"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/gmake"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/gmake"
+      - "/Users/richardchen/Library/Android/sdk/emulator/gmake"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/gmake"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/make"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/make"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/make"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/make"
+      - "/Users/richardchen/amax/0.5/bin/make"
+      - "/usr/local/opt/openssl@1.1/bin/make"
+      - "/Users/richardchen/.jenv/shims/make"
+      - "/Users/richardchen/.jenv/bin/make"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/make"
+      - "/opt/local/bin/make"
+      - "/opt/local/sbin/make"
+      - "/usr/local/bin/make"
+      - "/System/Cryptexes/App/usr/bin/make"
+    found: "/usr/bin/make"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompiler.cmake:73 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:64 (_cmake_find_compiler)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_C_COMPILER"
+    description: "C compiler"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cc"
+      - "gcc"
+      - "cl"
+      - "bcc"
+      - "xlc"
+      - "icx"
+      - "clang"
+    candidate_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/cc"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/cc"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/cc"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/cc"
+      - "/Users/richardchen/amax/0.5/bin/cc"
+      - "/usr/local/opt/openssl@1.1/bin/cc"
+      - "/Users/richardchen/.jenv/shims/cc"
+      - "/Users/richardchen/.jenv/bin/cc"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/cc"
+      - "/opt/local/bin/cc"
+      - "/opt/local/sbin/cc"
+      - "/usr/local/bin/cc"
+      - "/System/Cryptexes/App/usr/bin/cc"
+    found: "/usr/bin/cc"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:462 (find_file)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:500 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCCompilerId.c.in"
+    candidate_directories:
+      - "/usr/local/share/cmake/Modules/"
+    found: "/usr/local/share/cmake/Modules/CMakeCCompilerId.c.in"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/cc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is AppleClang, found in:
+        /Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/4.1.1/CompilerIdC/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:290 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Detecting C compiler apple sysroot: "/usr/bin/cc" "-E" "apple-sdk.c"
+        # 1 "apple-sdk.c"
+        # 1 "<built-in>" 1
+        # 1 "<built-in>" 3
+        # 384 "<built-in>" 3
+        # 1 "<command line>" 1
+        # 1 "<built-in>" 2
+        # 1 "apple-sdk.c" 2
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 1 3 4
+        # 243 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 3 4
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 1 3 4
+        # 165 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 166 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
+        # 167 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 244 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 2 "apple-sdk.c" 2
+        
+        
+      Found apple sysroot: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_AR"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ar"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    found: "/usr/bin/ar"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_RANLIB"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ranlib"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    found: "/usr/bin/ranlib"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_STRIP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "strip"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    found: "/usr/bin/strip"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ld"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    found: "/usr/bin/ld"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_NM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "nm"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    found: "/usr/bin/nm"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJDUMP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "objdump"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    found: "/usr/bin/objdump"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJCOPY"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "objcopy"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/usr/bin/objcopy"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/objcopy"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/objcopy"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/objcopy"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/objcopy"
+      - "/Users/richardchen/amax/0.5/bin/objcopy"
+      - "/usr/local/opt/openssl@1.1/bin/objcopy"
+      - "/Users/richardchen/.jenv/shims/objcopy"
+      - "/Users/richardchen/.jenv/bin/objcopy"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/objcopy"
+      - "/opt/local/bin/objcopy"
+      - "/opt/local/sbin/objcopy"
+      - "/usr/local/bin/objcopy"
+      - "/System/Cryptexes/App/usr/bin/objcopy"
+      - "/bin/objcopy"
+      - "/usr/sbin/objcopy"
+      - "/sbin/objcopy"
+      - "/Library/Apple/usr/bin/objcopy"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/objcopy"
+      - "/Users/richardchen/.cargo/bin/objcopy"
+      - "/Users/richardchen/work/flutter/bin/objcopy"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/objcopy"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/objcopy"
+      - "/Users/richardchen/Library/Android/sdk/emulator/objcopy"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/objcopy"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_READELF"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "readelf"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/usr/bin/readelf"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/readelf"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/readelf"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/readelf"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/readelf"
+      - "/Users/richardchen/amax/0.5/bin/readelf"
+      - "/usr/local/opt/openssl@1.1/bin/readelf"
+      - "/Users/richardchen/.jenv/shims/readelf"
+      - "/Users/richardchen/.jenv/bin/readelf"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/readelf"
+      - "/opt/local/bin/readelf"
+      - "/opt/local/sbin/readelf"
+      - "/usr/local/bin/readelf"
+      - "/System/Cryptexes/App/usr/bin/readelf"
+      - "/bin/readelf"
+      - "/usr/sbin/readelf"
+      - "/sbin/readelf"
+      - "/Library/Apple/usr/bin/readelf"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/readelf"
+      - "/Users/richardchen/.cargo/bin/readelf"
+      - "/Users/richardchen/work/flutter/bin/readelf"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/readelf"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/readelf"
+      - "/Users/richardchen/Library/Android/sdk/emulator/readelf"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/readelf"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_DLLTOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "dlltool"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/usr/bin/dlltool"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/dlltool"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/dlltool"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/dlltool"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/dlltool"
+      - "/Users/richardchen/amax/0.5/bin/dlltool"
+      - "/usr/local/opt/openssl@1.1/bin/dlltool"
+      - "/Users/richardchen/.jenv/shims/dlltool"
+      - "/Users/richardchen/.jenv/bin/dlltool"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/dlltool"
+      - "/opt/local/bin/dlltool"
+      - "/opt/local/sbin/dlltool"
+      - "/usr/local/bin/dlltool"
+      - "/System/Cryptexes/App/usr/bin/dlltool"
+      - "/bin/dlltool"
+      - "/usr/sbin/dlltool"
+      - "/sbin/dlltool"
+      - "/Library/Apple/usr/bin/dlltool"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/dlltool"
+      - "/Users/richardchen/.cargo/bin/dlltool"
+      - "/Users/richardchen/work/flutter/bin/dlltool"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/dlltool"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/dlltool"
+      - "/Users/richardchen/Library/Android/sdk/emulator/dlltool"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/dlltool"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_ADDR2LINE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "addr2line"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/usr/bin/addr2line"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/addr2line"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/addr2line"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/addr2line"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/addr2line"
+      - "/Users/richardchen/amax/0.5/bin/addr2line"
+      - "/usr/local/opt/openssl@1.1/bin/addr2line"
+      - "/Users/richardchen/.jenv/shims/addr2line"
+      - "/Users/richardchen/.jenv/bin/addr2line"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/addr2line"
+      - "/opt/local/bin/addr2line"
+      - "/opt/local/sbin/addr2line"
+      - "/usr/local/bin/addr2line"
+      - "/System/Cryptexes/App/usr/bin/addr2line"
+      - "/bin/addr2line"
+      - "/usr/sbin/addr2line"
+      - "/sbin/addr2line"
+      - "/Library/Apple/usr/bin/addr2line"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/addr2line"
+      - "/Users/richardchen/.cargo/bin/addr2line"
+      - "/Users/richardchen/work/flutter/bin/addr2line"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/addr2line"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/addr2line"
+      - "/Users/richardchen/Library/Android/sdk/emulator/addr2line"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/addr2line"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeFindBinUtils.cmake:238 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_TAPI"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "tapi"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/usr/bin/tapi"
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/tapi"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/tapi"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/tapi"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/tapi"
+      - "/Users/richardchen/amax/0.5/bin/tapi"
+      - "/usr/local/opt/openssl@1.1/bin/tapi"
+      - "/Users/richardchen/.jenv/shims/tapi"
+      - "/Users/richardchen/.jenv/bin/tapi"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/tapi"
+      - "/opt/local/bin/tapi"
+      - "/opt/local/sbin/tapi"
+      - "/usr/local/bin/tapi"
+      - "/System/Cryptexes/App/usr/bin/tapi"
+      - "/bin/tapi"
+      - "/usr/sbin/tapi"
+      - "/sbin/tapi"
+      - "/Library/Apple/usr/bin/tapi"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/tapi"
+      - "/Users/richardchen/.cargo/bin/tapi"
+      - "/Users/richardchen/work/flutter/bin/tapi"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/tapi"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/tapi"
+      - "/Users/richardchen/Library/Android/sdk/emulator/tapi"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/tapi"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompiler.cmake:54 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:69 (_cmake_find_compiler)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_CXX_COMPILER"
+    description: "CXX compiler"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "c++"
+      - "g++"
+      - "cl"
+      - "bcc"
+      - "icpx"
+      - "icx"
+      - "clang++"
+    candidate_directories:
+      - "/usr/bin/"
+    found: "/usr/bin/c++"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:462 (find_file)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:500 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCXXCompilerId.cpp.in"
+    candidate_directories:
+      - "/usr/local/share/cmake/Modules/"
+    found: "/usr/local/share/cmake/Modules/CMakeCXXCompilerId.cpp.in"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /usr/bin/c++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is AppleClang, found in:
+        /Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/4.1.1/CompilerIdCXX/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerId.cmake:290 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Detecting CXX compiler apple sysroot: "/usr/bin/c++" "-E" "apple-sdk.cpp"
+        # 1 "apple-sdk.cpp"
+        # 1 "<built-in>" 1
+        # 1 "<built-in>" 3
+        # 398 "<built-in>" 3
+        # 1 "<command line>" 1
+        # 1 "<built-in>" 2
+        # 1 "apple-sdk.cpp" 2
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 1 3 4
+        # 243 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 3 4
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 1 3 4
+        # 165 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 166 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 1 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
+        # 167 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 244 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 2 "apple-sdk.cpp" 2
+        
+        
+      Found apple sysroot: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/Platform/Darwin.cmake:76 (find_program)"
+      - "/usr/local/share/cmake/Modules/CMakeSystemSpecificInformation.cmake:32 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_INSTALL_NAME_TOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "install_name_tool"
+    candidate_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/"
+      - "/Users/richardchen/amax/0.5/bin/"
+      - "/usr/local/opt/openssl@1.1/bin/"
+      - "/Users/richardchen/.jenv/shims/"
+      - "/Users/richardchen/.jenv/bin/"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/Library/Apple/usr/bin/"
+      - "/Users/richardchen/.sdkman/candidates/gradle/current/bin/"
+      - "/Users/richardchen/.cargo/bin/"
+      - "/Users/richardchen/work/flutter/bin/"
+      - "/Users/richardchen/Library/Android/sdk/platform-tools/"
+      - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin/"
+      - "/Users/richardchen/Library/Android/sdk/emulator/"
+      - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+    searched_directories:
+      - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin/install_name_tool"
+      - "/Users/richardchen/.gem/ruby/3.2.1/bin/install_name_tool"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin/install_name_tool"
+      - "/Users/richardchen/.rubies/ruby-3.2.1/bin/install_name_tool"
+      - "/Users/richardchen/amax/0.5/bin/install_name_tool"
+      - "/usr/local/opt/openssl@1.1/bin/install_name_tool"
+      - "/Users/richardchen/.jenv/shims/install_name_tool"
+      - "/Users/richardchen/.jenv/bin/install_name_tool"
+      - "/usr/local/Cellar/dart/2.19.6/libexec/bin/install_name_tool"
+      - "/opt/local/bin/install_name_tool"
+      - "/opt/local/sbin/install_name_tool"
+      - "/usr/local/bin/install_name_tool"
+      - "/System/Cryptexes/App/usr/bin/install_name_tool"
+    found: "/usr/bin/install_name_tool"
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR"
+      binary: "/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_EXE_LINKER_FLAGS: "-L/usr/local/opt/openssl@1.1/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: ""
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_35214/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_35214.dir/build.make CMakeFiles/cmTC_35214.dir/build
+        Building C object CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o
+        /usr/bin/cc   -v -Wl,-v -MD -MT CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -c /usr/local/share/cmake/Modules/CMakeCCompilerABI.c
+        Apple clang version 14.0.3 (clang-1403.0.22.14.1)
+        Target: x86_64-apple-darwin22.1.0
+        Thread model: posix
+        InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+        clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]
+         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx13.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -mrelax-all --mrelax-relocations -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=all -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=2 -target-sdk-version=13.3 -fvisibility-inlines-hidden-static-local-var -target-cpu penryn -tune-cpu generic -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=lldb -target-linker-version 857.1 -v -fcoverage-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3 -dependency-file CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-reorder-init-list -Wno-implicit-int-float-conversion -Wno-c99-designator -Wno-final-dtor-non-final-class -Wno-extra-semi-stmt -Wno-misleading-indentation -Wno-quoted-include-in-framework-header -Wno-implicit-fallthrough -Wno-enum-enum-conversion -Wno-enum-float-conversion -Wno-elaborated-enum-base -Wno-reserved-identifier -Wno-gnu-folding-constant -fdebug-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -no-opaque-pointers -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -mllvm -disable-aligned-alloc-awareness=1 -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -x c /usr/local/share/cmake/Modules/CMakeCCompilerABI.c
+        clang -cc1 version 14.0.3 (clang-1403.0.22.14.1) default target x86_64-apple-darwin22.1.0
+        ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include"
+        ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/local/include
+         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include
+         /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
+         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include
+         /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
+        End of search list.
+        Linking C executable cmTC_35214
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_35214.dir/link.txt --verbose=1
+        Apple clang version 14.0.3 (clang-1403.0.22.14.1)
+        Target: x86_64-apple-darwin22.1.0
+        Thread model: posix
+        InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 13.0.0 13.3 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -o cmTC_35214 -L/usr/local/opt/openssl@1.1/lib -L/usr/local/lib -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a
+        @(#)PROGRAM:ld  PROJECT:ld64-857.1
+        BUILD 23:13:24 May  7 2023
+        configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em
+        Library search paths:
+        	/usr/local/opt/openssl@1.1/lib
+        	/usr/local/lib
+        	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib
+        Framework search paths:
+        	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/
+        /usr/bin/cc -Wl,-search_paths_first -Wl,-headerpad_max_install_names -L/usr/local/opt/openssl@1.1/lib -v -Wl,-v CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -o cmTC_35214
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:122 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Effective list of requested architectures (possibly empty)  : ""
+      Effective list of architectures found in the ABI info binary: "x86_64"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:217 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/local/include]
+          add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include]
+          add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include]
+          add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+        end of search list found
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+        implicit include dirs: [/usr/local/include;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_35214/fast]
+        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_35214.dir/build.make CMakeFiles/cmTC_35214.dir/build]
+        ignore line: [Building C object CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/cc   -v -Wl -v -MD -MT CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -c /usr/local/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [Apple clang version 14.0.3 (clang-1403.0.22.14.1)]
+        ignore line: [Target: x86_64-apple-darwin22.1.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+        ignore line: [clang: warning: -Wl -v: 'linker' input unused [-Wunused-command-line-argument]]
+        ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx13.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -mrelax-all --mrelax-relocations -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=all -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=2 -target-sdk-version=13.3 -fvisibility-inlines-hidden-static-local-var -target-cpu penryn -tune-cpu generic -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=lldb -target-linker-version 857.1 -v -fcoverage-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3 -dependency-file CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-reorder-init-list -Wno-implicit-int-float-conversion -Wno-c99-designator -Wno-final-dtor-non-final-class -Wno-extra-semi-stmt -Wno-misleading-indentation -Wno-quoted-include-in-framework-header -Wno-implicit-fallthrough -Wno-enum-enum-conversion -Wno-enum-float-conversion -Wno-elaborated-enum-base -Wno-reserved-identifier -Wno-gnu-folding-constant -fdebug-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-4BjKIR -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -no-opaque-pointers -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -mllvm -disable-aligned-alloc-awareness=1 -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -x c /usr/local/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [clang -cc1 version 14.0.3 (clang-1403.0.22.14.1) default target x86_64-apple-darwin22.1.0]
+        ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)]
+        ignore line: [End of search list.]
+        ignore line: [Linking C executable cmTC_35214]
+        ignore line: [/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_35214.dir/link.txt --verbose=1]
+        ignore line: [Apple clang version 14.0.3 (clang-1403.0.22.14.1)]
+        ignore line: [Target: x86_64-apple-darwin22.1.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+        link line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 13.0.0 13.3 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -o cmTC_35214 -L/usr/local/opt/openssl@1.1/lib -L/usr/local/lib -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a]
+          arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld] ==> ignore
+          arg [-demangle] ==> ignore
+          arg [-lto_library] ==> ignore, skip following value
+          arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib] ==> skip value of -lto_library
+          arg [-dynamic] ==> ignore
+          arg [-arch] ==> ignore
+          arg [x86_64] ==> ignore
+          arg [-platform_version] ==> ignore
+          arg [macos] ==> ignore
+          arg [13.0.0] ==> ignore
+          arg [13.3] ==> ignore
+          arg [-syslibroot] ==> ignore
+          arg [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_35214] ==> ignore
+          arg [-L/usr/local/opt/openssl@1.1/lib] ==> dir [/usr/local/opt/openssl@1.1/lib]
+          arg [-L/usr/local/lib] ==> dir [/usr/local/lib]
+          arg [-search_paths_first] ==> ignore
+          arg [-headerpad_max_install_names] ==> ignore
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_35214.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lSystem] ==> lib [System]
+          arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a] ==> lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a]
+        linker tool for 'C': /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
+        Library search paths: [;/usr/local/opt/openssl@1.1/lib;/usr/local/lib;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib]
+        Framework search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/]
+        remove lib [System]
+        remove lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a]
+        collapse library dir [/usr/local/opt/openssl@1.1/lib] ==> [/usr/local/opt/openssl@1.1/lib]
+        collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+        collapse library dir [/usr/local/opt/openssl@1.1/lib] ==> [/usr/local/opt/openssl@1.1/lib]
+        collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+        collapse library dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib]
+        collapse framework dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks]
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: [/usr/local/opt/openssl@1.1/lib;/usr/local/lib;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib]
+        implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the C compiler's linker: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" "-v"
+      @(#)PROGRAM:ld  PROJECT:ld64-857.1
+      BUILD 23:13:24 May  7 2023
+      configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em
+      LTO support using: LLVM version 14.0.3, (clang-1403.0.22.14.1) (static support for 29, runtime is 29)
+      TAPI support using: Apple TAPI version 14.0.3 (tapi-1403.0.5.1)
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw"
+      binary: "/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "-L/usr/local/opt/openssl@1.1/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: ""
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_50876/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_50876.dir/build.make CMakeFiles/cmTC_50876.dir/build
+        Building CXX object CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -v -Wl,-v -MD -MT CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -c /usr/local/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Apple clang version 14.0.3 (clang-1403.0.22.14.1)
+        Target: x86_64-apple-darwin22.1.0
+        Thread model: posix
+        InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+        clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]
+         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx13.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -mrelax-all --mrelax-relocations -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=all -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=2 -target-sdk-version=13.3 -fvisibility-inlines-hidden-static-local-var -target-cpu penryn -tune-cpu generic -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=lldb -target-linker-version 857.1 -v -fcoverage-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3 -dependency-file CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -stdlib=libc++ -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-reorder-init-list -Wno-implicit-int-float-conversion -Wno-c99-designator -Wno-final-dtor-non-final-class -Wno-extra-semi-stmt -Wno-misleading-indentation -Wno-quoted-include-in-framework-header -Wno-implicit-fallthrough -Wno-enum-enum-conversion -Wno-enum-float-conversion -Wno-elaborated-enum-base -Wno-reserved-identifier -Wno-gnu-folding-constant -fdeprecated-macro -fdebug-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fno-cxx-modules -no-opaque-pointers -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -mllvm -disable-aligned-alloc-awareness=1 -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/local/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        clang -cc1 version 14.0.3 (clang-1403.0.22.14.1) default target x86_64-apple-darwin22.1.0
+        ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include"
+        ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/local/include
+         /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1
+         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include
+         /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
+         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include
+         /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
+        End of search list.
+        Linking CXX executable cmTC_50876
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_50876.dir/link.txt --verbose=1
+        Apple clang version 14.0.3 (clang-1403.0.22.14.1)
+        Target: x86_64-apple-darwin22.1.0
+        Thread model: posix
+        InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 13.0.0 13.3 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -o cmTC_50876 -L/usr/local/opt/openssl@1.1/lib -L/usr/local/lib -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a
+        @(#)PROGRAM:ld  PROJECT:ld64-857.1
+        BUILD 23:13:24 May  7 2023
+        configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em
+        Library search paths:
+        	/usr/local/opt/openssl@1.1/lib
+        	/usr/local/lib
+        	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib
+        Framework search paths:
+        	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/
+        /usr/bin/c++ -Wl,-search_paths_first -Wl,-headerpad_max_install_names -L/usr/local/opt/openssl@1.1/lib -v -Wl,-v CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_50876
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:122 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Effective list of requested architectures (possibly empty)  : ""
+      Effective list of architectures found in the ABI info binary: "x86_64"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:217 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/local/include]
+          add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1]
+          add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include]
+          add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include]
+          add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+        end of search list found
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include]
+        collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+        implicit include dirs: [/usr/local/include;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_50876/fast]
+        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_50876.dir/build.make CMakeFiles/cmTC_50876.dir/build]
+        ignore line: [Building CXX object CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -v -Wl -v -MD -MT CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -c /usr/local/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Apple clang version 14.0.3 (clang-1403.0.22.14.1)]
+        ignore line: [Target: x86_64-apple-darwin22.1.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+        ignore line: [clang: warning: -Wl -v: 'linker' input unused [-Wunused-command-line-argument]]
+        ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx13.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -mrelax-all --mrelax-relocations -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=all -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=2 -target-sdk-version=13.3 -fvisibility-inlines-hidden-static-local-var -target-cpu penryn -tune-cpu generic -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=lldb -target-linker-version 857.1 -v -fcoverage-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3 -dependency-file CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -stdlib=libc++ -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-reorder-init-list -Wno-implicit-int-float-conversion -Wno-c99-designator -Wno-final-dtor-non-final-class -Wno-extra-semi-stmt -Wno-misleading-indentation -Wno-quoted-include-in-framework-header -Wno-implicit-fallthrough -Wno-enum-enum-conversion -Wno-enum-float-conversion -Wno-elaborated-enum-base -Wno-reserved-identifier -Wno-gnu-folding-constant -fdeprecated-macro -fdebug-compilation-dir=/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/CMakeScratch/TryCompile-VsXaSw -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fno-cxx-modules -no-opaque-pointers -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -mllvm -disable-aligned-alloc-awareness=1 -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/local/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang -cc1 version 14.0.3 (clang-1403.0.22.14.1) default target x86_64-apple-darwin22.1.0]
+        ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+        ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)]
+        ignore line: [End of search list.]
+        ignore line: [Linking CXX executable cmTC_50876]
+        ignore line: [/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_50876.dir/link.txt --verbose=1]
+        ignore line: [Apple clang version 14.0.3 (clang-1403.0.22.14.1)]
+        ignore line: [Target: x86_64-apple-darwin22.1.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+        link line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 13.0.0 13.3 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -o cmTC_50876 -L/usr/local/opt/openssl@1.1/lib -L/usr/local/lib -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a]
+          arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld] ==> ignore
+          arg [-demangle] ==> ignore
+          arg [-lto_library] ==> ignore, skip following value
+          arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib] ==> skip value of -lto_library
+          arg [-dynamic] ==> ignore
+          arg [-arch] ==> ignore
+          arg [x86_64] ==> ignore
+          arg [-platform_version] ==> ignore
+          arg [macos] ==> ignore
+          arg [13.0.0] ==> ignore
+          arg [13.3] ==> ignore
+          arg [-syslibroot] ==> ignore
+          arg [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_50876] ==> ignore
+          arg [-L/usr/local/opt/openssl@1.1/lib] ==> dir [/usr/local/opt/openssl@1.1/lib]
+          arg [-L/usr/local/lib] ==> dir [/usr/local/lib]
+          arg [-search_paths_first] ==> ignore
+          arg [-headerpad_max_install_names] ==> ignore
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_50876.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lc++] ==> lib [c++]
+          arg [-lSystem] ==> lib [System]
+          arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a] ==> lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a]
+        linker tool for 'CXX': /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
+        Library search paths: [;/usr/local/opt/openssl@1.1/lib;/usr/local/lib;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib]
+        Framework search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/]
+        remove lib [System]
+        remove lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3/lib/darwin/libclang_rt.osx.a]
+        collapse library dir [/usr/local/opt/openssl@1.1/lib] ==> [/usr/local/opt/openssl@1.1/lib]
+        collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+        collapse library dir [/usr/local/opt/openssl@1.1/lib] ==> [/usr/local/opt/openssl@1.1/lib]
+        collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+        collapse library dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib]
+        collapse framework dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks]
+        implicit libs: [c++]
+        implicit objs: []
+        implicit dirs: [/usr/local/opt/openssl@1.1/lib;/usr/local/lib;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib]
+        implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "/usr/local/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "/usr/local/share/cmake/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the CXX compiler's linker: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" "-v"
+      @(#)PROGRAM:ld  PROJECT:ld64-857.1
+      BUILD 23:13:24 May  7 2023
+      configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em
+      LTO support using: LLVM version 14.0.3, (clang-1403.0.22.14.1) (static support for 29, runtime is 29)
+      TAPI support using: Apple TAPI version 14.0.3 (tapi-1403.0.5.1)
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "CMakeLists.txt:30 (find_package)"
+    name: "flon.cdt"
+    configs:
+      -
+        filename: "flon.cdtConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "flon.cdt-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "flon.cdt"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/pkgRedirects/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/CMakeFiles/pkgRedirects/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.gem/ruby/3.2.1/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.gem/ruby/3.2.1/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.rubies/ruby-3.2.1/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.rubies/ruby-3.2.1/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/amax/0.5/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/amax/0.5/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/opt/openssl@1.1/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/opt/openssl@1.1/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.jenv/shims/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.jenv/shims/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.jenv/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/Users/richardchen/.jenv/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/Cellar/dart/2.19.6/libexec/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/Cellar/dart/2.19.6/libexec/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/opt/local/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/opt/local/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/flon.cdt/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/flon.cdt/flon.cdt-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/lib/cmake/flon.cdt/flon.cdtConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: "/usr/local/lib/cmake/flon.cdt/flon.cdt-config.cmake"
+      mode: "config"
+      version: ""
+    search_context:
+      ENV{PATH}:
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.gem/ruby/3.2.1/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/lib/ruby/gems/3.2.0/bin"
+        - "/Users/richardchen/.rubies/ruby-3.2.1/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/Library/Apple/usr/bin"
+        - "/usr/local/Cellar/dart/2.19.6/libexec/bin/"
+        - "/Library/Java/JavaVirtualMachines/temurin-22.jdk/Contents/Home/bin"
+        - "/Users/richardchen/.sdkman/candidates/gradle/current/bin"
+        - "/Users/richardchen/amax/0.5/bin"
+        - "/usr/local/opt/openssl@1.1/bin"
+        - "/Users/richardchen/.jenv/shims"
+        - "/Users/richardchen/.jenv/bin"
+        - "/opt/local/bin"
+        - "/opt/local/sbin"
+        - "/Users/richardchen/.cargo/bin"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+        - "/Users/richardchen/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/richardchen/work/flutter/bin"
+        - "/Users/richardchen/Library/Android/sdk/platform-tools"
+        - "/Users/richardchen/Library/Android/sdk/cmdline-tools/latest/bin"
+        - "/Users/richardchen/Library/Android/sdk/emulator"
+      CMAKE_INSTALL_PREFIX: "/Users/richardchen/flon/cisum.contracts"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr"
+        - "/usr/local"
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr/local"
+        - "/Users/richardchen/flon/cisum.contracts"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+        - "/sw"
+        - "/opt/local"
+      CMAKE_SYSTEM_FRAMEWORK_PATH:
+        - "~/Library/Frameworks"
+        - "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks"
+        - "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks"
+        - "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+        - "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks"
+        - "/Applications/Xcode.app/Contents/Developer/Library/Frameworks"
+        - "/Library/Frameworks"
+        - "/Network/Library/Frameworks"
+        - "/System/Library/Frameworks"
+      CMAKE_MODULE_PATH:
+        - "/Users/richardchen/work/flon/flon-cdt/build/lib/cmake/flon.cdt"
+...

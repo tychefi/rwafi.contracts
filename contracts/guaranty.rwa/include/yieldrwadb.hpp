@@ -17,7 +17,6 @@ using std::string;
 static constexpr eosio::name active_perm        {"active"_n};
 static constexpr symbol SYS_SYMBOL              = SYMBOL("flon", 8);
 static constexpr name SYS_BANK                  { "flon.token"_n };
-static constexpr uint32_t MIN_SINGLE_REDPACK    = 100;
 static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
 
 #ifndef DAY_SECONDS_FOR_TEST
@@ -37,9 +36,9 @@ static constexpr name AMM_SWAP_DEX              { "flon.swap"_n };
 namespace wasm { namespace db {
 
 #define TBL [[eosio::table, eosio::contract("yieldrwa")]]
-#define TBL_NAME(name) [[eosio::table(name), eosio::contract("yieldrwa")]]
+#define NTBL(name) [[eosio::table(name), eosio::contract("yieldrwa")]]
 
-struct TBL_NAME("global") global_t {
+struct NTBL("global") global_t {
     name                admin;
 
     map<name, uin8_t>   yield_split_conf = {
@@ -56,7 +55,7 @@ typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 TBL yield_log_t {                       //scope: plan_id
     uint64_t        year;               //PK
-    uint64_t        year_no = 0;
+    uint64_t        year_no = 1;
     asset           year_total_quantity;
     asset           plan_total_quantity;
     time_point_sec  created_at;
@@ -65,12 +64,9 @@ TBL yield_log_t {                       //scope: plan_id
     uint64_t primary_key() const { return id; }
 
     yield_log_t(){}
-    yield_log_t( const name& c ): code(c){}
+    yield_log_t( const uint64_t y ): year(y){}
 
-    typedef eosio::multi_index<"yieldlogs"_n, yield_log_t
-        // indexed_by<"updatedid"_n,  const_mem_fun<redpack_t, uint64_t, &redpack_t::by_updatedid> >,
-        // indexed_by<"senderid"_n,  const_mem_fun<redpack_t, uint64_t, &redpack_t::by_sender> >
-    > idx_t;
+    typedef eosio::multi_index<"yieldlogs"_n, yield_log_t> idx_t;
 
     EOSLIB_SERIALIZE( yield_log_t, (year)(year_no)(year_total_quantity)(plan_total_quantity)(created_at)(updated_at) )
 };

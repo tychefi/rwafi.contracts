@@ -11,43 +11,25 @@ using namespace eosio;
 using namespace std;
 using std::string;
 
-// using namespace wasm;
-#define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
-
-static constexpr eosio::name active_perm        {"active"_n};
-static constexpr symbol SYS_SYMBOL              = SYMBOL("flon", 8);
-static constexpr name SYS_BANK                  { "flon.token"_n };
-
-static constexpr uint32_t MIN_SINGLE_REDPACK    = 100;
-static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
-static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
-static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
-
 namespace wasm { namespace db {
 
-#define TBL [[eosio::table, eosio::contract("did.redpack")]]
-#define TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
+#define TBL [[eosio::table, eosio::contract("investrwa")]]
+#define NTBL(name) [[eosio::table(name), eosio::contract("investrwa")]]
 
-inline uint128_t get_unionid( const name& rec, uint64_t packid ) {
-     return ( (uint128_t) rec.value << 64 ) | packid;
-}
+// struct NTBL("global") global_t {
+//     name            admin;
+//     name            stake_contract      = "stake.rwa"_n;
+//     name            yield_contract      = "yield.rwa"_n;
+//     name            guanranty_contract  = "guanranty.rwa"_n;
+//     uint64_t        last_plan_id        = 0;
 
-struct TBL_NAME("global") global_t {
-    name            admin;
-    name            stake_contract      = "stake.rwa"_n;
-    name            yield_contract      = "yield.rwa"_n;
-    name            guanranty_contract  = "guanranty.rwa"_n;
-    uint64_t        last_plan_id        = 0;
-
-    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
-};
-typedef eosio::singleton< "global"_n, global_t > global_singleton;
+//     EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
+// };
+// typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 // whitlisted investment tokens
 //
-struct TG_TBL allow_token_t {               //scope: _self
+struct TBL allow_token_t {               //scope: _self
     symbol          token_symbol;           //PK: token symbol
     name            token_contract;         //token issuing contract
     bool            onshelf = true;

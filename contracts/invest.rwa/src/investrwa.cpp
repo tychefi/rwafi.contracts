@@ -49,13 +49,13 @@ asset investrwa::_get_balance(const name& token_contract, const name& owner, con
 
 asset investrwa::_get_investor_stake_balance( const name& investor, const uint64_t& plan_id ) {
     auto stake =  yield_stake_t::stakes(_gstate.yield_contract, owner.value);
-    CHECKC( _db.get( stake ), err::RECORD_NO_FOUND, "no yield token balance for plan: " + to_string( plan_id ))
+    CHECKC( _db.get( stake ), err::RECORD_NOT_FOUND, "no yield token balance for plan: " + to_string( plan_id ))
     return stake.balance;
 }
 
 asset investrwa::_get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id ) {
     auto stakes =  collateral_stake_t::stakes(_gstate.stake_contract, guanrantor.value);
-    CHECKC( _db.get( stakes ), err::RECORD_NO_FOUND, "no collateral token balance for plan: " + to_string( plan_id ))
+    CHECKC( _db.get( stakes ), err::RECORD_NOT_FOUND, "no collateral token balance for plan: " + to_string( plan_id ))
     return stakes.balance;
 }
 
@@ -83,7 +83,7 @@ void investrwa::_process_refund( const name& from, const name& to, const asset& 
     // process refund: ocassionally to use
     // check if plan is in REFUNDABLE status
     auto plan = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
+    CHECKC( _db.get( plan ), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
     auto fund_balance = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
@@ -123,7 +123,7 @@ void investrwa::addtoken(const name& contract, const symbol& sym ) {
     check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
     
     auto token          = allow_token_t( sym );
-    CHECKC( !_db.get( token ), err::RECORD_NO_FOUND, "Token not found: " + symb.to_string() )
+    CHECKC( !_db.get( token ), err::RECORD_NOT_FOUND, "Token not found: " + symb.to_string() )
 
     token.token_symbol  = sym;
     token.token_contract= contract;
@@ -135,7 +135,7 @@ void investrwa::deltoken( const symbol& sym ) {
     check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
 
     auto token = tokenlist_t( sym );
-    CHECKC( _db.get( token ), err::RECORD_NO_FOUND, "no such token id: " + to_string( token_id ))
+    CHECKC( _db.get( token ), err::RECORD_NOT_FOUND, "no such token id: " + to_string( token_id ))
     _db.del( token );
 }
 
@@ -143,7 +143,7 @@ void investrwa::onshelf( const symbol& sym, const bool& onshelf ) {
     check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
 
     auto token = allow_token_t( sym );
-    CHECKC( _db.get( token ), err::RECORD_NO_FOUND, "no such token symbol: " + sym.to_string() )
+    CHECKC( _db.get( token ), err::RECORD_NOT_FOUND, "no such token symbol: " + sym.to_string() )
     token.onshelf = onshelf;
     _db.set( token, _self );
 }
@@ -157,7 +157,7 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
     CHECK( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" );
     auto plan_id = (uint64_t) stoi(string(parts[1]));
     auto plan = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
+    CHECKC( _db.get( plan ), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     
     if ( quantity.symbol == plan.goal_quantity.symbol ) {
         _process_investment( from, to, quantity, memo, plan );
@@ -176,7 +176,7 @@ void investrwa::refund( const name& submitter, const name& investor, const uint6
     require_auth( submitter );
 
     auto plan                       = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
+    CHECKC( _db.get( plan ), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
     auto fund_balance_total         = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
@@ -250,7 +250,7 @@ void investrwa::cancelplan( const name& creator, const uint64_t& plan_id ) {
     require_auth( creator );
 
     auto plan = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NO_FOUND, "no such fund plan id: " + to_string( plan_id ) )
+    CHECKC( _db.get( plan ), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.creator == creator, err::NO_AUTH, "no auth to cancel this plan" )
     
     _update_plan_status( plan );

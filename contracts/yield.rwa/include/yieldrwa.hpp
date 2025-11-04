@@ -15,7 +15,7 @@ enum class err: uint8_t {
    SYMBOL_MISMATCH      = 5,
    EXPIRED              = 6,
    PWHASH_INVALID       = 7,
-   RECORD_NO_FOUND      = 8,
+   RECORD_NOT_FOUND      = 8,
    NOT_REPEAT_RECEIVE   = 9,
    NOT_EXPIRED          = 10,
    ACCOUNT_INVALID      = 11,

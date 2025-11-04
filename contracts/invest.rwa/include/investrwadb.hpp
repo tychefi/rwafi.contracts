@@ -15,10 +15,7 @@ using std::string;
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 
 static constexpr eosio::name active_perm        {"active"_n};
-static constexpr symbol SYS_SYMBOL              = SYMBOL("flon", 8);
-static constexpr name SYS_BANK                  { "flon.token"_n };
 
-static constexpr uint32_t MIN_SINGLE_REDPACK    = 100;
 static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
 static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
 static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
@@ -27,41 +24,8 @@ static constexpr uint8_t  EXPIRY_HOURS          = 12;
 
 namespace wasm { namespace db {
 
-#define TBL [[eosio::table, eosio::contract("did.redpack")]]
-#define TBL_NAME(name) [[eosio::table(name), eosio::contract("did.redpack")]]
-
-inline uint128_t get_unionid( const name& rec, uint64_t packid ) {
-     return ( (uint128_t) rec.value << 64 ) | packid;
-}
-
-struct TBL_NAME("global") global_t {
-    name            admin;
-    name            stake_contract      = "stake.rwa"_n;
-    name            yield_contract      = "yield.rwa"_n;
-    name            guanranty_contract  = "guanranty.rwa"_n;
-    uint64_t        last_plan_id        = 0;
-
-    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
-};
-typedef eosio::singleton< "global"_n, global_t > global_singleton;
-
-// whitlisted investment tokens
-//
-struct TG_TBL allow_token_t {               //scope: _self
-    symbol          token_symbol;           //PK: token symbol
-    name            token_contract;         //token issuing contract
-    bool            onshelf = true;
-
-    uint64_t primary_key() const { return token_symbol.raw(); }
-
-    allow_token_t(){}
-    allow_token_t( const symbole& symb ): token_symbol(symb){}
-
-    typedef eosio::multi_index<"allowtokens"_n, allow_token_t,
-    > idx_t;
-
-    EOSLIB_SERIALIZE( allow_token_t, (token_symbol)(token_contract)(onshelf) )
-};
+#define TBL struct [[eosio::table, eosio::contract("investrwa")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("investrwa")]]
 
 // fundraising plan status
 namespace PlanStatus {
@@ -76,7 +40,35 @@ namespace PlanStatus {
 };
 
 
-struct TBL fundplan_t {                             //scope: _self
+NTBL("global") global_t {
+    name            admin;
+    name            stake_contract      = "stake.rwa"_n;
+    name            yield_contract      = "yield.rwa"_n;
+    name            guanranty_contract  = "guanranty.rwa"_n;
+    uint64_t        last_plan_id        = 0;
+
+    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
+};
+typedef eosio::singleton< "global"_n, global_t > global_singleton;
+
+// whitlisted investment tokens
+//
+TBL allow_token_t {               //scope: _self
+    symbol          token_symbol;           //PK: token symbol
+    name            token_contract;         //token issuing contract
+    bool            onshelf = true;
+
+    uint64_t primary_key() const { return token_symbol.raw(); }
+
+    allow_token_t(){}
+    allow_token_t( const symbol& symb ): token_symbol(symb){}
+
+    typedef eosio::multi_index<"allowtokens"_n, allow_token_t> idx_t;
+
+    EOSLIB_SERIALIZE( allow_token_t, (token_symbol)(token_contract)(onshelf) )
+};
+
+TBL fundplan_t {                                    //scope: _self
     uint64_t            id;                         //PK: 募资计划ID
     string              title;                      //plan title: <=64 chars
     name                creator;                    //plan owner
@@ -111,21 +103,19 @@ struct TBL fundplan_t {                             //scope: _self
     name                status = PlanStatus::PENDING; //募资计划状态
     
     uint64_t primary_key() const { return id; }
-    // uint64_t by_updatedid() const { return ((uint64_t)updated_at.sec_since_epoch() << 32) | (code.value & 0x00000000FFFFFFFF); }
-    // uint64_t by_creator() const { return creator.value; }
-    fundplan_t(){}
-    fundplan_t( const name& c ): code(c){}
-    typedef eosio::multi_index<"fundplans"_n, fundplan_t
-        // indexed_by<"updatedid"_n,  const_mem_fun<fundplan_t, uint64_t, &fundplan_t::by_updatedid> >,
-        // indexed_by<"creatorid"_n,  const_mem_fun<fundplan_t, uint64_t, &fundplan_t::by_creator> >
-    > idx_t;
 
-    EOS_LIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)
-        (created_at)(receipt_asset_contract)(receipt_symbol)
-        (soft_cap_percent)(hard_cap_percent)(start_time)(end_time)
-        (return_years)(return_end_time)(guaranteed_yield_apr)
-        (total_raised_funds)(total_issued_receipts)(status)
-    )
+    fundplan_t(){}
+    fundplan_t( const uint64_t& i ): id(i){}
+
+    typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
+
+    EOS_LIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(created_at)
+                                        (receipt_asset_contract)(receipt_symbol)
+                                        (soft_cap_percent)(hard_cap_percent)
+                                        (start_time)(end_time)
+                                        (return_years)(return_end_time)
+                                        (guaranteed_yield_apr)
+                                        (total_raised_funds)(total_issued_receipts)(status) )
  
 };
 

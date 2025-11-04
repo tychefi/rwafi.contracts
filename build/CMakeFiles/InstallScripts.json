@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/richardchen/work/wasm.contracts/flon/rwafi.contracts/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

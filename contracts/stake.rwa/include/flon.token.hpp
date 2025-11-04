@@ -23,6 +23,7 @@ namespace eosiosystem {
          
 namespace flon {
 
+   using namespace eosio;
    using std::string;
 
    /**

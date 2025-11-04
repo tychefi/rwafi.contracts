@@ -11,69 +11,69 @@ using namespace eosio;
 using namespace std;
 using std::string;
 
-// using namespace wasm;
-#define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
-
-static constexpr eosio::name active_perm        {"active"_n};
-static constexpr symbol SYS_SYMBOL              = SYMBOL("flon", 8);
-static constexpr name SYS_BANK                  { "flon.token"_n };
-static constexpr uint32_t MIN_SINGLE_REDPACK    = 100;
-static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
-
-#ifndef DAY_SECONDS_FOR_TEST
-static constexpr uint64_t DAY_SECONDS           = 24 * 60 * 60;
-#else
-#warning "DAY_SECONDS_FOR_TEST should be used only for test!!!"
-static constexpr uint64_t DAY_SECONDS           = DAY_SECONDS_FOR_TEST;
-#endif//DAY_SECONDS_FOR_TEST
-
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t    EXPIRY_HOURS        = 12;
-
 namespace wasm { namespace db {
 
-#define TBL [[eosio::table, eosio::contract("guarantyrwa")]]
-#define TBL_NAME(name) [[eosio::table(name), eosio::contract("guarantyrwa")]]
+using namespace eosio;
 
-struct TBL_NAME("global") global_t {
+#define TBL struct [[eosio::table, eosio::contract("guarantyrwa")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("guarantyrwa")]]
+
+NTBL("global") global_t {
     name            admin;
-    name            guarantor_pool = "guarantorpool"_n;
+    name            invest_contract     = "invest.rwa"_n;
+    name            yield_contract      = "yield.rwa"_n;
+    name            stake_contract      = "stake.rwa"_n;
+    name            guanranty_contract  = "guanranty.rwa"_n;
 
-    EOSLIB_SERIALIZE( global_t, (admin) )
+    EOSLIB_SERIALIZE( global_t, (admin)(invest_contract)(yield_contract)(stake_contract)(guanranty_contract) )
 };
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 TBL guaranty_stats_t {                      //scope: _self
     uint64_t        plan_id;
     asset           total_guarantee_funds;
+    asset           available_guarantee_funds;
+    asset           used_guarantee_funds;
     time_point      created_at;
     time_point      updated_at;
     
     uint64_t primary_key() const { return plan_id; }
 
-    typedef eosio::multi_index<"guarantystats"_n, guaranty_stats_t > idx_t;
+    typedef eosio::multi_index<"guarantystat"_n, guaranty_stats_t > idx_t;
 
-    EOSLIB_SERIALIZE( guaranty_stats_t, (plan_id)(total_guarantee_funds)(created_at)(updated_at) )
-}
+    EOSLIB_SERIALIZE( guaranty_stats_t, (plan_id)(total_guarantee_funds)(available_guarantee_funds)(used_guarantee_funds)
+                                        (created_at)(updated_at) )
+};
 
-TBL guaranty_t {                            // scope: guanrantor
+TBL guarantor_stake_t {                     // scope: guanrantor
     uint64_t        plan_id;                // PK
-    asset           accmu_guarantor_funds;  // yield shared between guarantors
-    asset           accmu_plan_funds;       // accumulated funds in the plan, wont change once finalized 
-                                            // for calculating each guarantor's share
-
+    asset           total_funds;            // yield shared between guarantors based on this amount against total in stats
     time_point      created_at;
     time_point      updated_at;
 
     uint64_t primary_key() const { return plan_id; }
 
-    guaranty_t(){}
-    guaranty_t( const uint64_t& pid ): plan_id(pid) {}
+    guarantor_stake_t(){}
+    guarantor_stake_t( const uint64_t& pid ): plan_id(pid) {}
 
-    typedef eosio::multi_index<"guaranties"_n, guaranty_t
-    > idx_t;
+    typedef eosio::multi_index<"stakes"_n, guarantor_stake_t> idx_t;
 
-    EOSLIB_SERIALIZE( guaranty_t, (plan_id)(accmu_guarantor_funds)(accmu_plan_funds)(created_at)(updated_at) )
+    EOSLIB_SERIALIZE( guarantor_stake_t, (plan_id)(total_funds)(created_at)(updated_at) )
+};
+
+TBL plan_payment_t {                        // scope: plan_id
+    uint64_t        year;                   // PK, paid in this year, but for the last year's due
+    asset           total_amount;
+    time_point      created_at;
+
+    uint64_t primary_key() const { return year; }
+
+    plan_payment_t(){}
+    plan_payment_t( const uint64_t y ): year(y) {}
+
+    typedef eosio::multi_index<"payments"_n, plan_payment_t > idx_t;
+
+    EOSLIB_SERIALIZE( plan_payment_t, (year)(total_amount)(created_at) )
 };
 
 } }

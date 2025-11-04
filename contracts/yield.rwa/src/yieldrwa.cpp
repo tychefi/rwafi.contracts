@@ -1,7 +1,6 @@
 
 #include <flon.token.hpp>
 #include "yieldrwa.hpp"
-#include "utils.hpp"
 #include <algorithm>
 #include <chrono>
 #include <eosio/transaction.hpp>
@@ -84,7 +83,7 @@ void yieldrwa::on_transfer( const name& from, const name& to, const asset& quant
     auto plan_id = (uint64_t) stoi(string(parts[1]));
     // auto plan = fundplan_t( plan_id );
 
-    auto bank = get_first_contract();
+    auto bank = get_first_receiver();
     _perform_distribution( bank, quantity );
 
     _log_yield( plan_id, quantity )
@@ -92,7 +91,7 @@ void yieldrwa::on_transfer( const name& from, const name& to, const asset& quant
 
 void yieldrwa::init(const name& admin) {
     require_auth( _self );
-    _gstate.admin = _admin;
+    _gstate.admin = admin;
 }
 
 void yieldrwa::updateconfig( const name& key, const uint8_t& value ) {

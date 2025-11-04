@@ -1,4 +1,4 @@
-add_contract(guaranty.rwa guarantyrwa ${CMAKE_CURRENT_SOURCE_DIR}/src/guarantyrwa.cpp)
+add_contract(guarantyrwa guarantyrwa ${CMAKE_CURRENT_SOURCE_DIR}/src/guarantyrwa.cpp)
 
 if(DEFINED ENV{DAY_SECONDS_FOR_TEST})
    message(WARNING "ENV{DAY_SECONDS_FOR_TEST}=$ENV{DAY_SECONDS_FOR_TEST} should use only for test!!!")
@@ -6,10 +6,9 @@ if(DEFINED ENV{DAY_SECONDS_FOR_TEST})
 endif()
 
 
-target_include_directories(guaranty.rwa
+target_include_directories(guarantyrwa
    PUBLIC
    ${CMAKE_CURRENT_SOURCE_DIR}/include
-   ${CMAKE_CURRENT_SOURCE_DIR}/../flon.did/include
 )
 
 set_target_properties(guarantyrwa
