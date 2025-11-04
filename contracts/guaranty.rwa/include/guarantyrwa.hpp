@@ -69,9 +69,9 @@ public:
     }
 
     ACTION guarantpay( const name& submitter, const uint64_t& plan_id );
+    ACTION withdraw(const name& guarantor, const uint64_t& plan_id, const asset& quantity);
 
 private:
-    // void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
     void _calculate_yield_due( const fundplan_t& plan, asset& due );
 
 

@@ -13,20 +13,6 @@ using std::string;
 
 namespace wasm { namespace db {
 
-#define TBL struct [[eosio::table, eosio::contract("investrwa")]]
-#define NTBL(name) struct [[eosio::table(name), eosio::contract("investrwa")]]
-
-// struct NTBL("global") global_t {
-//     name            admin;
-//     name            stake_contract      = "stake.rwa"_n;
-//     name            yield_contract      = "yield.rwa"_n;
-//     name            guanranty_contract  = "guanranty.rwa"_n;
-//     uint64_t        last_plan_id        = 0;
-
-//     EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
-// };
-// typedef eosio::singleton< "global"_n, global_t > global_singleton;
-
 // whitlisted investment tokens
 //
 TBL allow_token_t {               //scope: _self

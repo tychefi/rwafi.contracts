@@ -15,12 +15,19 @@
 
 using std::chrono::system_clock;
 using namespace wasm;
+using namespace eosio;
 
 static constexpr eosio::name active_permission{"active"_n};
 
 // transfer out from contract self
-#define TRANSFER_OUT(bank, to, quantity, memo) \
-    { action(permission_level{get_self(), "active"_n }, bank, "transfer"_n, std::make_tuple( _self, to, quantity, memo )).send(); }
+inline void transfer_out(const name& bank, const name& from, const name& to, const asset& quantity, const string& memo) {
+    action(
+        permission_level{ from, active_permission },
+        bank,
+        "transfer"_n,
+        std::make_tuple(from, to, quantity, memo)
+    ).send();
+}
 
 // inline int64_t get_precision(const symbol &s) {
 //     int64_t digit = s.precision();
@@ -170,7 +177,7 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
     auto bank = plan.goal_asset_contract;
     auto to = _invest_gstate.stake_contract;
     auto memo = string("Guaranty pay yield for RWA plan: ") + std::to_string(plan_id);
-    TRANSFER_OUT( bank, to, yield_due, memo )
+    transfer_out( bank, _self, to, yield_due, memo );
 
     auto year = year_from_unix_seconds( current_time_point().sec_since_epoch() );
     auto payment = plan_payment_t( year );
@@ -181,4 +188,42 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
         payment.total_paid += yield_due;
     }
     _db.set( plan_id, payment );
+}
+
+void guarantyrwa::withdraw(const name& guarantor, const uint64_t& plan_id, const asset& quantity) {
+    require_auth( guarantor );
+
+    CHECKC( quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive" )
+
+    // check plan exists
+    auto plan = fundplan_t( plan_id );
+    CHECKC( _db_invest.get( plan ), err::RECORD_NOT_FOUND, "plan not found: " + to_string( plan_id ) )
+
+    // symbol must match plan's asset
+    CHECKC( quantity.symbol == plan.goal_quantity.symbol, err::SYMBOL_MISMATCH, "token symbol mismatch" )
+
+    // stats exist and have enough available funds
+    auto stats = guaranty_stats_t( plan_id );
+    CHECKC( _db.get( stats ), err::RECORD_NOT_FOUND, "guaranty stats not found for plan: " + to_string( plan_id ) )
+    CHECKC( stats.available_guarantee_funds.amount >= quantity.amount, err::QUANTITY_INSUFFICIENT, "insufficient available guaranty funds" )
+
+    // guarantor stake record exists and has enough total_funds
+    auto stake = guarantor_stake_t( plan_id );
+    CHECKC( _db.get( guarantor.value, stake ), err::RECORD_NOT_FOUND, "guarantor stake not found for: " + guarantor.to_string() )
+    CHECKC( stake.total_funds.amount >= quantity.amount, err::QUANTITY_INSUFFICIENT, "guarantor stake insufficient" )
+
+    // deduct amounts and update DB
+    stats.available_guarantee_funds -= quantity;
+    stats.total_guarantee_funds     -= quantity;
+    stats.updated_at                = time_point_sec( current_time_point() );
+    _db.set( stats );
+
+    stake.total_funds   -= quantity;
+    stake.updated_at    = time_point_sec( current_time_point() );
+    _db.set( guarantor.value, stake );
+
+    // transfer out to guarantor
+    auto bank = plan.goal_asset_contract;
+    auto memo = string("Withdraw guaranty funds for RWA plan: ") + std::to_string( plan_id );
+    transfer_out( bank, _self, guarantor, quantity, memo );
 }

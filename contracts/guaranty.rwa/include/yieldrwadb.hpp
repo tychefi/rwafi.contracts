@@ -32,24 +32,6 @@ static constexpr name SWAP_POOL              { "flon.swap"_n };
 
 namespace wasm { namespace db {
 
-#define TBL struct [[eosio::table, eosio::contract("yieldrwa")]]
-#define NTBL(name) struct [[eosio::table(name), eosio::contract("yieldrwa")]]
-
-// struct NTBL("global") global_t {
-//     name                admin;
-
-//     map<name, uin8_t>   yield_split_conf = {
-//         { STAKE_POOL,       80 },
-//         { SWAP_POOL,         10 },
-//         { GUARANTY_POOL,    10 }
-//     }
-
-//     EOSLIB_SERIALIZE( global_t, (admin)(yield_split_conf) )
-// };
-// typedef eosio::singleton< "global"_n, global_t > global_singleton;
-
-
-
 TBL yield_log_t {                       //scope: plan_id
     uint64_t        year;               //PK
     uint64_t        year_no = 1;
