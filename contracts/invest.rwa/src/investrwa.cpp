@@ -1,6 +1,8 @@
 
 #include <flon.token.hpp>
 #include "investrwa.hpp"
+#include "stakerwadb.hpp"
+#include <wasm_db.hpp>
 #include <algorithm>
 #include <chrono>
 #include <eosio/transaction.hpp>
@@ -8,6 +10,7 @@
 
 using std::chrono::system_clock;
 using namespace wasm;
+using namespace eosio;
 
 static constexpr eosio::name active_permission{"active"_n};
 
@@ -37,9 +40,8 @@ static constexpr eosio::name active_permission{"active"_n};
 
 // ------------------- Internal functions ------------------------------------------------------
 asset investrwa::_get_balance(const name& token_contract, const name& owner, const symbol& sym) {
-    using accounts_table = eosio::multi_index<"accounts"_n, eosio::asset>;
-    accounts_table act_tbl(token_contract, owner.value);
-    auto itr = act_tbl.find(sym.code().raw());
+    auto account_tbl = eosio::multi_index< "accounts"_n, flon::token::account >( token_contract, owner.value );
+    auto acnt_itr = account_tbl.find( sym.code().raw() );
     if ( acnt_itr == account_tbl.end() ) {
         return asset(0, sym);
     }
@@ -47,16 +49,16 @@ asset investrwa::_get_balance(const name& token_contract, const name& owner, con
 }
 
 asset investrwa::_get_investor_stake_balance( const name& investor, const uint64_t& plan_id ) {
-    auto stake =  yield_stake_t::stakes(_gstate.yield_contract, owner.value);
-    CHECKC( _db.get( stake ), err::RECORD_NOT_FOUND, "no yield token balance for plan: " + to_string( plan_id ))
+    auto stake =  invest_stake_t(plan_id);
+    CHECKC( _db_stake.get( investor.value, stake ), err::RECORD_NOT_FOUND, "no yield stake balance for plan: " + to_string( plan_id ))
     return stake.balance;
 }
 
-asset investrwa::_get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id ) {
-    auto stakes =  collateral_stake_t::stakes(_gstate.stake_contract, guanrantor.value);
-    CHECKC( _db.get( stakes ), err::RECORD_NOT_FOUND, "no collateral token balance for plan: " + to_string( plan_id ))
-    return stakes.balance;
-}
+// asset investrwa::_get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id ) {
+//     auto stakes =  collateral_stake_t::stakes(_gstate.stake_contract, guanrantor.value);
+//     CHECKC( _db.get( stakes ), err::RECORD_NOT_FOUND, "no collateral balance for plan: " + to_string( plan_id ))
+//     return stakes.balance;
+// }
 
 void investrwa::_process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan ) {
     CHECKC( plan.start_time > time_point(current_time_point()), err::INVALID_STATUS, "investments not started yet" )
@@ -75,14 +77,12 @@ void investrwa::_process_investment( const name& from, const name& to, const ass
 
     _update_plan_status( plan );
 
-    _dbc.set( plan, _self );
+    _db.set( plan, _self );
 }
 
-void investrwa::_process_refund( const name& from, const name& to, const asset& quantity, const string& memo, const fundplan_t& plan ) {
+void investrwa::_process_refund( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan ) {
     // process refund: ocassionally to use
     // check if plan is in REFUNDABLE status
-    auto plan = fundplan_t( plan_id );
-    CHECKC( _db.get( plan ), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string( plan_id ) )
     CHECKC( plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled" )
 
     auto fund_balance = _get_balance( plan.goal_asset_contract, _self, plan.goal_quantity.symbol );
@@ -93,7 +93,7 @@ void investrwa::_process_refund( const name& from, const name& to, const asset& 
 
     plan.total_raised_funds         -= fund_quantity;
     plan.total_issued_receipts      -= quantity;
-    _db.set( plan, _self );
+    _db.set( plan );
 }
 
 void investrwa::_update_plan_status( fundplan_t& plan ) {
@@ -119,7 +119,7 @@ void investrwa::_update_plan_status( fundplan_t& plan ) {
 // -------------------- actions  -------------------------------------------------------------
 
 void investrwa::addtoken(const name& contract, const symbol& sym ) {
-    check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
+    CHECKC( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
     
     auto token          = allow_token_t( sym );
     CHECKC( !_db.get( token ), err::RECORD_NOT_FOUND, "Token not found: " + symb.to_string() )

@@ -1,4 +1,6 @@
 #include "guarantyrwadb.hpp"
+#include "investrwadb.hpp"
+
 #include <wasm_db.hpp>
 
 using namespace std;
@@ -66,9 +68,11 @@ public:
         _gstate.admin = admin;
     }
 
+    ACTION guarantpay( const name& submitter, const uint64_t& plan_id );
+
 private:
     // void _token_transfer( const name& from, const name& to, const asset& quantity, const string& memo );
-    asset _calculate_yield_due( const uint64_t& plan_id );
+    void _calculate_yield_due( const fundplan_t& plan, asset& due );
 
 
 }; //contract guarantyrwa

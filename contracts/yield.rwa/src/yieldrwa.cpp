@@ -1,6 +1,8 @@
 
 #include <flon.token.hpp>
 #include "yieldrwa.hpp"
+#include "utils.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <eosio/transaction.hpp>
@@ -15,7 +17,20 @@ static constexpr eosio::name active_permission{"active"_n};
 #define TRANSFER_OUT(bank, to, quantity, memo) \
     { action(permission_level{get_self(), "active"_n }, bank, "transfer"_n, std::make_tuple( _self, to, quantity, memo )).send(); }
 
+
 //--------------------------
+// 天数到某年 1月1日 的累计天数（1970年起）
+static uint64_t days_to_year_start(uint64_t year) {
+    uint64_t y = year - 1;  // 前一年
+    return y * 365 + y/4 - y/100 + y/400;
+}
+
+// 该年总天数（闰年 366，平年 365）
+static uint64_t days_in_year(uint64_t year) {
+    bool is_leap = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
+    return is_leap ? 366 : 365;
+}
+
 // 由 Unix 时间戳计算年份（1970 年起）
 static uint64_t year_from_unix_seconds(uint64_t unix_seconds) {
     uint64_t days = unix_seconds / 86400;  // 秒 → 天
@@ -40,20 +55,7 @@ static uint64_t year_from_unix_seconds(uint64_t unix_seconds) {
     }
     return year;
 }
-
-// 天数到某年 1月1日 的累计天数（1970年起）
-static uint64_t days_to_year_start(uint64_t year) {
-    uint64_t y = year - 1;  // 前一年
-    return y * 365 + y/4 - y/100 + y/400;
-}
-
-// 该年总天数（闰年 366，平年 365）
-static uint64_t days_in_year(uint64_t year) {
-    bool is_leap = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
-    return is_leap ? 366 : 365;
-}
 //--------------------------
-
 
 void yieldrwa::_perform_distribution(const name& bank, const asset& total) {
     // 计算各部分金额
@@ -79,7 +81,7 @@ void yieldrwa::on_transfer( const name& from, const name& to, const asset& quant
 
     //memo format: plan:xxx
     auto parts = split(memo, ":");
-    CHECK( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" );
+    CHECKC( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" );
     auto plan_id = (uint64_t) stoi(string(parts[1]));
     // auto plan = fundplan_t( plan_id );
 

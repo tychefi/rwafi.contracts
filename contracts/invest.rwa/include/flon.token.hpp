@@ -148,7 +148,7 @@ namespace flon {
 
          using forcetake_action = eosio::action_wrapper<"forcetake"_n, &token::forcetake>;
 
-      private:
+      public:
          struct [[eosio::table]] account {
             asset    balance;
 

@@ -30,7 +30,7 @@ NTBL("global") global_t {
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 TBL guaranty_stats_t {                      //scope: _self
-    uint64_t        plan_id;
+    uint64_t        plan_id;                //PK
     asset           total_guarantee_funds;
     asset           available_guarantee_funds;
     asset           used_guarantee_funds;
@@ -39,6 +39,9 @@ TBL guaranty_stats_t {                      //scope: _self
     
     uint64_t primary_key() const { return plan_id; }
 
+    guaranty_stats_t(){}
+    guaranty_stats_t( const uint64_t& pid ): plan_id(pid) {}
+    
     typedef eosio::multi_index<"guarantystat"_n, guaranty_stats_t > idx_t;
 
     EOSLIB_SERIALIZE( guaranty_stats_t, (plan_id)(total_guarantee_funds)(available_guarantee_funds)(used_guarantee_funds)

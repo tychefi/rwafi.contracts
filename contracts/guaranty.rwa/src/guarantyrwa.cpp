@@ -4,6 +4,8 @@
 #include "investrwa.hpp"
 #include "investrwadb.hpp"
 #include "yieldrwadb.hpp"
+#include "utils.hpp"
+
 #include "wasm_db.hpp"
 
 #include <algorithm>
@@ -31,6 +33,18 @@ static constexpr eosio::name active_permission{"active"_n};
 // }
 
 //--------------------------
+// 天数到某年 1月1日 的累计天数（1970年起）
+static uint64_t days_to_year_start(uint64_t year) {
+    uint64_t y = year - 1;  // 前一年
+    return y * 365 + y/4 - y/100 + y/400;
+}
+
+// 该年总天数（闰年 366，平年 365）
+static uint64_t days_in_year(uint64_t year) {
+    bool is_leap = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
+    return is_leap ? 366 : 365;
+}
+
 // 由 Unix 时间戳计算年份（1970 年起）
 static uint64_t year_from_unix_seconds(uint64_t unix_seconds) {
     uint64_t days = unix_seconds / 86400;  // 秒 → 天
@@ -55,30 +69,20 @@ static uint64_t year_from_unix_seconds(uint64_t unix_seconds) {
     }
     return year;
 }
-
-// 天数到某年 1月1日 的累计天数（1970年起）
-static uint64_t days_to_year_start(uint64_t year) {
-    uint64_t y = year - 1;  // 前一年
-    return y * 365 + y/4 - y/100 + y/400;
-}
-
-// 该年总天数（闰年 366，平年 365）
-static uint64_t days_in_year(uint64_t year) {
-    bool is_leap = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
-    return is_leap ? 366 : 365;
-}
 //--------------------------
 
 void guarantyrwa::_calculate_yield_due( const fundplan_t& plan, asset& due ) {
     uint32_t last_year = year_from_unix_seconds( current_time_point().sec_since_epoch() ) - 1;
     auto lastyieldlog = yield_log_t( last_year );
-    CHECKC( _db_yield.get( plan_id, lastyieldlog ), err::RECORD_NOT_FOUND, "yield log not found for plan: " + to_string( plan_id ) + " on last year: " + to_string( last_year ) )
+    CHECKC( _db_yield.get( plan.id, lastyieldlog ), err::RECORD_NOT_FOUND, "yield log not found for plan: " 
+                                                        + to_string( plan.id ) + " on last year: " + to_string( last_year ) )
 
-    auto min_year_total = plan.guaranteed_yield_apr * goal_quantity / 100;
+    auto min_year_total = plan.guaranteed_yield_apr * plan.goal_quantity / 100;
     if ( lastyieldlog.year_total_quantity >= min_year_total ) return;
     due = min_year_total - lastyieldlog.year_total_quantity;
 
-    CHECKC( due.amount > 0, err::NOT_POSITIVE, "no yield due for plan: " + to_string( plan_id ) + " on last year: " + to_string( last_year ) )
+    CHECKC( due.amount > 0, err::NOT_POSITIVE, "no yield due for plan: " + to_string( plan.id ) + " on last year: " 
+                                                + to_string( last_year ) )
 }
 
 // --------------------------
@@ -91,9 +95,9 @@ void guarantyrwa::on_transfer( const name& from, const name& to, const asset& qu
 
     //memo params format: plan:xxx
     auto parts = split(memo, ":");
-    CHECKC( parts.zie() == 2, err::INVALID_FORMAT, "invalid memo format" )
+    CHECKC( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" )
     auto plan_id = (uint64_t) stoi(string(parts[1]));
-    auto plan = guaranty_t( plan_id );
+    auto plan = fundplan_t( plan_id );
 
     // update guaranty stats
     auto now = time_point_sec( current_time_point() );
@@ -114,18 +118,18 @@ void guarantyrwa::on_transfer( const name& from, const name& to, const asset& qu
     _db.set( guaranty_stats );
 
     // update guaranty record
-    auto guaranty_log = guaranty_t( plan_id )
-    if ( !_db.get( guaranty_log, from.value ) ) {
-        guaranty_log.plan_id                        = plan_id;
-        guaranty_log.total_guarantee_funds          = quantity;
-        guaranty_log.created_at                     = now;
-        guaranty_log.updated_at                     = now;
+    auto stake = guarantor_stake_t( plan_id );
+    if ( !_db.get( from.value, stake ) ) {
+        stake.plan_id                               = plan_id;
+        stake.total_funds                           = quantity;
+        stake.created_at                            = now;
+        stake.updated_at                            = now;
 
     } else {
-        guaranty_log.total_guarantee_funds          += quantity;
-        guaranty_log.updated_at                     = now;
+        stake.total_funds                           += quantity;
+        stake.updated_at                            = now;
     }
-    _db.set( guaranty_log, from.value );
+    _db.set( from.value, stake );
 
 }
 
@@ -146,7 +150,7 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
     //check guaranty stats
     auto stats = guaranty_stats_t( plan_id );
     CHECKC( _db.get( stats ), err::RECORD_NOT_FOUND, "guaranty stats not found for plan: " + to_string( plan_id ) )
-    CHECKC( stats.available_guarantee_funds > 0, err::QUANTITY_INSUFFICIENT, "insufficient guaranty funds" )
+    CHECKC( stats.available_guarantee_funds.amount > 0, err::QUANTITY_INSUFFICIENT, "insufficient guaranty funds" )
 
     if ( stats.available_guarantee_funds < yield_due ) {
         yield_due = stats.available_guarantee_funds;
@@ -160,8 +164,11 @@ void guarantyrwa::guarantpay( const name& submitter, const uint64_t& plan_id ) {
 
     //distribute yield to investors via stake.rwa
     //transfer out from guaranty.rwa to stake.rwa
+    global_singleton _invest_global(_gstate.invest_contract, _gstate.invest_contract.value);
+    global_t _invest_gstate = _invest_global.get();
+
     auto bank = plan.goal_asset_contract;
-    auto to = plan.stake_contract;
+    auto to = _invest_gstate.stake_contract;
     auto memo = string("Guaranty pay yield for RWA plan: ") + std::to_string(plan_id);
     TRANSFER_OUT( bank, to, yield_due, memo )
 }

@@ -44,6 +44,7 @@ enum class investrwa_type: uint8_t {
 class [[eosio::contract("investrwa")]] investrwa: public eosio::contract {
 private:
     dbc                 _db;
+    dbc                 _db_stake;
     global_singleton    _global;
     global_t            _gstate;
 
@@ -52,17 +53,20 @@ public:
 
     investrwa(eosio::name receiver, eosio::name code, datastream<const char*> ds):
         _db(_self),
+        _db_stake(_self),
         contract(receiver, code, ds),
         _global(_self, _self.value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
+
+        _db_stake = dbc( _gstate.stake_contract );
     }
 
     ~investrwa() {
         _global.set(_gstate, get_self());
     }
 
-    ACTION addtoken(const name& contract, const symbol& sym, const time_point_sec& expired_time);
+    ACTION addtoken( const name& contract, const symbol& sym );
     ACTION deltoken( const symbol& sym );
     ACTION onshelf( const symbol& sym, const bool& onshelf );
 
@@ -107,6 +111,6 @@ private:
 
     asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
     asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );
-    asset _get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id );
+    // asset _get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id );
 
 }; //contract investrwa
