@@ -29,9 +29,9 @@ static constexpr uint64_t DAY_SECONDS           = DAY_SECONDS_FOR_TEST;
 static constexpr uint32_t MAX_TITLE_SIZE        = 64;
 static constexpr uint8_t    EXPIRY_HOURS        = 12;
 
-static constexpr name RWA_STAKE_POOL            { "stake.rwa"_n };
-static constexpr name RWA_GUARANTY_POOL         { "guarant.rwa"_n };
-static constexpr name AMM_SWAP_DEX              { "flon.swap"_n };
+static constexpr name STAKE_POOL            { "stake.rwa"_n };
+static constexpr name GUARANTY_POOL         { "guarant.rwa"_n };
+static constexpr name SWAP_POOL              { "flon.swap"_n };
 
 namespace wasm { namespace db {
 
@@ -42,9 +42,9 @@ struct NTBL("global") global_t {
     name                admin;
 
     map<name, uin8_t>   yield_split_conf = {
-        { RWA_STAKE_POOL,       80 },
-        { AMM_SWAP_DEX,         10 },
-        { RWA_GUARANTY_POOL,    10 }
+        { STAKE_POOL,       80 },
+        { SWAP_POOL,         10 },
+        { GUARANTY_POOL,    10 }
     }
 
     EOSLIB_SERIALIZE( global_t, (admin)(yield_split_conf) )

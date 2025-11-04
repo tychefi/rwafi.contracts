@@ -37,10 +37,9 @@ struct TBL allow_token_t {               //scope: _self
     uint64_t primary_key() const { return token_symbol.raw(); }
 
     allow_token_t(){}
-    allow_token_t( const symbole& symb ): token_symbol(symb){}
+    allow_token_t( const symbol& symb ): token_symbol(symb){}
 
-    typedef eosio::multi_index<"allowtokens"_n, allow_token_t,
-    > idx_t;
+    typedef eosio::multi_index<"allowtokens"_n, allow_token_t> idx_t;
 
     EOSLIB_SERIALIZE( allow_token_t, (token_symbol)(token_contract)(onshelf) )
 };

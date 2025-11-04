@@ -57,7 +57,7 @@ public:
     ACTION updateconfig( const name& key, const uint8_t& value );
 
 private:
-    void _perform_distribution( const asset& total );
+    void _perform_distribution(const name& bank, const asset& total);
     void _log_yield( const uint64_t& plan_id, const asset& quantity );
 
 }; //contract yieldrwa

@@ -1,1 +1,0 @@
-/Users/richardchen/work/flon/flon-cdt/build/bin/cdt-ld -L/usr/local/opt/openssl@1.1/lib CMakeFiles/yieldrwa.dir/src/yieldrwa.cpp.obj -o yieldrwa.wasm

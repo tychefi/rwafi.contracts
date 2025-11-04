@@ -58,18 +58,18 @@ static uint64_t days_in_year(uint64_t year) {
 void yieldrwa::_perform_distribution(const name& bank, const asset& total) {
     // 计算各部分金额
     auto cfg            = _gstate.yield_split_conf;
-    auto amt_stake      = asset{(total.amount * cfg[ RWA_STAKE_POOL ]) / 100, total.symbol};
-    auto amt_pool       = asset{(total.amount * cfg[ RWA_GUARANTY_POOL ]) / 100, total.symbol};
+    auto amt_stake      = asset{(total.amount * cfg[ STAKE_POOL ]) / 100, total.symbol};
+    auto amt_pool       = asset{(total.amount * cfg[ GUARANTY_POOL ]) / 100, total.symbol};
     auto amt_swap       = total - amt_stake - amt_pool;
 
     // 转移到stake.rwa
-    TRANSFER_OUT( bank, cfg.stake_rwa, amt_stake, string("Stake RWA allocation") )
+    TRANSFER_OUT( bank, cfg[ STAKE_POOL ], amt_stake, string("Stake RWA allocation") )
 
     // 转移到flon.swap（回购燃烧）TODO: must conform to swap memo format!!
-    TRANSFER_OUT( bank, cfg.flon_swap, amt_swap, string("AMM Swap buyback & burn") )
+    TRANSFER_OUT( bank, cfg[ SWAP_POOL ], amt_swap, string("AMM Swap buyback & burn") )
 
     // 转移到担保人池
-    TRANSFER_OUT( bank, cfg.guarantor_pool, amt_pool, string("Guarantor pool for RWA funding") )
+    TRANSFER_OUT( bank, cfg[ GUARANTY_POOL ], amt_pool, string("Guarantor pool for RWA funding") )
 }
 
 void yieldrwa::on_transfer( const name& from, const name& to, const asset& quantity, const string& memo)
