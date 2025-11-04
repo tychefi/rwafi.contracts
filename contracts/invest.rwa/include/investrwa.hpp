@@ -90,7 +90,7 @@ public:
     [[eosio::on_notify("*::transfer")]]
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    ACTION refund( const name& investor, const uint64_t& plan_id ); //refund with receipt token staked in stake contract
+    ACTION refund( const name& submitter, const name& investor, const uint64_t& plan_id );
 
 
     ACTION claiminvestrwa( const name& claimer, const name& code, const string& pwhash );

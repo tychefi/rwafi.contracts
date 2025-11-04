@@ -88,7 +88,7 @@ void yieldrwa::on_transfer( const name& from, const name& to, const asset& quant
     auto bank = get_first_receiver();
     _perform_distribution( bank, quantity );
 
-    _log_yield( plan_id, quantity )
+    _log_yield( plan_id, quantity );
 }
 
 void yieldrwa::init(const name& admin) {

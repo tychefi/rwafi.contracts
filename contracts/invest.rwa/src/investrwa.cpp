@@ -3,6 +3,7 @@
 #include "investrwa.hpp"
 #include "stakerwadb.hpp"
 #include <wasm_db.hpp>
+#include "utils.hpp"
 #include <algorithm>
 #include <chrono>
 #include <eosio/transaction.hpp>
@@ -122,7 +123,7 @@ void investrwa::addtoken(const name& contract, const symbol& sym ) {
     CHECKC( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
     
     auto token          = allow_token_t( sym );
-    CHECKC( !_db.get( token ), err::RECORD_NOT_FOUND, "Token not found: " + symb.to_string() )
+    CHECKC( !_db.get( token ), err::RECORD_NOT_FOUND, "Token symbol already existing" )
 
     token.token_symbol  = sym;
     token.token_contract= contract;
@@ -131,18 +132,18 @@ void investrwa::addtoken(const name& contract, const symbol& sym ) {
 }
 
 void investrwa::deltoken( const symbol& sym ) {
-    check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
+    CHECKC( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
 
-    auto token = tokenlist_t( sym );
-    CHECKC( _db.get( token ), err::RECORD_NOT_FOUND, "no such token id: " + to_string( token_id ))
+    auto token = allow_token_t( sym );
+    CHECKC( _db.get( token ), err::RECORD_NOT_FOUND, "no such token symbol" )
     _db.del( token );
 }
 
 void investrwa::onshelf( const symbol& sym, const bool& onshelf ) {
-    check( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
+    CHECKC( has_auth( _self) || has_auth( _gstate.admin ), err::NO_AUTH, "no auth to add token" )
 
     auto token = allow_token_t( sym );
-    CHECKC( _db.get( token ), err::RECORD_NOT_FOUND, "no such token symbol: " + sym.to_string() )
+    CHECKC( _db.get( token ), err::RECORD_NOT_FOUND, "no such token symbol" )
     token.onshelf = onshelf;
     _db.set( token, _self );
 }
@@ -153,7 +154,7 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
 
     CHECKC( quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive" )
     auto parts = split(memo, ":");
-    CHECK( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" );
+    CHECKC( parts.size() == 2, err::INVALID_FORMAT, "invalid memo format" );
     auto plan_id = (uint64_t) stoi(string(parts[1]));
     auto plan = fundplan_t( plan_id );
     CHECKC( _db.get( plan ), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string( plan_id ) )
@@ -167,7 +168,7 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
         return;
 
     } else {
-        CHECKC( false, err::SYMBOL_MISMATCH, "symbol mismatch, expected: " + plan.goal_quantity.symbol.to_string() + " or " + plan.receipt_symbol.symbol.to_string() + ", actual: " + quantity.symbol.to_string() )
+        CHECKC( false, err::SYMBOL_MISMATCH, "symbol mismatch, expected: " + plan.goal_quantity.symbol.code().to_string() + " or " + plan.receipt_symbol.code().to_string() + ", actual: " + quantity.symbol.code().to_string() )
     }
 }
 
