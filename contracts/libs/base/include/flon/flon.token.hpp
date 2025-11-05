@@ -20,7 +20,7 @@ namespace eosiosystem {
 #define TRANSFER(bank, to, quantity, memo) \
     {	token::transfer_action act{ bank, { {_self, active_perm} } };\
 			act.send( _self, to, quantity , memo );}
-         
+
 namespace flon {
 
    using std::string;

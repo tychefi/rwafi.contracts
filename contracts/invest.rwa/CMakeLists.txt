@@ -17,3 +17,4 @@ set_target_properties(investrwa
 
 
 target_compile_options( investrwa PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian )
+target_link_libraries(investrwa flon_base)

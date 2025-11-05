@@ -1,6 +1,7 @@
 #include "investrwadb.hpp"
-#include <wasm_db.hpp>
-#include "flon.token.hpp"
+#include <flon/wasm_db.hpp>
+#include "flon/flon.token.hpp"
+#include "flon/utils.hpp"
 
 using namespace std;
 using namespace wasm::db;
@@ -30,7 +31,8 @@ enum class err: uint8_t {
    NONE_DELETED         = 19,
    IN_THE_WHITELIST     = 20,
    NON_RENEWAL          = 21,
-   INVALID_STATUS       = 31
+   INVALID_STATUS       = 31,
+   CONTRACT_MISMATCH    = 32
 };
 
 enum class investrwa_type: uint8_t {
@@ -82,15 +84,13 @@ public:
                        const time_point& start_time,
                        const time_point& end_time,
                        const uint16_t& return_years,
-                       const double& guaranteed_yield_apr );
+                       const uint32_t& guaranteed_yield_apr );
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
 
     // Invest with some allowed token
     [[eosio::on_notify("*::transfer")]]
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
-
-    ACTION refund( const name& submitter, const name& investor, const uint64_t& plan_id );
 
     ACTION init(const name& admin) {
         require_auth( _self );
@@ -99,7 +99,7 @@ public:
         _gstate.admin = admin;
     }
 
-private:    
+private:
     void _process_refund( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );

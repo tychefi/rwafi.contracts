@@ -30,7 +30,7 @@ namespace wasm { namespace db {
 // fundraising plan status
 namespace PlanStatus {
     static constexpr eosio::name PENDING        = "pending"_n;  // 待开始募资
-    static constexpr eosio::name ACTIVE         = "active"_n;   // 募资成功
+    static constexpr eosio::name ACTIVE         = "active"_n;   // 募资开始
     static constexpr eosio::name CLOSED         = "closed"_n;   // 已达硬顶 (不可投)
     static constexpr eosio::name SUCCESS        = "success"_n;  // 募资成功
     static constexpr eosio::name FAILED         = "failed"_n;   // 募资失败 (处理退款)
@@ -44,10 +44,10 @@ NTBL("global") global_t {
     name            admin;
     name            stake_contract      = "stake.rwa"_n;
     name            yield_contract      = "yield.rwa"_n;
-    name            guanranty_contract  = "guanranty.rwa"_n;
+    name            guaranty_contract   = "guaranty.rwa"_n;
     uint64_t        last_plan_id        = 0;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guanranty_contract)(last_plan_id) )
+    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guaranty_contract)(last_plan_id) )
 };
 typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
@@ -80,7 +80,7 @@ TBL fundplan_t {                                    //scope: _self
 
     // === 投资凭证 ===
     name                receipt_asset_contract;     //receipt issuing contract (FRC20)
-    symbol              receipt_symbol;             //receipt symbol (1:1 ratio with invest unit)       
+    symbol              receipt_symbol;             //receipt symbol (1:1 ratio with invest unit)
 
     // === 软顶 & 硬顶 ===
     uint8_t             soft_cap_percent;           // 软顶比例：最低成功门槛（如 60 → 60%）
@@ -95,13 +95,13 @@ TBL fundplan_t {                                    //scope: _self
     time_point_sec      return_end_time;            // 回报结束时间（自动计算）
 
     // === 投资担保机制 ===
-    double              guaranteed_yield_apr = 0.05; // 兜底年化收益率（5% → 0.05）
+    uint32_t            guaranteed_yield_apr = 500; // 兜底年化收益率（5% → 500）
 
     // === 实时状态 ===
     asset               total_raised_funds;        // 已募集数量
     asset               total_issued_receipts;     // 已发凭证数量
     name                status = PlanStatus::PENDING; //募资计划状态
-    
+
     uint64_t primary_key() const { return id; }
 
     fundplan_t(){}
@@ -116,7 +116,7 @@ TBL fundplan_t {                                    //scope: _self
                                         (return_years)(return_end_time)
                                         (guaranteed_yield_apr)
                                         (total_raised_funds)(total_issued_receipts)(status) )
- 
+
 };
 
 } }
