@@ -18,65 +18,9 @@ using namespace eosio;
 using namespace std;
 using namespace flon;
 
-static constexpr eosio::name active_perm        {"active"_n};
-static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
-static constexpr int128_t HIGH_PRECISION = 1'000'000'000'000'000'000; // 10^18
-
-#ifndef DAY_SECONDS_FOR_TEST
-static constexpr uint64_t DAY_SECONDS           = 24 * 60 * 60;
-#else
-#warning "DAY_SECONDS_FOR_TEST should be used only for test!!!"
-static constexpr uint64_t DAY_SECONDS           = DAY_SECONDS_FOR_TEST;
-#endif // DAY_SECONDS_FOR_TEST
-
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
-
 #define TBL struct [[eosio::table, eosio::contract("stakerwa")]]
 #define NTBL(name) struct [[eosio::table(name), eosio::contract("stakerwa")]]
 
-#define CHECKC(exp, code, msg) \
-   { if (!(exp)) eosio::check(false, string("[[") + to_string((int)code) + string("]] ") + msg); }
-
-
-enum class err: uint8_t {
-   NONE                 = 0,
-   RECORD_NOT_FOUND     = 1,
-   RECORD_EXISTING      = 2,
-   CONTRACT_MISMATCH    = 3,
-   SYMBOL_MISMATCH      = 4,
-   PARAM_ERROR          = 5,
-   MEMO_FORMAT_ERROR    = 6,
-   PAUSED               = 7,
-   NO_AUTH              = 8,
-   NOT_POSITIVE         = 9,
-   NOT_STARTED          = 10,
-   OVERSIZED            = 11,
-   TIME_EXPIRED         = 12,
-   TIME_PREMATURE       = 13,
-   ACTION_REDUNDANT     = 14,
-   ACCOUNT_INVALID      = 15,
-   FEE_INSUFFICIENT     = 16,
-   PLAN_INEFFECTIVE     = 17,
-   STATUS_ERROR         = 18,
-   INCORRECT_AMOUNT     = 19,
-   UNAVAILABLE_PURCHASE = 20,
-   INVALID_FORMAT      = 21,
-   QUANTITY_INSUFFICIENT= 22
-
-};
-
-
-NTBL("global") global_t {
-    name                admin               = "admin"_n;            // 管理员账户
-    name                investrwa_contract  = "investrwa"_n;        // RWA 投资主合约
-    uint64_t            reward_id           = 0;                    // 奖励记录自增ID
-    uint64_t            stake_id            = 0;                    // 质押记录自增ID
-
-    EOSLIB_SERIALIZE(global_t,
-        (admin)(investrwa_contract)(reward_id)(stake_id))
-};
-typedef eosio::singleton<"global"_n, global_t> global_singleton;
 struct stake_reward_st {
     uint64_t        reward_id = 0;                                  // 发奖自增 ID
     asset           total_rewards;                                  // 总奖励 = unalloted + unclaimed + claimed

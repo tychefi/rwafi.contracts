@@ -11,23 +11,11 @@ using namespace eosio;
 using namespace std;
 using std::string;
 
-// using namespace wasm;
-#define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
-
-static constexpr eosio::name active_perm        {"active"_n};
-
-static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
-static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
-static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
-
 namespace rwafi {
 
 #define TBL struct [[eosio::table, eosio::contract("investrwa")]]
 #define NTBL(name) struct [[eosio::table(name), eosio::contract("investrwa")]]
 
-// fundraising plan status
 namespace PlanStatus {
     static constexpr eosio::name PENDING        = "pending"_n;  // 待开始募资
     static constexpr eosio::name ACTIVE         = "active"_n;   // 募资开始
@@ -39,17 +27,6 @@ namespace PlanStatus {
     static constexpr eosio::name PENDING_PLEDGE = "pendingpldge"_n;//
 };
 
-
-NTBL("global") global_t {
-    name            admin;
-    name            stake_contract      = "stake.rwa"_n;
-    name            yield_contract      = "yield.rwa"_n;
-    name            guaranty_contract   = "guaranty.rwa"_n;
-    uint64_t        last_plan_id        = 0;
-
-    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guaranty_contract)(last_plan_id) )
-};
-typedef eosio::singleton< "global"_n, global_t > global_singleton;
 
 // whitlisted investment tokens
 //

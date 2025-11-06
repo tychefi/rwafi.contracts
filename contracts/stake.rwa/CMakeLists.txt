@@ -17,3 +17,4 @@ set_target_properties(stakerwa
 
 
 target_compile_options( stakerwa PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian )
+target_link_libraries(  stakerwa flon_base)

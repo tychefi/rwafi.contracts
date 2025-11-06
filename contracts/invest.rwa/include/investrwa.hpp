@@ -6,6 +6,7 @@
 using namespace std;
 using namespace wasm::db;
 
+namespace rwafi {
 #define CHECKC(exp, code, msg) \
    { if (!(exp)) eosio::check(false, string("[[") + to_string((int)code) + string("]] ") + msg); }
 
@@ -71,7 +72,7 @@ public:
     ACTION addtoken( const name& contract, const symbol& sym );
     ACTION deltoken( const symbol& sym );
     ACTION onshelf( const symbol& sym, const bool& onshelf );
-
+    ACTION refund(const name& submitter, const name& investor, const uint64_t& plan_id);
     ACTION createplan( const name& creator,
                        const string& title,
                        const name& goal_asset_contract,
@@ -108,4 +109,5 @@ private:
     asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );
     // asset _get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id );
 
-}; //contract investrwa
+};
+} // namespace rwafi

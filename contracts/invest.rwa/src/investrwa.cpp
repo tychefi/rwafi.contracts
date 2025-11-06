@@ -9,7 +9,7 @@
 using std::chrono::system_clock;
 using namespace wasm;
 using namespace eosio;
-
+using namespace rwafi;
 static constexpr name RECEIPT_TOKEN_BANK{"rwafi.token"_n};
 static constexpr name active_permission{"active"_n};
 
@@ -166,16 +166,19 @@ void investrwa::_update_plan_status(fundplan_t& plan) {
             if (guar_itr == guar_tbl.end()) {
                 plan.status = PlanStatus::FAILED;
             } else {
-                // 计算剩余担保期
-                uint16_t total_years     = plan.return_years;
-                uint16_t elapsed_years   = (now.sec_since_epoch() - plan.start_time.sec_since_epoch()) / seconds_per_year;
-                uint16_t remaining_years = total_years > elapsed_years ? (total_years - elapsed_years) : 1;
+                // ======== 计算剩余担保期（月） ========
+                uint16_t total_months   = plan.return_months;
+                uint16_t elapsed_months = (now.sec_since_epoch() - plan.start_time.sec_since_epoch()) / seconds_per_month;
+                uint16_t remaining_months = total_months > elapsed_months ? (total_months - elapsed_months) : 1;
 
+                // APR 是年化利率，需要按月折算
+                // 所以 / 12 是换算成月化收益率
                 int64_t required_amount = goal_amount *
-                                          plan.guaranteed_yield_apr *
-                                          remaining_years / 10000 / 2;
+                                        plan.guaranteed_yield_apr *
+                                        remaining_months / 10000 / 12 / 2;
 
                 asset required_guarantee(required_amount, plan.goal_quantity.symbol);
+
                 plan.status = (guar_itr->available_guarantee_funds.amount >= required_guarantee.amount)
                             ? PlanStatus::SUCCESS
                             : PlanStatus::FAILED;
@@ -253,6 +256,55 @@ void investrwa::on_transfer( const name& from, const name& to, const asset& quan
     }
 }
 
+void investrwa::refund(const name& submitter, const name& investor, const uint64_t& plan_id) {
+    require_auth(submitter);
+
+    auto plan = fundplan_t(plan_id);
+    CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "no such fund plan id: " + to_string(plan_id))
+    CHECKC(plan.status == PlanStatus::CANCELLED, err::INVALID_STATUS, "refunds only allowed when plan is cancelled")
+
+    auto stake_balance = _get_investor_stake_balance(investor, plan_id);
+    CHECKC(stake_balance.amount > 0, err::NOT_POSITIVE, "no stake found for investor");
+
+    auto fund_balance_total = _get_balance(plan.goal_asset_contract, _self, plan.goal_quantity.symbol);
+    CHECKC(fund_balance_total.amount >= stake_balance.amount, err::QUANTITY_INSUFFICIENT,
+        "contract fund balance not enough for refund");
+
+    // 调用 stakerwa 合约的 unstake 动作，返还 receipt token 给投资人
+    {
+        action(
+            permission_level{get_self(), "active"_n},
+            _gstate.stake_contract,
+            "unstake"_n,
+            std::make_tuple(investor, plan_id, stake_balance)
+        ).send();
+    }
+
+    // ========== 退还本金 ==========
+    {
+        TRANSFER_OUT(
+            plan.goal_asset_contract,
+            investor,
+            asset(stake_balance.amount, plan.goal_quantity.symbol),
+            string("refund for plan:") + to_string(plan.id)
+        )
+    }
+
+    // ========== 销毁凭证（Receipt Token）==========
+    {
+        REFUND_BURN_RECEIPT(
+            plan.receipt_asset_contract,
+            _gstate.stake_contract,
+            stake_balance,
+            string("refund:") + to_string(plan.id) + ":" + investor.to_string()
+        )
+    }
+
+    plan.total_raised_funds   -= asset(stake_balance.amount, plan.goal_quantity.symbol);
+    plan.total_issued_receipts -= stake_balance;
+    _db.set(plan, _self);
+}
+
 void investrwa::createplan(const name& creator,
                            const string& title,
                            const name& goal_asset_contract,
@@ -264,7 +316,7 @@ void investrwa::createplan(const name& creator,
                            const uint8_t& hard_cap_percent,
                            const time_point& start_time,
                            const time_point& end_time,
-                           const uint16_t& return_years,
+                           const uint16_t& return_months,
                            const uint32_t& guaranteed_yield_apr) {
     require_auth(creator);
 
@@ -273,7 +325,7 @@ void investrwa::createplan(const name& creator,
     CHECKC(soft_cap_percent > 0 && soft_cap_percent <= 100, err::INVALID_FORMAT, "soft cap invalid");
     CHECKC(hard_cap_percent >= soft_cap_percent, err::INVALID_FORMAT, "hard cap invalid");
     CHECKC(end_time > start_time, err::INVALID_FORMAT, "end time must follow start");
-    CHECKC(return_years > 0, err::INVALID_FORMAT, "return years invalid");
+    CHECKC(return_months > 0, err::INVALID_FORMAT, "return years invalid");
     CHECKC(guaranteed_yield_apr > 0, err::INVALID_FORMAT, "yield apr invalid");
     CHECKC(receipt_asset_contract == RECEIPT_TOKEN_BANK, err::CONTRACT_MISMATCH, "receipt must be rwafi.token");
 
@@ -293,8 +345,8 @@ void investrwa::createplan(const name& creator,
     plan.hard_cap_percent     = hard_cap_percent;
     plan.start_time           = time_point_sec(start_time.sec_since_epoch());
     plan.end_time             = time_point_sec(end_time.sec_since_epoch());
-    plan.return_years         = return_years;
-    plan.return_end_time      = time_point_sec(start_time.sec_since_epoch() + return_years * seconds_per_year);
+    plan.return_months         = return_months;
+    plan.return_end_time      = time_point_sec(start_time.sec_since_epoch() + return_months * seconds_per_month);
     plan.guaranteed_yield_apr = guaranteed_yield_apr;
     plan.total_raised_funds   = asset(0, goal_quantity.symbol);
     plan.total_issued_receipts= asset(0, receipt_quantity_per_unit.symbol);

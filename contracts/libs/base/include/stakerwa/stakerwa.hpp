@@ -27,18 +27,6 @@ class [[eosio::contract("stakerwa")]] stakerwa : public contract {
 public:
     using contract::contract;
 
-    stakerwa(name receiver, name code, datastream<const char*> ds)
-    : contract(receiver, code, ds),
-      _global(get_self(), get_self().value),
-      _db(get_self())
-    {
-        _gstate = _global.exists() ? _global.get() : global_t{};
-    }
-
-    ~stakerwa() {
-        _global.set(_gstate, get_self());
-    }
-
     /**
      * 初始化（仅一次）
      * @param admin 管理员账户
@@ -69,53 +57,10 @@ public:
 
     ACTION unstake(const name& owner, const uint64_t& plan_id, const asset& quantity) ;
 
-    // ========== 监听转账 ==========
-    /**
-     * 用户质押（监听 rwafi.token 转账）
-     * memo 格式： "stake:<plan_id>"
-     */
-    [[eosio::on_notify("rwafi.token::transfer")]]
-    void on_transfer_rwafi(const name& from, const name& to, const asset& quantity, const std::string& memo);
-
-    /**
-     * 管理员充值奖励（监听 sing.token 转账）
-     * memo 格式： "reward:<plan_id>"
-     */
-    [[eosio::on_notify("sing.token::transfer")]]
-    void on_transfer_reward(const name& from, const name& to, const asset& quantity, const std::string& memo);
-
 
     using claim_action      = eosio::action_wrapper<"claim"_n, &stakerwa::claim>;
     using addplan_action    = eosio::action_wrapper<"addplan"_n, &stakerwa::addplan>;
 
-private:
-    // ========== 内部逻辑函数 ==========
-
-    /**
-     * 处理用户质押
-     */
-    void _on_stake(const name& from, const asset& quantity, const uint64_t& plan_id);
-
-    /**
-     * 处理奖励注入
-     */
-    void _on_reward_in(const name& from, const asset& quantity, const uint64_t& plan_id);
-
-    /**
-     * 计算 reward_per_share 增量
-     */
-    static int128_t calc_reward_per_share_delta(const asset& rewards, const asset& total_staked);
-
-    /**
-     * 计算单个用户应得奖励
-     */
-    static asset calc_user_reward(const asset& staked, const int128_t& reward_per_share_delta, const symbol& reward_symbol);
-
-
-private:
-    global_singleton       _global;
-    global_t               _gstate;
-    dbc                    _db;
 };
 
 } // namespace rwafi
