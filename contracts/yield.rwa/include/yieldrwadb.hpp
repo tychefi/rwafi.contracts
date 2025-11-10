@@ -2,72 +2,56 @@
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
-#include <eosio/privileged.hpp>
 #include <eosio/singleton.hpp>
-#include <eosio/system.hpp>
 #include <eosio/time.hpp>
-
+#include <flon/wasm_db.hpp>
+#include <flon/consts.hpp>
 using namespace eosio;
 using namespace std;
-using std::string;
+using namespace wasm::db;
+using namespace flon;
+namespace rwafi {
 
-// using namespace wasm;
-#define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
+// ----------------------------------------------------
+// 表宏定义
+// ----------------------------------------------------
+#define TBL struct [[eosio::table, eosio::contract("yield.rwa")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("yield.rwa")]]
 
-static constexpr eosio::name active_perm        {"active"_n};
-static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
-
-#ifndef DAY_SECONDS_FOR_TEST
-static constexpr uint64_t DAY_SECONDS           = 24 * 60 * 60;
-#else
-#warning "DAY_SECONDS_FOR_TEST should be used only for test!!!"
-static constexpr uint64_t DAY_SECONDS           = DAY_SECONDS_FOR_TEST;
-#endif//DAY_SECONDS_FOR_TEST
-
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t    EXPIRY_HOURS        = 12;
-
-static constexpr name STAKE_POOL            { "stake.rwa"_n };
-static constexpr name GUARANTY_POOL         { "guarant.rwa"_n };
-static constexpr name SWAP_POOL              { "flon.swap"_n };
-
-namespace wasm { namespace db {
-
-using namespace eosio;
-
-#define TBL struct [[eosio::table, eosio::contract("yieldrwa")]]
-#define NTBL(name) struct [[eosio::table(name), eosio::contract("yieldrwa")]]
-
+// ----------------------------------------------------
+// 全局配置表（收益分配比例）
+// ----------------------------------------------------
 NTBL("global") global_t {
-    name                admin;
+    name admin;
 
-    map<name, uint8_t>   yield_split_conf = {
-        { STAKE_POOL,       80 },
-        { SWAP_POOL,        10 },
-        { GUARANTY_POOL,    10 }
+    map<name, uint8_t> yield_split_conf = {
+        { STAKE_POOL,     80 },
+        { SWAP_POOL,      10 },
+        { GUARANTY_POOL,  10 }
     };
 
-    EOSLIB_SERIALIZE( global_t, (admin)(yield_split_conf) )
+    EOSLIB_SERIALIZE(global_t, (admin)(yield_split_conf))
 };
-typedef eosio::singleton< "global"_n, global_t > global_singleton;
+typedef eosio::singleton<"global"_n, global_t> global_singleton;
 
-TBL yield_log_t {                   //scope: plan_id
-    uint64_t        year;           //PK
-    uint64_t        year_no = 0;
-    asset           year_total_quantity;
-    asset           plan_total_quantity;
+// ----------------------------------------------------
+// 收益日志表（按月）
+// ----------------------------------------------------
+TBL yield_log_t {
+    uint64_t        period;              // 主键：YYYYMM
+    asset           period_yield;        // 当月收益
+    asset           cumulative_yield;    // 累计收益
     time_point_sec  created_at;
     time_point_sec  updated_at;
 
-    uint64_t primary_key() const { return year; }
+    uint64_t primary_key() const { return period; }
 
-    yield_log_t(){}
-    yield_log_t( const uint64_t& y ): year(y){}
+    yield_log_t() {}
+    yield_log_t(const uint64_t& p): period(p) {}
 
     typedef eosio::multi_index<"yieldlogs"_n, yield_log_t> idx_t;
 
-    EOSLIB_SERIALIZE( yield_log_t, (year)(year_no)(year_total_quantity)(plan_total_quantity)(created_at)(updated_at) )
+    EOSLIB_SERIALIZE(yield_log_t, (period)(period_yield)(cumulative_yield)(created_at)(updated_at))
 };
 
-
-} }
+} // namespace rwafi
