@@ -10,10 +10,10 @@ static constexpr eosio::name SING_BANK              {"sing.token"_n};    // SING
 
 static constexpr eosio::symbol SING_SYM             = eosio::symbol("SING", 8);
 
-static constexpr eosio::name STAKE_POOL             = "stake.rwa"_n;
-static constexpr eosio::name INVEST_POOL            = "invest.rwa"_n;
-static constexpr eosio::name GUARANTY_POOL          = "guaranty.rwa"_n;
-static constexpr eosio::name YIELD_POOL             = "yield.rwa"_n;
+static constexpr eosio::name STAKE_POOL             = "stake1111"_n;       //stake.rwa
+static constexpr eosio::name INVEST_POOL            = "investrwa112"_n;      //invest.rwa
+static constexpr eosio::name GUARANTY_POOL          = "guaranty1111"_n;    //guaranty.rwa
+static constexpr eosio::name YIELD_POOL             = "yieldrwa1111"_n;       //yield.rwa
 static constexpr eosio::name SWAP_POOL              = "flon.swap"_n;
 
 }

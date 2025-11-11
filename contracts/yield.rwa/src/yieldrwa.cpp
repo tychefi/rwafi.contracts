@@ -7,6 +7,7 @@
 #include <chrono>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
+#include <invest.rwa/investrwadb.hpp>
 
 using namespace eosio;
 using namespace rwafi;
@@ -45,11 +46,23 @@ void yieldrwa::on_transfer(const name& from, const name& to, const asset& quanti
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive");
 
     auto parts = split(memo, ":");
-    CHECKC(parts.size() == 2 && parts[0] == "plan", err::INVALID_FORMAT, "invalid memo, expect plan:<id>");
-    uint64_t plan_id = std::stoull(parts[1]);
+    CHECKC(parts.size() == 2 && parts[0] == "plan", err::INVALID_FORMAT, "invalid memo format, expect plan:<id>");
+    const uint64_t plan_id = std::stoull(parts[1]);
 
-    auto bank = get_first_receiver();
-    _perform_distribution(bank, quantity,plan_id);
+    // 查找 plan
+    fundplan_t::idx_t plan_tbl("invest.rwa"_n, "invest.rwa"_n.value);
+    auto plan_itr = plan_tbl.find(plan_id);
+    CHECKC(plan_itr != plan_tbl.end(), err::RECORD_NOT_FOUND, "plan not found: " + std::to_string(plan_id));
+
+    // 校验符号匹配
+    CHECKC(quantity.symbol == plan_itr->goal_quantity.symbol,
+                err::SYMBOL_MISMATCH,
+                "symbol mismatch, expected " + plan_itr->goal_quantity.symbol.code().to_string() +
+                ", got " + quantity.symbol.code().to_string());
+
+    // 执行分配
+    const name bank = get_first_receiver();
+    _perform_distribution(bank, quantity, plan_id);
     _log_yield(plan_id, quantity);
 }
 
@@ -71,8 +84,8 @@ void yieldrwa::_perform_distribution(const name& bank, const asset& total, const
     // 仅当金额非零才转账
     if (amt_stake.amount > 0)
         TRANSFER(bank, STAKE_POOL, amt_stake, "reward:" + std::to_string(plan_id));
-    if (amt_swap.amount > 0)
-        TRANSFER(bank, SWAP_POOL, amt_swap, "AMM Swap buyback & burn");
+    // if (amt_swap.amount > 0)
+    //     TRANSFER(bank, SWAP_POOL, amt_swap, "AMM Swap buyback & burn");
     if (amt_guaranty.amount > 0)
         TRANSFER(bank, GUARANTY_POOL, amt_guaranty, "guaranty:" + std::to_string(plan_id));
 }

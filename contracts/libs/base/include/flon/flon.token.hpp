@@ -10,16 +10,16 @@ namespace eosiosystem {
 }
 
 #define CREATE(bank, issuer, maximum_supply) \
-    {	token::create_action act{ bank, { {_self, active_perm} } };\
+    {	token::create_action act{ bank, { {issuer, active_perm} } };\
 			act.send(issuer, maximum_supply );}
 
 #define ISSUE(bank, to, quantity, memo) \
     {	token::issue_action act{ bank, { {_self, active_perm} } };\
 			act.send( to, quantity, memo );}
 
-#define BURN(bank, from, quantity,memo) \
-    {	token::burn_action act{ bank, { {_self, active_perm} } };\
-			act.send( from, quantity, memo );}
+#define BURN(bank,quantity,memo) \
+    {	token::retire_action act{ bank, { {_self, active_perm} } };\
+			act.send(quantity, memo );}
 
 #define TRANSFER(bank, to, quantity, memo) \
     {	token::transfer_action act{ bank, { {_self, active_perm} } };\

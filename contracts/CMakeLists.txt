@@ -46,10 +46,11 @@ set(VOTING_ICON_URI "voting.png#db28cd3db6e62d4509af3644ce7d377329482a14bb4bfaca
 
 
 add_subdirectory(libs)
-add_subdirectory(investrwa)
-add_subdirectory(stakerwa)
+add_subdirectory(invest.rwa)
+add_subdirectory(stake.rwa)
 add_subdirectory(yield.rwa)
-add_subdirectory(guarantyrwa)
+add_subdirectory(guaranty.rwa)
+add_subdirectory(rwafi.token)
 # if(BUILD_TESTS)
 #   add_subdirectory(test_contracts)
 # endif()
