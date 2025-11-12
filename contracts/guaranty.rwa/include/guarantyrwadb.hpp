@@ -43,12 +43,14 @@ typedef eosio::singleton< "global"_n, global_t > global_singleton;
  * scope: self
  */
 TBL guaranty_stats_t {
-    uint64_t        plan_id;                        // PK
-    asset           total_guarantee_funds;          // 充值累计
-    asset           available_guarantee_funds;      // 可用
-    asset           used_guarantee_funds;           // 已用（已支付）
-    time_point_sec  created_at;
-    time_point_sec  updated_at;
+    uint64_t        plan_id;
+    asset           total_guarantee_funds;     // 担保池总额
+    asset           total_locked_funds;        // 当前应锁定的总担保额
+    asset           total_unlocked_funds;      // 已可解押但未取走总额
+    asset           used_guarantee_funds;      // 担保已使用
+    asset           cumulative_yield;          // 担保池累计分红（投资人部分）
+    time_point_sec created_at;
+    time_point_sec updated_at;
 
     uint64_t primary_key() const { return plan_id; }
 
@@ -58,7 +60,7 @@ TBL guaranty_stats_t {
     typedef eosio::multi_index<"guarantystat"_n, guaranty_stats_t> idx_t;
 
     EOSLIB_SERIALIZE(guaranty_stats_t,
-        (plan_id)(total_guarantee_funds)(available_guarantee_funds)(used_guarantee_funds)
+        (plan_id)(total_guarantee_funds)(total_locked_funds)(total_unlocked_funds)(used_guarantee_funds)(cumulative_yield)
         (created_at)(updated_at))
 };
 
@@ -67,10 +69,14 @@ TBL guaranty_stats_t {
  * scope: plan_id
  */
 TBL guarantor_stake_t {
-    name            guarantor;       // ✅ 主键：担保人
-    asset           total_funds;     // ✅ 当前担保金额（实时更新）
-    time_point_sec  created_at;
-    time_point_sec  updated_at;
+    name       guarantor;            // 担保人账户
+    asset      total_stake;          // 总质押本金
+    asset      available_stake;      // 可赎回部分（动态更新）
+    asset      locked_stake;         // 已锁定（未可解押）
+    asset      earned_yield;         // 累计担保分红收益
+    asset      withdrawn;            // 已取走金额（总计）
+    time_point_sec created_at;
+    time_point_sec updated_at;
 
     uint64_t primary_key() const { return guarantor.value; }
 
@@ -80,7 +86,7 @@ TBL guarantor_stake_t {
     typedef eosio::multi_index<"stakes"_n, guarantor_stake_t> idx_t;
 
     EOSLIB_SERIALIZE(guarantor_stake_t,
-        (guarantor)(total_funds)(created_at)(updated_at))
+        (guarantor)(total_stake)(available_stake)(locked_stake)(earned_yield)(withdrawn)(created_at)(updated_at))
 };
 
 /**
@@ -101,27 +107,6 @@ TBL plan_payment_t {
 
     EOSLIB_SERIALIZE(plan_payment_t,
         (period)(total_paid)(created_at))
-};
-
-/**
- * 每计划担保配置（覆盖比例等）
- * scope: self
- */
-TBL guaranty_conf_t {
-    uint64_t        plan_id;                        // PK
-    uint16_t        coverage_ratio_bp = 10000;      // 部分担保覆盖比例（基点：10000=100%）
-    time_point_sec  created_at;
-    time_point_sec  updated_at;
-
-    uint64_t primary_key() const { return plan_id; }
-
-    guaranty_conf_t() {}
-    explicit guaranty_conf_t(const uint64_t& pid): plan_id(pid) {}
-
-    typedef eosio::multi_index<"gconfs"_n, guaranty_conf_t> idx_t;
-
-    EOSLIB_SERIALIZE(guaranty_conf_t,
-        (plan_id)(coverage_ratio_bp)(created_at)(updated_at))
 };
 
 } //namespace rwafi

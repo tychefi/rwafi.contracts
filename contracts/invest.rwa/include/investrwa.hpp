@@ -35,7 +35,8 @@ enum class err: uint8_t {
    INVALID_STATUS       = 31,
    CONTRACT_MISMATCH    = 32,
    PARAM_ERROR          = 33,
-   INVALID_SYMBOL       = 34
+   INVALID_SYMBOL       = 34,
+   TOKEN_NOT_ALLOWED    = 35
 };
 
 enum class investrwa_type: uint8_t {
@@ -74,18 +75,19 @@ public:
     ACTION addtoken( const name& contract, const symbol& sym );
     ACTION deltoken( const symbol& sym );
     ACTION onshelf( const symbol& sym, const bool& onshelf );
-    ACTION createplan( const name& creator,
-                       const string& title,
-                       const name& goal_asset_contract,
-                       const asset& goal_quantity,
-                       const name& receipt_asset_contract,
-                       const asset& receipt_quantity_per_unit,
-                       const uint8_t& soft_cap_percent,
-                       const uint8_t& hard_cap_percent,
-                       const time_point& start_time,
-                       const time_point& end_time,
-                       const uint16_t& return_years,
-                       const uint32_t& guaranteed_yield_apr );
+    ACTION createplan(
+                        const name& creator,
+                        const string& title,
+                        const name& goal_asset_contract,
+                        const asset& goal_quantity,
+                        const name& receipt_asset_contract,
+                        const asset& receipt_quantity_per_unit,
+                        const uint8_t& soft_cap_percent,
+                        const uint8_t& hard_cap_percent,
+                        const time_point& start_time,
+                        const time_point& end_time,
+                        const uint16_t& return_months,
+                        const uint32_t& guaranteed_yield_apr  );
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
 
@@ -106,6 +108,8 @@ private:
     void _process_refund( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
+
+    bool _check_guarantee(const fundplan_t& plan);
 
     asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
     asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );

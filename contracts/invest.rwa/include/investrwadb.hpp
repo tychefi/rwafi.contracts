@@ -30,16 +30,16 @@ namespace rwafi {
 
 // fundraising plan status
 namespace PlanStatus {
-    static constexpr eosio::name PENDING        = "pending"_n;  // 待开始募资
-    static constexpr eosio::name ACTIVE         = "active"_n;   // 募资开始
-    static constexpr eosio::name CLOSED         = "closed"_n;   // 已达硬顶 (不可投)
-    static constexpr eosio::name SUCCESS        = "success"_n;  // 募资成功
-    static constexpr eosio::name FAILED         = "failed"_n;   // 募资失败 (处理退款)
-    static constexpr eosio::name COMPLETED      = "completed"_n;// 已完成（回报发完）
-    static constexpr eosio::name CANCELLED      = "cancelled"_n;// 已取消
-    static constexpr eosio::name REFUNDED       = "refunded"_n; // 已退款
-    static constexpr eosio::name PENDING_PLEDGE = "pendingpldge"_n;//
-};
+    static constexpr eosio::name PENDING     = "pending"_n;      // 计划创建未开始
+    static constexpr eosio::name RAISEACTIVE = "raiseactive"_n;  // 募资中
+    static constexpr eosio::name SOFTCAPHIT  = "softcaphit"_n;   // 达到软顶（待担保）
+    static constexpr eosio::name HARDCAPHIT  = "hardcaphit"_n;   // 达到硬顶（封顶未担保）
+    static constexpr eosio::name SUCCESS     = "success"_n;      // 担保完成（进入收益期）
+    static constexpr eosio::name COMPLETED   = "completed"_n;    // 收益期结束
+    static constexpr eosio::name FAILED      = "failed"_n;       // 未达软顶或超期未担保
+    static constexpr eosio::name CANCELLED   = "cancelled"_n;    // 手动取消
+    static constexpr eosio::name REFUNDED    = "refunded"_n;     // 已退款完毕
+}
 
 
 NTBL("global") global_t {
