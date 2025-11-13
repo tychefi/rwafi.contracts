@@ -15,23 +15,35 @@ using std::string;
 using namespace wasm::db;
 using namespace flon;
 
+#define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
+
+static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
+static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
+static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
+static constexpr uint32_t MAX_TITLE_SIZE        = 64;
+static constexpr uint8_t  EXPIRY_HOURS          = 12;
 
 namespace rwafi {
 
+#define TBL struct [[eosio::table, eosio::contract("invest.rwa")]]
+#define NTBL(name) struct [[eosio::table(name), eosio::contract("invest.rwa")]]
+
 // fundraising plan status
 namespace PlanStatus {
-    static constexpr eosio::name PENDING        = "pending"_n;  // 待开始募资
-    static constexpr eosio::name ACTIVE         = "active"_n;   // 募资开始
-    static constexpr eosio::name CLOSED         = "closed"_n;   // 已达硬顶 (不可投)
-    static constexpr eosio::name SUCCESS        = "success"_n;  // 募资成功
-    static constexpr eosio::name FAILED         = "failed"_n;   // 募资失败 (处理退款)
-    static constexpr eosio::name COMPLETED      = "completed"_n;// 已完成（回报发完）
-    static constexpr eosio::name CANCELLED      = "cancelled"_n;// 已取消
-    static constexpr eosio::name PENDING_PLEDGE = "pendingpldge"_n;//
-};
+    static constexpr eosio::name PENDING     = "pending"_n;      // 计划创建未开始
+    static constexpr eosio::name RAISEACTIVE = "raiseactive"_n;  // 募资中
+    static constexpr eosio::name SOFTCAPHIT  = "softcaphit"_n;   // 达到软顶（待担保）
+    static constexpr eosio::name HARDCAPHIT  = "hardcaphit"_n;   // 达到硬顶（封顶未担保）
+    static constexpr eosio::name SUCCESS     = "success"_n;      // 担保完成（进入收益期）
+    static constexpr eosio::name COMPLETED   = "completed"_n;    // 收益期结束
+    static constexpr eosio::name FAILED      = "failed"_n;       // 未达软顶或超期未担保
+    static constexpr eosio::name CANCELLED   = "cancelled"_n;    // 手动取消
+    static constexpr eosio::name REFUNDED    = "refunded"_n;     // 已退款完毕
+}
+
 // whitlisted investment tokens
-   //scope: _self
-struct [[eosio::table, eosio::contract("invest.rwa")]] allow_token_t {
+//
+TBL allow_token_t {                         //scope: _self
     symbol          token_symbol;           //PK: token symbol
     name            token_contract;         //token issuing contract
     bool            onshelf = true;
@@ -45,8 +57,8 @@ struct [[eosio::table, eosio::contract("invest.rwa")]] allow_token_t {
 
     EOSLIB_SERIALIZE( allow_token_t, (token_symbol)(token_contract)(onshelf) )
 };
- //scope: _self
-struct [[eosio::table, eosio::contract("invest.rwa")]] fundplan_t {
+
+TBL fundplan_t {                                    //scope: _self
     uint64_t            id;                         //PK: 募资计划ID
     string              title;                      //plan title: <=64 chars
     name                creator;                    //plan owner
@@ -59,6 +71,7 @@ struct [[eosio::table, eosio::contract("invest.rwa")]] fundplan_t {
     // === 投资凭证 ===
     name                receipt_asset_contract;     //receipt issuing contract (FRC20)
     symbol              receipt_symbol;             //receipt symbol (1:1 ratio with invest unit)
+    asset               receipt_quantity_per_unit;
 
     // === 软顶 & 硬顶 ===
     uint8_t             soft_cap_percent;           // 软顶比例：最低成功门槛（如 60 → 60%）
@@ -88,7 +101,7 @@ struct [[eosio::table, eosio::contract("invest.rwa")]] fundplan_t {
     typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
 
     EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(created_at)
-                                        (receipt_asset_contract)(receipt_symbol)
+                                        (receipt_asset_contract)(receipt_symbol)(receipt_quantity_per_unit)
                                         (soft_cap_percent)(hard_cap_percent)
                                         (start_time)(end_time)
                                         (return_months)(return_end_time)

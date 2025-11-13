@@ -16,6 +16,15 @@ static constexpr eosio::name GUARANTY_POOL          = "guaranty1111"_n;    //gua
 static constexpr eosio::name YIELD_POOL             = "yieldrwa1111"_n;       //yield.rwa
 static constexpr eosio::name SWAP_POOL              = "flon.swap"_n;
 
+
+static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
+static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
+static constexpr uint64_t DAY_SECONDS           = 24 * 3600;
+static constexpr uint32_t MAX_TITLE_SIZE        = 64;
+static constexpr uint8_t  EXPIRY_HOURS          = 12;
+
+
+
 }
 
 

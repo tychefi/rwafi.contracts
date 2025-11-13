@@ -165,16 +165,18 @@ void stakerwa::unstake(const name& owner, const uint64_t& plan_id, const asset& 
 }
 
 void stakerwa::batchunstake(const uint64_t& plan_id) {
-    require_auth(INVEST_POOL);  // investrwa112 授权调用
+    require_auth(INVEST_POOL);
 
-    // === 查找计划 ===
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
     auto plan_itr = stakeplans.find(plan_id);
     CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
 
-    // === 查找 stakers ===
     staker_t::tbl_t stakers(get_self(), plan_id);
-    CHECKC(stakers.begin() != stakers.end(), err::RECORD_NOT_FOUND, "no stakers found for this plan");
+    // 若没有任何投资人，直接跳过 unstake 流程
+    if (stakers.begin() == stakers.end()) {
+        stakeplans.erase(plan_itr);
+        return;
+    }
 
     // === 遍历退款 ===
     for (auto itr = stakers.begin(); itr != stakers.end();) {
@@ -185,25 +187,18 @@ void stakerwa::batchunstake(const uint64_t& plan_id) {
 
         const name& investor = itr->owner;
         const asset& refund_receipt = itr->avl_staked;
-
         string memo = "refund:" + std::to_string(plan_id) + ":" + investor.to_string();
 
-        // ✅ 从 stake 合约账户发送给 INVEST_POOL
-        TRANSFER("rwafi.token"_n,   INVEST_POOL,refund_receipt,memo);
+        TRANSFER("rwafi.token"_n, INVEST_POOL, refund_receipt, memo);
 
-        // ✅ 更新统计（安全减法）
         stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
-            if (p.total_staked.amount >= refund_receipt.amount)
-                p.total_staked -= refund_receipt;
-            else
-                p.total_staked.amount = 0;
+            p.total_staked.amount = std::max<int64_t>(
+                0, p.total_staked.amount - refund_receipt.amount
+            );
         });
 
-        // ✅ 删除当前用户记录
         itr = stakers.erase(itr);
     }
-
-    // === 若无更多 stakers，则可删除该计划 ===
     if (stakers.begin() == stakers.end()) {
         stakeplans.erase(plan_itr);
     }
@@ -272,16 +267,24 @@ void stakerwa::_on_reward_in(const name& from, const asset& quantity, const uint
 
     stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
         auto& r = p.reward_state;
-        r.reward_id++;
-        r.total_rewards += quantity;
-        r.last_rewards   = quantity;
-        r.last_reward_per_share = r.reward_per_share;
-        r.reward_per_share += delta_rps;
-        r.prev_reward_added_at = r.reward_added_at;
-        r.reward_added_at = now;
 
-        // 若使用“即时分配”模式，可视情况清零未分配奖励
-        r.unalloted_rewards += quantity;
+        // 防御性修正：如果 total_rewards 还是默认 symbol，主动重建为 reward_symbol
+        if (r.total_rewards.amount == 0 && r.total_rewards.symbol.raw() == 0) {
+            r.total_rewards     = asset(0, r.reward_symbol);
+            r.last_rewards      = asset(0, r.reward_symbol);
+            r.unalloted_rewards = asset(0, r.reward_symbol);
+            r.unclaimed_rewards = asset(0, r.reward_symbol);
+            r.claimed_rewards   = asset(0, r.reward_symbol);
+        }
+
+        r.reward_id++;
+        r.total_rewards       += quantity;
+        r.last_rewards         = quantity;
+        r.last_reward_per_share = r.reward_per_share;
+        r.reward_per_share    += delta_rps;
+        r.prev_reward_added_at = r.reward_added_at;
+        r.reward_added_at      = now;
+        r.unalloted_rewards   += quantity;
     });
 }
 

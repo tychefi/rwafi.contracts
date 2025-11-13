@@ -17,11 +17,6 @@ using namespace flon;
 
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 
-static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
-static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
-static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
 
 namespace rwafi {
 

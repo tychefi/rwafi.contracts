@@ -59,7 +59,7 @@ void investrwa::_process_investment(const name& from, const name&, const asset& 
 
     // === Step 3: 检查币种是否在白名单中 ===
     allow_token_t::idx_t tokens(_self, _self.value);
-    auto token_itr = tokens.find(quantity.symbol.code().raw());
+    auto token_itr = tokens.find(quantity.symbol.raw());
     CHECKC(token_itr != tokens.end() && token_itr->token_contract == token_contract,
            err::TOKEN_NOT_ALLOWED,
            "token not allowed: " + quantity.symbol.code().to_string());
@@ -284,14 +284,13 @@ void investrwa::on_transfer(const name& from,const name& to,const asset& quantit
     const uint64_t plan_id = std::stoull(parts[1]);
 
     fundplan_t plan(plan_id);
-    CHECKC(_db.get(plan), err::RECORD_NOT_FOUND,
-           "no such fund plan id: " + std::to_string(plan_id));
+    CHECKC(_db.get(plan), err::RECORD_NOT_FOUND,"no such fund plan id: " + std::to_string(plan_id));
 
     // === 投资逻辑 ===
     if (action == "plan") {
         // --- 校验白名单 ---
         allow_token_t::idx_t allow_tokens(_self, _self.value);
-        auto token_itr = allow_tokens.find(quantity.symbol.code().raw());
+        auto token_itr = allow_tokens.find(quantity.symbol.raw());
         CHECKC(token_itr != allow_tokens.end(), err::INVALID_SYMBOL,
                "token not registered: " + quantity.symbol.code().to_string());
         CHECKC(token_itr->token_contract == bank, err::CONTRACT_MISMATCH,
