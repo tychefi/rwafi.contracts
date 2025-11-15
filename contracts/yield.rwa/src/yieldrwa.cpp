@@ -216,6 +216,7 @@ void yieldrwa::_perform_distribution(const name& bank,const asset& total,const u
     CHECKC(total.amount > 0,    err::NOT_POSITIVE, "zero total");
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
+
     auto p = plans.find(plan_id);
     CHECKC(p != plans.end(),                                            err::RECORD_NOT_FOUND, "plan not found");
     CHECKC(p->status == "success"_n,                                    err::INVALID_FORMAT,"plan not in yield stage");

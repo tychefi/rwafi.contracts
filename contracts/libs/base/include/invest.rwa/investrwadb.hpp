@@ -17,12 +17,6 @@ using namespace flon;
 
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 
-static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
-static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
-static constexpr uint64_t DAY_SECONDS           = 24 * 36000;
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
-
 namespace rwafi {
 
 #define TBL struct [[eosio::table, eosio::contract("invest.rwa")]]
@@ -83,7 +77,7 @@ TBL fundplan_t {                                    //scope: _self
 
     // === 回报分配期限（新增）===
     uint16_t            return_months;               // 回报年限：8~10 年
-    time_point_sec      return_end_time;            // 回报结束时间（自动计算）
+    time_point_sec      return_end_time;             // 回报结束时间（自动计算）
 
     // === 投资担保机制 ===
     uint32_t            guaranteed_yield_apr = 500; // 兜底年化收益率（5% → 500），0为不担保

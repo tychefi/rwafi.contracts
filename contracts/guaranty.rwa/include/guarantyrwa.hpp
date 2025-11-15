@@ -37,7 +37,8 @@ enum class err: uint8_t {
    NON_RENEWAL            = 21,
    INVALID_STATUS         = 31,
    CONTRACT_MISMATCH      = 32,
-   PARAM_ERROR            = 33
+   PARAM_ERROR            = 33,
+   STATUS_ERROR           = 34
 };
 
 
@@ -52,11 +53,9 @@ public:
     guarantyrwa(name receiver, name code, datastream<const char*> ds)
     : contract(receiver, code, ds),
       _db(get_self()),
-      _db_invest(get_self()),
       _global(get_self(), get_self().value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
-        _db_invest = dbc(_gstate.invest_contract);
     }
 
     ~guarantyrwa() {
@@ -64,49 +63,75 @@ public:
     }
 
     [[eosio::on_notify("*::transfer")]]
-    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
+    void on_transfer(const name& from,
+                     const name& to,
+                     const asset& quantity,
+                     const string& memo);
 
     ACTION init(const name& admin);
-    ACTION guarantpay(const name& submitter, const uint64_t& plan_id, const uint64_t& year);
-    ACTION redeem(const name& guarantor, const uint64_t& plan_id, const asset& quantity);
+    ACTION guarantpay(const name& submitter,
+                      const uint64_t& plan_id);
+
+    ACTION redeem(const name& guarantor,
+                  const uint64_t& plan_id,
+                  const asset& quantity);
+    struct CoverageInfo {
+        int64_t G;               // guarantee pool
+        int64_t investor_yield;  // accumulated investor yield
+        int64_t H;               // half of raised funds
+        int64_t unlocked_pool;   // max unlocked
+    };
+
 
 private:
-    // === 工具方法 ===
-    static uint64_t _current_period_yyyymm();
-    static asset _yearly_guarantee_principal(const fundplan_t& plan);
+    void _handle_guaranty_transfer(const name& from,
+                                   const fundplan_t& plan,
+                                   const asset& quantity);
 
-    // === 内部事件处理 ===
-    void _handle_guaranty_transfer(const name& from, const fundplan_t& plan, const asset& quantity);
-    void _handle_reward_transfer(const fundplan_t& plan, const asset& quantity);
+    void _handle_reward_transfer(const fundplan_t& plan,
+                                 const asset& quantity);
 
-    // === 担保收益补足逻辑 ===
-    void _deduct_from_guarantors(uint64_t plan_id, const asset& pay);
-
-    // === 赎回逻辑分段 ===
+    // ------- redeem flows -------
     void _redeem_failed_project(const name& guarantor,
                                 const fundplan_t& plan,
-                                const guaranty_stats_t& stats,
+                                guaranty_stats_t& stats,
                                 const asset& quantity);
 
     void _redeem_in_progress(const name& guarantor,
                              const fundplan_t& plan,
-                             const guaranty_stats_t& stats,
+                             guaranty_stats_t& stats,
                              const asset& quantity);
 
     void _redeem_project_end(const name& guarantor,
                              const fundplan_t& plan,
-                             const guaranty_stats_t& stats,
+                             guaranty_stats_t& stats,
                              const asset& quantity);
 
-    // === 实际解押执行 ===
-    void _do_redeem(const name& guarantor,
-                    const fundplan_t& plan,
-                    const asset& quantity,
-                    const string& memo);
+    // ------- guarantee pool cost allocation -------
+    void _deduct_from_guarantors(uint64_t plan_id,
+                                 const asset& pay);
+
+    // ------- common getters -------
+    guarantor_stake_t::idx_t _get_stake_tbl(uint64_t plan_id) const;
+    guaranty_stats_t _get_stats_or_fail(uint64_t plan_id);
+    guarantor_stake_t _get_stake_or_fail(uint64_t plan_id, const name& guarantor);
+
+    // ------- calculations -------
+    asset _yearly_guarantee_principal(const fundplan_t& plan);
+    uint32_t _years_passed(const fundplan_t& plan) const;
+    int64_t _calc_investor_yield_sum(uint64_t plan_id, const symbol& sym) const;
+
+    CoverageInfo _calc_coverage(const fundplan_t& plan,
+                                const guaranty_stats_t& stats,
+                                const symbol& sym) const;
+
+    // -------
+    // misc
+    // -------
+    uint64_t _current_period_yyyymm();
 
 private:
     dbc              _db;           ///< 本合约数据库
-    dbc              _db_invest;    ///< 投资计划数据库 (investrwa)
     global_singleton _global;       ///< 全局配置
     global_t         _gstate;       ///< 全局状态
 };
