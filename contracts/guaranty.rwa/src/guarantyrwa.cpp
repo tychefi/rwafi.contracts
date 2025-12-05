@@ -82,23 +82,12 @@ guarantyrwa::CoverageInfo guarantyrwa::_calc_coverage(const fundplan_t& plan,
                                          const symbol& sym) const
 {
     guarantyrwa::CoverageInfo info;
-
-    // T = 募资总额
     int64_t T = plan.total_raised_funds.amount;
-
-    // H = 必须维持的安全线（50%）
     int64_t H = T / 2;
-
-    // G = 担保本金（质押本金 + 滚入收益）
     int64_t G = stats.total_guarantee_funds.amount;
 
-    // investor_yield = 投资人收益累计（按月累加）
     int64_t investor_sum = _calc_investor_yield_sum(plan.id, sym);
-
-    // coverage = 担保本金 + 投资收益
     int64_t coverage = G + investor_sum;
-
-    // 可解锁部分（不超过 G）
     int64_t unlocked_pool = 0;
     if (coverage > H) {
         unlocked_pool = coverage - H;
@@ -153,10 +142,6 @@ static void record_yield_log_monthly(const name&  yield_contract,
     }
 }
 
-// ========================================
-// init
-// ========================================
-
 void guarantyrwa::init(const name& admin) {
     require_auth(get_self());
     CHECKC(is_account(admin), err::ACCOUNT_INVALID, "invalid admin");
@@ -164,11 +149,8 @@ void guarantyrwa::init(const name& admin) {
     _global.set(_gstate, get_self());
 }
 
-// ========================================
 // on_transfer: 担保本金 / 担保收益
 // memo: "guaranty:<plan_id>" 或 "reward:<plan_id>"
-// ========================================
-
 void guarantyrwa::on_transfer(const name& from,
                               const name& to,
                               const asset& quantity,
@@ -190,11 +172,8 @@ void guarantyrwa::on_transfer(const name& from,
     CHECKC(itr != fundplans.end(), err::RECORD_NOT_FOUND, "plan not found");
     const fundplan_t plan = *itr;
 
-    // 校验资产来源与符号
-    CHECKC(get_first_receiver() == plan.goal_asset_contract,
-           err::CONTRACT_MISMATCH, "token contract mismatch");
-    CHECKC(quantity.symbol == plan.goal_quantity.symbol,
-           err::SYMBOL_MISMATCH, "symbol mismatch");
+    CHECKC(get_first_receiver() == plan.goal_asset_contract,    err::CONTRACT_MISMATCH, "token contract mismatch");
+    CHECKC(quantity.symbol      == plan.goal_quantity.symbol,   err::SYMBOL_MISMATCH, "symbol mismatch");
     if (action == "guaranty") {
         _handle_guaranty_transfer(from, plan, quantity);
         return;
@@ -207,10 +186,7 @@ void guarantyrwa::on_transfer(const name& from,
     CHECKC(false, err::PARAM_ERROR, "unsupported transfer type");
 }
 
-// ========================================
 // 担保本金充值（shares 模型）
-// ========================================
-
 void guarantyrwa::_handle_guaranty_transfer(const name&       from,
                                             const fundplan_t& plan,
                                             const asset&      quantity)
@@ -469,10 +445,7 @@ void guarantyrwa::guarantpay(const name& submitter,
                              pay);
 }
 
-// ========================================
 // 担保资金赎回入口
-// ========================================
-
 void guarantyrwa::redeem(const name& guarantor,
                          const uint64_t& plan_id,
                          const asset& quantity)
@@ -480,31 +453,21 @@ void guarantyrwa::redeem(const name& guarantor,
     require_auth(guarantor);
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid redeem amount");
 
-    // 1) 计划
-    fundplan_t::idx_t fundplans(_gstate.invest_contract,
-                                _gstate.invest_contract.value);
+    fundplan_t::idx_t fundplans(_gstate.invest_contract, _gstate.invest_contract.value);
     auto itr_plan = fundplans.find(plan_id);
     CHECKC(itr_plan != fundplans.end(), err::RECORD_NOT_FOUND, "plan not found");
+
     fundplan_t plan = *itr_plan;
-
-    CHECKC(quantity.symbol == plan.goal_quantity.symbol,
-           err::SYMBOL_MISMATCH, "symbol mismatch");
-
-    // 2) 担保统计
+    CHECKC(quantity.symbol == plan.goal_quantity.symbol, err::SYMBOL_MISMATCH, "symbol mismatch");
     guaranty_stats_t stats = _get_stats_or_fail(plan_id);
 
-    // 3) 担保人记录存在性校验（各子函数内部还会再查一次并修改）
     guarantor_stake_t::idx_t stakes(get_self(), plan_id);
     auto it = stakes.find(guarantor.value);
-    CHECKC(it != stakes.end(), err::RECORD_NOT_FOUND,
-           "guarantor not found in this plan");
-    CHECKC(it->total_stake.amount > 0, err::PARAM_ERROR,
-           "guarantor has no active stake");
+    CHECKC(it != stakes.end(), err::RECORD_NOT_FOUND,"guarantor not found in this plan");
+    CHECKC(it->total_stake.amount > 0, err::PARAM_ERROR,"guarantor has no active stake");
 
     const time_point_sec now = time_point_sec(current_time_point());
-
-    const bool failed = (plan.status == PlanStatus::FAILED ||
-                         plan.status == PlanStatus::CANCELLED);
+    const bool failed = (plan.status == PlanStatus::FAILED || plan.status == PlanStatus::CANCELLED);
     const bool ended  = (now >= plan.return_end_time);
 
     if (failed) {
@@ -527,16 +490,10 @@ void guarantyrwa::redeem(const name& guarantor,
         return;
     }
 
-    CHECKC(false,
-           err::INVALID_STATUS,
-           "plan not redeemable at current stage, now="
-               + std::to_string(now.sec_since_epoch()));
+    CHECKC(false, err::INVALID_STATUS,"plan not redeemable at current stage, now=" + std::to_string(now.sec_since_epoch()));
 }
 
-// ========================================
 // (1) 失败 / 取消项目：全部解锁，收益优先扣除
-// ========================================
-
 void guarantyrwa::_redeem_failed_project(const name&       guarantor,
                                          const fundplan_t& plan,
                                          guaranty_stats_t& stats,
@@ -548,65 +505,49 @@ void guarantyrwa::_redeem_failed_project(const name&       guarantor,
     const uint64_t       plan_id = plan.id;
     const time_point_sec now = time_point_sec(current_time_point());
 
-    // 1) 担保人记录
+    // 担保人记录
     guarantor_stake_t::idx_t stakes(get_self(), plan_id);
     auto it = stakes.find(guarantor.value);
-    CHECKC(it != stakes.end(), err::RECORD_NOT_FOUND, "guarantor not found");
 
-    CHECKC(it->total_stake.symbol == sym,
-           err::SYMBOL_MISMATCH, "stake symbol mismatch");
-    CHECKC(sym == plan.goal_quantity.symbol,
-           err::SYMBOL_MISMATCH, "plan symbol mismatch");
+    CHECKC(it != stakes.end(), err::RECORD_NOT_FOUND, "guarantor not found");
+    CHECKC(it->total_stake.symbol == sym, err::SYMBOL_MISMATCH, "stake symbol mismatch");
+    CHECKC(sym == plan.goal_quantity.symbol, err::SYMBOL_MISMATCH, "plan symbol mismatch");
 
     int64_t stake_v    = it->total_stake.amount;
     int64_t yield_v    = it->earned_yield.amount;
     int64_t redeemable = stake_v + yield_v;
 
-    CHECKC(redeemable > 0, err::QUANTITY_INSUFFICIENT,
-           "guarantor has nothing to redeem");
-    CHECKC(q <= redeemable, err::QUANTITY_INSUFFICIENT,
-           "redeem exceeds user redeemable amount: redeemable=" +
-           asset(redeemable, sym).to_string() +
-           ", required=" + quantity.to_string());
+    CHECKC(redeemable > 0, err::QUANTITY_INSUFFICIENT,"guarantor has nothing to redeem");
+    CHECKC(q <= redeemable, err::QUANTITY_INSUFFICIENT,"redeem exceeds user redeemable amount: redeemable=" +
+                                                         asset(redeemable, sym).to_string() + ", required=" + quantity.to_string());
+    CHECKC(stats.total_guarantee_funds.symbol == sym, err::SYMBOL_MISMATCH, "stats symbol mismatch");
+    CHECKC(stats.total_guarantee_funds.amount >= q, err::QUANTITY_INSUFFICIENT, "guarantee pool insufficient");
 
-    // 2) 池子余额
-    CHECKC(stats.total_guarantee_funds.symbol == sym,
-           err::SYMBOL_MISMATCH, "stats symbol mismatch");
-    CHECKC(stats.total_guarantee_funds.amount >= q,
-           err::QUANTITY_INSUFFICIENT, "guarantee pool insufficient");
-
-    // 3) 先扣 earned_yield，再扣 total_stake
+    // 先扣 earned_yield，再扣 total_stake
     int64_t need = q;
-
     stakes.modify(it, same_payer, [&](auto& s) {
         int64_t use_yield = std::min<int64_t>(need, s.earned_yield.amount);
         s.earned_yield.amount -= use_yield;
         need                  -= use_yield;
 
         if (need > 0) {
-            CHECKC(s.total_stake.amount >= need,
-                   err::QUANTITY_INSUFFICIENT,
-                   "internal error: total_stake insufficient");
+            CHECKC(s.total_stake.amount >= need, err::QUANTITY_INSUFFICIENT, "internal error: total_stake insufficient");
             s.total_stake.amount -= need;
             need                  = 0;
         }
-
-        CHECKC(need == 0, err::INVALID_STATUS,
-               "internal error: redeem not fully covered");
-
+        CHECKC(need == 0, err::INVALID_STATUS, "internal error: redeem not fully covered");
         s.withdrawn.amount += q;
         s.updated_at        = now;
     });
 
-    // 4) 更新担保池
+    // 更新担保池
     stats.total_guarantee_funds.amount -= q;
     stats.used_guarantee_funds.amount  += q;
     stats.updated_at                    = now;
     _db.set(stats);
 
-    // 5) 转账
-    TRANSFER(plan.goal_asset_contract, guarantor, quantity,
-             "redeem (failed project)");
+    // 转账
+    TRANSFER(plan.goal_asset_contract, guarantor, quantity, "redeem (failed project)");
 }
 
 // ========================================
@@ -616,10 +557,7 @@ void guarantyrwa::_redeem_failed_project(const name&       guarantor,
 // user_available = unlocked_pool * user_shares / total_shares
 // ========================================
 
-void guarantyrwa::_redeem_in_progress(const name&       guarantor,
-                                      const fundplan_t& plan,
-                                      guaranty_stats_t& stats,
-                                      const asset&      quantity)
+void guarantyrwa::_redeem_in_progress(const name& guarantor, const fundplan_t& plan, guaranty_stats_t& stats,const asset& quantity)
 {
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid redeem amount");
 
@@ -628,94 +566,63 @@ void guarantyrwa::_redeem_in_progress(const name&       guarantor,
     const uint64_t       plan_id = plan.id;
     const time_point_sec now = time_point_sec(current_time_point());
 
-    // 1) 担保人记录
+    // 担保人记录
     guarantor_stake_t::idx_t stakes(get_self(), plan_id);
     auto uit = stakes.find(guarantor.value);
     CHECKC(uit != stakes.end(), err::RECORD_NOT_FOUND, "guarantor not found");
-
     CHECKC(uit->total_stake.symbol == sym, err::SYMBOL_MISMATCH, "stake symbol mismatch");
     CHECKC(uit->total_stake.amount > 0,   err::PARAM_ERROR,      "guarantor total_stake is zero");
 
-    // 2) 汇总 total_stake（不再使用 shares）
+    // 汇总 total_stake（不再使用 shares）
     int64_t total_stake_sum = 0;
     for (auto& s : stakes) {
         total_stake_sum += s.total_stake.amount;
     }
     CHECKC(total_stake_sum > 0, err::PARAM_ERROR, "total_stake_sum is zero");
-
     int64_t user_stake = uit->total_stake.amount;
 
-    // 3) coverage（你最终确认的模型）
+    // coverage（你最终确认的模型）
     auto cov = _calc_coverage(plan, stats, sym);
     int64_t unlocked_pool = cov.unlocked_pool;
-
     CHECKC(unlocked_pool > 0, err::INVALID_STATUS, "no unlocked guarantee");
 
-    // ------------------------------------------------------------
-    // 4) 计算本用户应锁仓量 need_lock_user
+    //    计算本用户应锁仓量 need_lock_user
     //    全局需要锁仓 = max(0, H − coverage)
     //    每个用户按 total_stake 占比承担
-    // ------------------------------------------------------------
-
     int64_t coverage   = cov.G + cov.investor_yield;   // = total_stake + investor_yield
     int64_t half_goal  = cov.H;                         // = T/2
-
     int64_t need_lock = std::max<int64_t>(0, half_goal - coverage);
 
     // 用户承担的锁仓（按 total_stake 比例）
-    int64_t user_lock =
-        (int64_t)(((__int128)need_lock * user_stake) / total_stake_sum);
-
+    int64_t user_lock = (int64_t)(((__int128)need_lock * user_stake) / total_stake_sum);
     if (user_lock < 0) user_lock = 0;
     if (user_lock > user_stake) user_lock = user_stake;
 
-    // ------------------------------------------------------------
-    // 5) 可提现额度 = user_stake − user_lock
-    // ------------------------------------------------------------
+    // 可提现额度 = user_stake − user_lock
     int64_t user_available = user_stake - user_lock;
     if (user_available < 0) user_available = 0;
 
-    CHECKC(user_available >= q,
-           err::QUANTITY_INSUFFICIENT,
-           string("not enough unlocked stake: available=")
-                + asset(user_available, sym).to_string()
-                + ", required=" + quantity.to_string());
+    CHECKC(user_available >= q, err::QUANTITY_INSUFFICIENT,string("not enough unlocked stake: available=")
+                                                            + asset(user_available, sym).to_string() + ", required=" + quantity.to_string());
 
-    // ------------------------------------------------------------
-    // 6) 扣减用户 total_stake（shares 不变）
-    // ------------------------------------------------------------
+    // 扣减用户 total_stake（shares 不变）
     stakes.modify(uit, same_payer, [&](auto& s) {
         s.total_stake.amount -= q;
         s.withdrawn.amount   += q;
         s.updated_at          = now;
     });
 
-    // ------------------------------------------------------------
-    // 7) 扣减担保池统计（实际资金池）
-    // ------------------------------------------------------------
-    CHECKC(stats.total_guarantee_funds.amount >= q,
-           err::QUANTITY_INSUFFICIENT,
-           "guarantee pool insufficient");
-
+    // 扣减担保池统计（实际资金池）
+    CHECKC(stats.total_guarantee_funds.amount >= q,err::QUANTITY_INSUFFICIENT,"guarantee pool insufficient");
     stats.total_guarantee_funds.amount -= q;
     stats.updated_at = now;
     _db.set(stats);
 
-    // ------------------------------------------------------------
-    // 8) 转账
-    // ------------------------------------------------------------
-    TRANSFER(plan.goal_asset_contract, guarantor, quantity,
-             "redeem (in progress)");
+    TRANSFER(plan.goal_asset_contract, guarantor, quantity, "redeem (in progress)");
 }
 
-// ========================================
-// (3) 项目到期：全部可赎回（收益优先）
-// ========================================
-
-void guarantyrwa::_redeem_project_end(const name&       guarantor,
-                                      const fundplan_t& plan,
-                                      guaranty_stats_t& stats,
-                                      const asset&      quantity)
+// 项目到期：全部可赎回（收益优先）
+void guarantyrwa::_redeem_project_end(const name&  guarantor,const fundplan_t& plan, guaranty_stats_t& stats,const asset& quantity)
 {
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid redeem amount");
     const symbol         sym = quantity.symbol;
@@ -723,7 +630,7 @@ void guarantyrwa::_redeem_project_end(const name&       guarantor,
     const uint64_t       plan_id = plan.id;
     const time_point_sec now = time_point_sec(current_time_point());
 
-    // 1) 担保人记录
+    // 担保人记录
     guarantor_stake_t::idx_t stakes(get_self(), plan_id);
     auto it = stakes.find(guarantor.value);
     CHECKC(it != stakes.end(), err::RECORD_NOT_FOUND, "guarantor not found");
@@ -734,91 +641,60 @@ void guarantyrwa::_redeem_project_end(const name&       guarantor,
     int64_t yield_v    = it->earned_yield.amount;
     int64_t redeemable = stake_v + yield_v;
 
-    CHECKC(redeemable > 0, err::QUANTITY_INSUFFICIENT,
-           "nothing to redeem at project end");
+    CHECKC(redeemable > 0, err::QUANTITY_INSUFFICIENT,"nothing to redeem at project end");
+    CHECKC(q <= redeemable, err::QUANTITY_INSUFFICIENT,"redeem exceeds redeemable amount: redeemable="
+                                                             + asset(redeemable, sym).to_string() + ", required=" + quantity.to_string());
+    CHECKC(stats.total_guarantee_funds.symbol == sym,err::SYMBOL_MISMATCH,"guarantee stats symbol mismatch");
+    CHECKC(stats.total_guarantee_funds.amount >= q,err::QUANTITY_INSUFFICIENT, "guarantee pool insufficient");
 
-    CHECKC(q <= redeemable, err::QUANTITY_INSUFFICIENT,
-           "redeem exceeds redeemable amount: redeemable="
-           + asset(redeemable, sym).to_string()
-           + ", required=" + quantity.to_string());
-
-    // 2) 池子余额
-    CHECKC(stats.total_guarantee_funds.symbol == sym,
-           err::SYMBOL_MISMATCH,
-           "guarantee stats symbol mismatch");
-    CHECKC(stats.total_guarantee_funds.amount >= q,
-           err::QUANTITY_INSUFFICIENT,
-           "guarantee pool insufficient");
-
-    // 3) 先扣收益，再扣本金
+    // 先扣收益，再扣本金
     int64_t need = q;
-
     stakes.modify(it, same_payer, [&](auto& s) {
         int64_t use_yield = std::min(need, s.earned_yield.amount);
         s.earned_yield.amount -= use_yield;
         need                  -= use_yield;
-
         if (need > 0) {
-            CHECKC(s.total_stake.amount >= need, err::QUANTITY_INSUFFICIENT,
-                   "internal error: total_stake insufficient");
+            CHECKC(s.total_stake.amount >= need, err::QUANTITY_INSUFFICIENT,"internal error: total_stake insufficient");
             s.total_stake.amount -= need;
             need                  = 0;
         }
-
-        CHECKC(need == 0, err::INVALID_STATUS,
-               "internal error: redeem not fully covered");
-
+        CHECKC(need == 0, err::INVALID_STATUS,"internal error: redeem not fully covered");
         s.withdrawn.amount += q;
         s.updated_at        = now;
     });
 
-    // 4) 更新担保池
+    // 更新担保池
     stats.total_guarantee_funds.amount -= q;
     stats.updated_at                    = now;
     _db.set(stats);
-
-    // 5) 转账
-    TRANSFER(plan.goal_asset_contract, guarantor, quantity,
-             "redeem (project end)");
+    TRANSFER(plan.goal_asset_contract, guarantor, quantity,"redeem (project end)");
 }
 
-// ========================================
 // 担保成本在担保人之间分摊（按 total_stake 比例）
-// ========================================
-
-void guarantyrwa::_deduct_from_guarantors(uint64_t plan_id,
-                                          const asset& pay)
+void guarantyrwa::_deduct_from_guarantors(uint64_t plan_id, const asset& pay)
 {
     CHECKC(pay.amount > 0, err::NOT_POSITIVE, "invalid pay amount");
 
-    // 1) 当前 stats
+    // 当前 stats
     guaranty_stats_t stats = _get_stats_or_fail(plan_id);
-    CHECKC(stats.total_guarantee_funds.symbol == pay.symbol,
-           err::SYMBOL_MISMATCH,
-           "guarantee stats symbol mismatch");
-    CHECKC(stats.total_guarantee_funds.amount >= pay.amount,
-           err::QUANTITY_INSUFFICIENT,
-           "guarantee pool insufficient");
+    CHECKC(stats.total_guarantee_funds.symbol == pay.symbol,err::SYMBOL_MISMATCH,"guarantee stats symbol mismatch");
+    CHECKC(stats.total_guarantee_funds.amount >= pay.amount,err::QUANTITY_INSUFFICIENT,"guarantee pool insufficient");
 
     const time_point_sec now = time_point_sec(current_time_point());
 
-    // 2) 担保人列表
+    // 担保人列表
     guarantor_stake_t::idx_t stakes(get_self(), plan_id);
-    CHECKC(stakes.begin() != stakes.end(),
-           err::RECORD_NOT_FOUND,
-           "no guarantors");
+    CHECKC(stakes.begin() != stakes.end(),err::RECORD_NOT_FOUND,"no guarantors");
 
-    // 3) 汇总 total_stake
+    // 汇总total_stake
     __int128 total_stake = 0;
     for (const auto& s : stakes) {
-        CHECKC(s.total_stake.symbol == pay.symbol,
-               err::SYMBOL_MISMATCH,
-               "stake symbol mismatch");
+        CHECKC(s.total_stake.symbol == pay.symbol,err::SYMBOL_MISMATCH,"stake symbol mismatch");
         total_stake += s.total_stake.amount;
     }
     CHECKC(total_stake > 0, err::PARAM_ERROR, "total_stake is zero");
 
-    // 4) 按 total_stake 占比分摊扣减
+    // 按 total_stake 占比分摊扣减
     int64_t    total_deducted = 0;
     auto       last           = std::prev(stakes.end());
 
@@ -843,7 +719,7 @@ void guarantyrwa::_deduct_from_guarantors(uint64_t plan_id,
         });
     }
 
-    // 5) 更新担保池状态：扣减池子、增加 used_guarantee_funds
+    // 更新担保池状态：扣减池子、增加 used_guarantee_funds
     stats.total_guarantee_funds.amount -= pay.amount;
     if (stats.total_guarantee_funds.amount < 0)
         stats.total_guarantee_funds.amount = 0;

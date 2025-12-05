@@ -16,11 +16,11 @@ mpush   $guaranty_con init  '["flonian"]' -p $guaranty_con
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "guaranty1111", "300.00000000 SING", "guaranty:21"]' -p gahbnbehaskk
+mpush sing.token transfer '["gahbnbehaskk", "guaranty1111", "300.00000000 SING", "guaranty:22"]' -p gahbnbehaskk
 mpush sing.token transfer '["flonian", "guaranty1111", "300.00000000 SING", "guaranty:21"]' -p flonian
 
 mpush $guaranty_con redeem '["flonian",21,"5.00000000 SING"]' -p flonian
 
 
-mpush $invest_con  cancelplan '["gahbnbehaskk",7]' -p gahbnbehaskk
+mpush $invest_con  cancelplan '["gahbnbehaskk",13]' -p gahbnbehaskk
 

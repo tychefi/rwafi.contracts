@@ -29,11 +29,11 @@ mpush $invest_con createplan '[
   "sing.token",
   "100.00000000 SING",
   "rwafi.token",
-  "1.0000 STRCPZ",
+  "1.0000 STRCPY",
   60,
   120,
-  "2025-11-10T03:45:00",
-  "2025-11-14T11:08:00",
+  "2025-11-17T03:45:00",
+  "2025-11-17T07:08:00",
   18,
   1200
 ]' -p gahbnbehaskk
@@ -43,5 +43,6 @@ mpush $invest_con createplan '[
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "investrwa112", "120.00000000 SING", "plan:21"]' -p gahbnbehaskk
+mpush sing.token transfer '["gahbnbehaskk", "investrwa112", "120.00000000 SING", "plan:22"]' -p gahbnbehaskk
 
+mpush $invest_con updatestatus '["gahbnbehaskk",22]'  -p gahbnbehaskk

@@ -91,6 +91,8 @@ public:
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
 
+    ACTION updatestatus(const name& submitter,const uint64_t& plan_id);
+
     // Invest with some allowed token
     [[eosio::on_notify("*::transfer")]]
     void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
