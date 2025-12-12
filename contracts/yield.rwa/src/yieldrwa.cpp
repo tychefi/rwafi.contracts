@@ -25,22 +25,22 @@ static uint64_t current_period_yyyymm() {
 
 double get_amm_price(const asset& in_pool, const asset& out_pool)
 {
-    int64_t in_amount = in_pool.amount;
-    int64_t out_amount = out_pool.amount;
+    uint64_t in_amount = in_pool.amount;
+    uint64_t out_amount = out_pool.amount;
 
-    int64_t in_boost = power10(in_pool.symbol.precision());
-    int64_t out_boost = power10(out_pool.symbol.precision());
+    uint64_t in_boost = power10(in_pool.symbol.precision());
+    uint64_t out_boost = power10(out_pool.symbol.precision());
 
     return (double)out_amount * in_boost / (in_amount * out_boost);
 }
 
-int64_t calc_min_received(double min_price, const asset& input, const symbol& output_symbol)
+uint64_t calc_min_received(double min_price, const asset& input, const symbol& output_symbol)
 {
-    int64_t in_boost  = power10(input.symbol.precision());
-    int64_t out_boost = power10(output_symbol.precision());
+    uint64_t in_boost  = power10(input.symbol.precision());
+    uint64_t out_boost = power10(output_symbol.precision());
 
-    double out = (double)input.amount * min_price * out_boost / in_boost;
-    return (int64_t)out;
+    auto out = input.amount * min_price * out_boost / in_boost;
+    return out;
 }
 
 string build_swap_memo(const extended_asset& input,const name& pair_name,double slippage,const name& swap_contract)
@@ -70,7 +70,7 @@ string build_swap_memo(const extended_asset& input,const name& pair_name,double 
     double price = get_amm_price(in_pool.quantity, out_pool.quantity);
     double min_price = price * (1.0 - slippage);
 
-    int64_t min_amt = calc_min_received(min_price, input.quantity, out_pool.quantity.symbol);
+    uint64_t min_amt = calc_min_received(min_price, input.quantity, out_pool.quantity.symbol);
 
     return string("swap:") + asset(min_amt, out_pool.quantity.symbol).to_string()
            + ":" + pair_name.to_string();
@@ -231,11 +231,17 @@ void yieldrwa::_perform_distribution(const name& bank,const asset& total,const u
     double swap_pct     = 100.0 - stake_pct - guaranty_pct;
     if (swap_pct < 0) swap_pct = 0;
 
-    const __int128 T = total.amount;
+    const uint128_t T = total.amount;
 
-    asset stake{(int64_t)(T * stake_pct / 100.0), total.symbol};
-    asset guar {(int64_t)(T * guaranty_pct / 100.0), total.symbol};
-    asset swap {total.amount - stake.amount - guar.amount, total.symbol};
+    auto stake_calc = (T * stake_pct) / 100;
+    auto guar_calc  = (T * guaranty_pct) / 100;
+
+    int64_t stake_amt = static_cast<int64_t>(stake_calc);
+    int64_t guar_amt  = static_cast<int64_t>(guar_calc);
+
+    asset stake{ stake_amt, total.symbol };
+    asset guar { guar_amt,  total.symbol };
+    asset swap { total.amount - stake_amt - guar_amt, total.symbol };
 
     if (stake.amount > 0)
         TRANSFER(bank, STAKE_POOL, stake, "reward:" + std::to_string(plan_id));
@@ -315,7 +321,7 @@ asset yieldrwa::_calc_yearly_yield_core(const uint64_t& plan_id,const uint64_t& 
     CHECKC(logs.begin() != logs.end(), err::RECORD_NOT_FOUND,
            "no yield logs");
 
-    int64_t total = 0;
+    uint64_t total = 0;
     symbol sym = logs.begin()->period_yield.symbol;
 
     uint64_t start = year * 100 + 1;
