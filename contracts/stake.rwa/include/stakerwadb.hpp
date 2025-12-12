@@ -61,8 +61,9 @@ enum class err: uint8_t {
    STATUS_ERROR         = 18,
    INCORRECT_AMOUNT     = 19,
    UNAVAILABLE_PURCHASE = 20,
-   INVALID_FORMAT      = 21,
-   QUANTITY_INSUFFICIENT= 22
+   INVALID_FORMAT       = 21,
+   QUANTITY_INSUFFICIENT = 22,
+   INVALID_STATUS        = 23
 
 };
 

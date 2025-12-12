@@ -65,10 +65,7 @@ public:
      * @param plan_id 质押池ID
      */
     ACTION claim(const name& owner, const uint64_t& plan_id);
-
-
-    ACTION unstake(const name& owner, const uint64_t& plan_id, const asset& quantity) ;
-
+    //任务失败批量退款
     ACTION batchunstake(const uint64_t& plan_id);
     // ========== 监听转账 ==========
     /**

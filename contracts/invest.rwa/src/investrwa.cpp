@@ -153,7 +153,7 @@ void investrwa::_update_plan_status(fundplan_t& plan) {
     const int64_t raised        = plan.total_raised_funds.amount;
     const int64_t soft_cap      = plan.goal_quantity.amount * plan.soft_cap_percent / 100;
 
-    PlanStatus old_status       = plan.status;
+    auto old_status = plan.status;
     // === 1. PENDING：募资尚未开始 or 还未进入募资逻辑 ===
     if (plan.status == PlanStatus::PENDING) {
 
@@ -375,12 +375,21 @@ void investrwa::cancelplan(const name& creator, const uint64_t& plan_id) {
 
     // === 读取计划 ===
     fundplan_t plan(plan_id);
-    CHECKC(_db.get(plan),                                                   err::RECORD_NOT_FOUND, "no such fund plan id: " + std::to_string(plan_id));
+    CHECKC(_db.get(plan),  err::RECORD_NOT_FOUND, "no such fund plan id: " + std::to_string(plan_id));
+    CHECKC(plan.creator == creator,  err::NO_AUTH, "no auth to cancel this plan");
 
-    CHECKC(plan.creator == creator,                                         err::NO_AUTH, "no auth to cancel this plan");
     // === 校验状态合法性 ===
-    CHECKC(plan.status == PlanStatus::PENDING ||plan.status == PlanStatus::RAISEACTIVE ||plan.status == PlanStatus::SOFTCAPHIT ||plan.status == PlanStatus::HARDCAPHIT,
-                                                                            err::INVALID_STATUS,"cannot cancel in current status: " + plan.status.to_string());
+    const time_point_sec now = time_point_sec(current_time_point());
+    CHECKC(now < plan.end_time,err::INVALID_STATUS,"cannot cancel: fundraising already ended");
+    // === 募资期内的所有状态都允许取消 ===
+    CHECKC(
+        plan.status == PlanStatus::PENDING ||
+        plan.status == PlanStatus::RAISEACTIVE ||
+        plan.status == PlanStatus::SUCCESS,   // ✔ 即使达到 soft cap 也允许取消，因为 still before end_time
+        err::INVALID_STATUS,
+        "cannot cancel in current status: " + plan.status.to_string()
+    );
+
 
     // === 更新状态为 CANCELLED ===
     plan.status = PlanStatus::CANCELLED;

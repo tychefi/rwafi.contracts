@@ -198,13 +198,15 @@ void guarantyrwa::_handle_guaranty_transfer(const name&       from,
     const time_point_sec   now    = time_point_sec(current_time_point());
 
     // 1. 仅在 [start_time, end_time) 募资期间允许担保
-    CHECKC(now >= plan.start_time,
-           err::INVALID_STATUS,
-           "guaranty not allowed: fundraising not started");
-
-    CHECKC(now < plan.end_time,
-           err::INVALID_STATUS,
-           "guaranty not allowed: fundraising already ended");
+    CHECKC(now >= plan.start_time,err::INVALID_STATUS,"guaranty not allowed: fundraising not started");
+    CHECKC(now < plan.end_time,err::INVALID_STATUS,"guaranty not allowed: fundraising already ended");
+    // 状态允许 PENDING、RAISEACTIVE、SUCCESS：
+    // - PENDING: 募资刚开始
+    // - RAISEACTIVE: 募资进行中
+    // - SUCCESS: 已达 soft cap，但募资期尚未结束，仍可追加担保
+    // end_time 之后无论状态如何都不允许担保
+    CHECKC(plan.status == PlanStatus::PENDING || plan.status == PlanStatus::RAISEACTIVE ||plan.status == PlanStatus::SUCCESS,
+                                err::INVALID_STATUS,"guaranty only allowed during fundraising stage");
 
     // 2. 更新担保池统计（wasm_db）
     guaranty_stats_t::idx_t stats_tbl(get_self(), get_self().value);
@@ -268,11 +270,11 @@ void guarantyrwa::_handle_reward_transfer(const fundplan_t& plan,
     const time_point_sec now     = time_point_sec(current_time_point());
 
     // 1. 仅在：SUCCESS 且 [end_time, return_end_time] 期间允许 reward
-    CHECKC(plan.status == PlanStatus::SUCCESS,
+    CHECKC(plan.status == PlanStatus::SUCCESS|| plan.status == PlanStatus::COMPLETED,
            err::INVALID_STATUS,
            "reward not allowed: plan not SUCCESS");
 
-    CHECKC(now >= plan.end_time && now <= plan.return_end_time,
+    CHECKC(now >= plan.end_time ,
            err::INVALID_STATUS,
            "reward not allowed: out of reward window");
 
@@ -424,10 +426,10 @@ void guarantyrwa::guarantpay(const name& submitter,
     asset pay(pay_amt, yearly_due.symbol);
 
     // 9) 更新 stats：扣池子、记 used_guarantee_funds
-    stats.total_guarantee_funds.amount -= pay_amt;
-    stats.used_guarantee_funds.amount  += pay_amt;
-    stats.updated_at                    = now;
-    _db.set(stats);
+    // stats.total_guarantee_funds.amount -= pay_amt;
+    // stats.used_guarantee_funds.amount  += pay_amt;
+    // stats.updated_at                    = now;
+    // _db.set(stats);
 
     // 10) 按担保总仓位在担保人之间分摊成本
     _deduct_from_guarantors(plan_id, pay);

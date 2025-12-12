@@ -19,6 +19,10 @@ asset stakerwa::calc_user_reward(const asset& staked, const int128_t& reward_per
 
 void stakerwa::init(const name& admin, const name& investrwa_contract) {
     require_auth(get_self());
+
+    CHECKC(is_account(admin), err::ACCOUNT_INVALID, "invalid admin");
+    CHECKC(is_account(investrwa_contract), err::ACCOUNT_INVALID, "invalid invest contract");
+
     _gstate.admin              = admin;
     _gstate.investrwa_contract = investrwa_contract;
 }
@@ -54,11 +58,21 @@ void stakerwa::delplan(const uint64_t& plan_id) {
     require_auth(_gstate.admin);
 
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
-    auto itr = stakeplans.find(plan_id);
-    CHECKC(itr != stakeplans.end(), err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(itr->total_staked.amount == 0, err::ACTION_REDUNDANT, "plan still has active stakes");
+    auto plan_itr = stakeplans.find(plan_id);
 
-    stakeplans.erase(itr);
+    CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
+    CHECKC(plan_itr->total_staked.amount == 0,err::ACTION_REDUNDANT,"plan still has active stakes");
+
+    // 读取 staker 表，必须为空才能删除计划
+    staker_t::tbl_t stakers(get_self(), plan_id);
+    CHECKC(stakers.begin() == stakers.end(),err::INVALID_STATUS, "cannot delete plan: stakers still exist");
+
+    // 奖励必须全部被领取
+    CHECKC(plan_itr->reward_state.total_rewards.amount ==plan_itr->reward_state.claimed_rewards.amount,
+                err::INVALID_STATUS,"cannot delete plan: rewards not fully claimed");
+
+    //  删除质押计划
+    stakeplans.erase(plan_itr);
 }
 
 void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
@@ -106,17 +120,35 @@ void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
 }
 
 // --- 用户质押 ---
-void stakerwa::on_transfer_rwafi(const name& from, const name& to,const asset& quantity, const string& memo) {
+void stakerwa::on_transfer_rwafi(const name& from, const name& to, const asset& quantity, const string& memo){
+
     if (from == get_self() || to != get_self()) return;
+
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "must transfer positive amount");
 
+    // ✅ 只接受来自 INVEST_POOL（investrwa）的质押转入
+    CHECKC(from == INVEST_POOL,err::NO_AUTH,"only invest.rwa contract can stake receipts");
+
+    // ✅ memo = stake:<plan_id>:<user>
     auto parts = split(memo, ":");
-    CHECKC(parts.size() == 3 && parts[0] == "stake", err::MEMO_FORMAT_ERROR, "invalid memo format, expect stake:<plan_id>:<user>");
+    CHECKC(parts.size() == 3 && parts[0] == "stake",
+           err::MEMO_FORMAT_ERROR,
+           "invalid memo format, expect stake:<plan_id>:<user>");
 
     uint64_t plan_id = std::stoull(parts[1]);
-    name investor = name(parts[2]);
+    name user = name(parts[2]);
+    CHECKC(is_account(user), err::ACCOUNT_INVALID, "invalid stake user");
 
-    _on_stake(investor, quantity, plan_id);
+    // ✅ 校验符号匹配当前 plan 的 receipt_symbol，防止乱币充进来
+    stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
+    auto plan_itr = stakeplans.find(plan_id);
+    CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
+
+    CHECKC(quantity.symbol == plan_itr->receipt_symbol,
+           err::SYMBOL_MISMATCH,
+           "stake symbol mismatch with plan receipt");
+
+    _on_stake(user, quantity, plan_id);
 }
 
 // --- 管理员充值奖励 ---
@@ -131,74 +163,58 @@ void stakerwa::on_transfer_reward(const name& from, const name& to, const asset&
     _on_reward_in(from, quantity, plan_id);
 }
 
-
-void stakerwa::unstake(const name& owner, const uint64_t& plan_id, const asset& quantity) {
-    require_auth(owner);
-    CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "must unstake positive amount");
-
-    // ✅ 结算奖励（自动发放）
-    claim_action{
-        get_self(),
-        { permission_level{ get_self(), "active"_n } }
-    }.send(owner, plan_id);
-
-    // ✅ 再执行赎回逻辑
-    stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
-    auto plan_itr = stakeplans.find(plan_id);
-    CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
-
-    staker_t::tbl_t stakers(get_self(), plan_id);
-    auto user_itr = stakers.find(owner.value);
-    CHECKC(user_itr != stakers.end(), err::RECORD_NOT_FOUND, "user not found");
-    CHECKC(user_itr->avl_staked >= quantity, err::INCORRECT_AMOUNT, "insufficient staked balance");
-
-    stakers.modify(user_itr, get_self(), [&](auto& s) {
-        s.avl_staked -= quantity;
-    });
-
-    stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
-        p.total_staked -= quantity;
-    });
-
-    // ✅ 返还本金
-    TRANSFER("rwafi.token"_n, owner, quantity, "unstake from plan: " + std::to_string(plan_id));
-}
-
 void stakerwa::batchunstake(const uint64_t& plan_id) {
+    // ===  只有 invest.rwa 主合约可触发退款流程 ===
     require_auth(INVEST_POOL);
 
+    // ===  查询 invest.rwa 上的 fundplan 状态 ===
+    fundplan_t::idx_t fundplans(_gstate.investrwa_contract, _gstate.investrwa_contract.value);
+    auto fplan_itr = fundplans.find(plan_id);
+    CHECKC(fplan_itr != fundplans.end(), err::RECORD_NOT_FOUND, "fundplan not found");
+
+    // ===  仅 FAILED / CANCELLED 状态允许退款 ===
+    CHECKC(fplan_itr->status == PlanStatus::FAILED ||fplan_itr->status == PlanStatus::CANCELLED,
+                err::INVALID_STATUS, "refund only allowed when plan is cancelled or failed");
+
+    // === 查询 stake.rwa 内的质押池 ===
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
     auto plan_itr = stakeplans.find(plan_id);
     CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
 
+    // ===  查询所有投资人记录 ===
     staker_t::tbl_t stakers(get_self(), plan_id);
-    // 若没有任何投资人，直接跳过 unstake 流程
+
+    // 如果没人质押 → 删除空计划即可
     if (stakers.begin() == stakers.end()) {
         stakeplans.erase(plan_itr);
         return;
     }
 
-    // === 遍历退款 ===
+    // ===  遍历所有质押人，逐个退款 ===
     for (auto itr = stakers.begin(); itr != stakers.end();) {
+
         if (itr->avl_staked.amount <= 0) {
             itr = stakers.erase(itr);
             continue;
         }
 
         const name& investor = itr->owner;
-        const asset& refund_receipt = itr->avl_staked;
+        const asset refund_amount = itr->avl_staked;
+
+        // 退款 memo: refund:<plan_id>:<investor>
         string memo = "refund:" + std::to_string(plan_id) + ":" + investor.to_string();
 
-        TRANSFER("rwafi.token"_n, INVEST_POOL, refund_receipt, memo);
+        // === 资金流：stake.rwa → invest.rwa（退回 receipt token）===
+        TRANSFER("rwafi.token"_n, INVEST_POOL, refund_amount, memo);
 
+        // === 减少池中已质押数量 ===
         stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
-            p.total_staked.amount = std::max<int64_t>(
-                0, p.total_staked.amount - refund_receipt.amount
-            );
+            p.total_staked.amount = std::max<int64_t>(0,p.total_staked.amount - refund_amount.amount);
         });
 
         itr = stakers.erase(itr);
     }
+
     if (stakers.begin() == stakers.end()) {
         stakeplans.erase(plan_itr);
     }
