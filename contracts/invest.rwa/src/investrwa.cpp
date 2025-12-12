@@ -278,7 +278,7 @@ void investrwa::on_transfer(const name& from,const name& to,const asset& quantit
         CHECKC(parts.size() == 3,                                           err::INVALID_FORMAT, "expect memo format: refund:<id>:<user>");
         CHECKC(bank == plan.receipt_asset_contract,                         err::CONTRACT_MISMATCH,"refund must come from receipt contract: " +
                                                                                 bank.to_string() + " ≠ " + plan.receipt_asset_contract.to_string());
-        CHECKC(quantity.symbol == plan.receipt_symbol,                      err::SYMBOL_MISMATCH,                           "symbol mismatch for refund token");
+        CHECKC(quantity.symbol == plan.receipt_symbol,                      err::SYMBOL_MISMATCH,"symbol mismatch for refund token");
         CHECKC(plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED,
                                                                             err::INVALID_STATUS,"refund not allowed (plan status: " + plan.status.to_string() + ")");
         // --- 执行退款 ---

@@ -70,7 +70,7 @@ public:
     // ========== 监听转账 ==========
     /**
      * 用户质押（监听 rwafi.token 转账）
-     * memo 格式： "stake:<plan_id>"
+     * memo 格式： "stake:<plan_id>:user"
      */
     [[eosio::on_notify("rwafi.token::transfer")]]
     void on_transfer_rwafi(const name& from, const name& to, const asset& quantity, const std::string& memo);

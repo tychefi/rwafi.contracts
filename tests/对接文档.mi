@@ -1,0 +1,341 @@
+
+=====================================================
+
+A. invest.rwa 模块（募资计划管理）
+
+=====================================================
+
+模块作用
+
+负责创建募资计划、更新计划状态、接收投资、触发 stake.rwa 退款。
+是整个 RWA 募资生命周期的起点。
+
+⸻
+
+======================
+
+A.1 addtoken(sym)
+
+======================
+
+调用者：admin 或 self
+
+参数
+
+名称	类型	说明
+sym	symbol	新增允许募资的币种
+
+逻辑要点
+	•	在白名单表中新增一个募资币种。
+
+失败条件
+	•	无权限 → NO_AUTH
+	•	币种已存在 → RECORD_EXISTS
+
+⸻
+
+======================
+
+A.2 deltoken(sym)
+
+======================
+
+调用者：admin 或 self
+
+参数
+
+名称	类型	说明
+sym	symbol	要删除的募资币种
+
+逻辑要点
+	•	从白名单表中移除该币种。
+
+失败条件
+	•	无权限
+	•	币种不存在
+
+⸻
+
+======================
+
+A.3 createplan(args…)
+
+======================
+
+调用者：任意用户（募资发起人）
+
+参数（关键字段）
+
+名称	类型	说明
+goal_asset_contract	        name	        募资使用的 token 合约
+goal_quantity	            asset	        募资目标金额
+receipt_asset_contract	    name	        投资凭证合约
+receipt_symbol	            symbol	        投资凭证 symbol
+soft_cap_percent	        uint8	        软顶比例
+hard_cap_percent	        uint8	        硬顶比例
+start_time	                time_point_sec	开始时间
+end_time	                time_point_sec	结束时间
+return_months	            uint16	        回报周期
+
+逻辑要点
+	•	创建募资计划，状态初始化为 PENDING。
+
+失败条件
+	•	参数非法（symbol mismatch、目标为 0、时间错误等）
+
+⸻
+
+======================
+
+A.4 cancelplan(plan_id)
+
+======================
+
+调用者：计划创建者
+
+参数
+
+名称	    类型	    说明
+plan_id	    uint64	    计划 ID
+
+逻辑要点
+	•	仅能在募资未结束时取消。
+	•	取消后推送 refund 至 stake.rwa。
+
+失败条件
+	•	权限不足
+	•	计划不存在
+	•	当前时间 ≥ end_time（不能取消）
+
+⸻
+
+======================
+
+A.5 on_transfer（投资入口）
+
+======================
+
+触发方：goal_asset_contract::transfer
+
+参数
+
+名称	类型	说明
+memo	string	格式必须为 "plan:<plan_id>||refund:<plan_id>:<investor>"
+
+
+=====================================================
+
+B. stake.rwa 模块（投资凭证管理 + 投资退款）
+
+=====================================================
+
+模块作用
+
+负责记录投资人 stake 数量、分红记录及批量退款。
+invest.rwa 负责募资，stake.rwa 负责投资余额的管理。
+
+⸻
+
+======================
+
+B.1 addplan(plan_id, receipt_symbol)
+
+======================
+
+调用者：invest.rwa
+
+参数
+
+名称	类型	说明
+plan_id	uint64	计划 ID
+receipt_symbol	symbol	投资凭证 symbol
+
+逻辑要点
+	•	为每个募资计划创建 staking 数据记录。
+
+⸻
+
+======================
+
+B.2 on_transfer（投资凭证 staking）
+
+======================
+
+触发方：rwafi.token::transfer
+
+memo 格式
+
+stake:<plan_id>:<investor> --触发退款
+
+reward:<plan_id> --充值奖励
+
+
+======================
+
+B.3 batchunstake(plan_id)
+
+（批量退款）
+
+======================
+
+调用者：INVEST_POOL（投资池账号）
+
+参数
+
+名称	类型	说明
+plan_id	uint64	要退款的计划
+
+逻辑要点
+	•	用于 FAILED 或 CANCELLED 计划的退款。
+	•	遍历所有 staker，将可退款余额返还。
+
+失败条件
+	•	计划不存在
+	•	状态不允许退款
+
+⸻
+
+======================
+
+B.4 delplan(plan_id)
+
+======================
+
+调用者：admin
+
+参数
+
+名称	类型
+plan_id	uint64
+
+逻辑要点
+	•	删除 stake plan，仅在：
+	•	无 stakers
+	•	奖励已全部领取
+
+失败条件
+	•	stakers 未清空
+	•	奖励未结算完毕
+
+⸻
+
+=====================================================
+
+C. guaranty.rwa 模块（担保资金池 + 担保补贴 + 担保人赎回）
+
+=====================================================
+
+模块作用
+	•	处理担保本金（guaranty）
+	•	分红收益滚仓（reward）
+	•	年度兜底补贴（guarantpay）
+	•	担保人赎回（redeem）
+
+⸻
+
+======================
+
+C.1 on_transfer
+
+======================
+
+触发方：募资币种 token 合约
+
+memo 格式
+
+guaranty:<plan_id>
+reward:<plan_id>
+
+逻辑要点
+	•	“guaranty” 进入担保池创建/增加 shares
+	•	“reward” 视为投资收益向担保人滚仓
+
+失败条件
+	•	memo 错误
+	•	token 合约不匹配
+	•	symbol 不匹配
+
+⸻
+
+======================
+
+C.2 guarantpay(plan_id)
+
+======================
+
+调用者：admin
+
+参数
+
+名称	类型
+plan_id	uint64
+
+逻辑要点
+	•	每自然年检查担保覆盖率是否达标
+	•	不达标时触发兜底补贴
+	•	补贴从担保人池子按占比扣除
+
+失败条件
+	•	计划未成功（必须 SUCCESS）
+	•	当前时间不在收益期内
+	•	担保池余额不足
+
+⸻
+
+======================
+
+C.3 redeem(plan_id, quantity)
+
+======================
+
+调用者：担保人
+
+参数
+
+名称	类型	说明
+plan_id	uint64	计划 ID
+quantity	asset	赎回金额
+
+赎回分三种逻辑（内部自动判断）
+
+无需前端决定：
+	1.	失败计划（FAILED / CANCELLED） → 全部可赎回
+	2.	成功但未到期，需 coverage ≥ 50% → 部分可赎回
+	3.	项目到期（COMPLETED / return_end_time 之后） → 全部可赎回
+
+失败条件
+	•	金额不足
+	•	coverage 不足
+	•	状态错误
+
+⸻
+
+=====================================================
+
+D. yield.rwa 模块（投资收益日志）
+
+=====================================================
+
+模块作用
+	•	维护每月收益日志（period_yield, cumulative_yield）
+	•	stake.rwa 从此日志读取投资人收益
+
+（该模块结构简单，通常不开放外部 Action）
+
+⸻
+
+======================
+
+D.1 logyield(plan_id, quantity) (内部使用)
+
+======================
+
+参数
+
+名称	类型
+plan_id	uint64
+quantity	asset
+
+逻辑要点
+	•	记录分红收益（由 guaranty.rwa 或 stake.rwa 调用）
+
