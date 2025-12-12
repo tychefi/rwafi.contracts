@@ -23,8 +23,7 @@ uint64_t guarantyrwa::_current_period_yyyymm() {
 // 每年最低担保额度：goal / years / 2
 asset guarantyrwa::_yearly_guarantee_principal(const fundplan_t& plan) {
     uint16_t years = std::max<uint16_t>(1, (plan.return_months + 11) / 12);
-    int64_t  yearly_amt =
-        (int64_t)((__int128)plan.goal_quantity.amount / years / 2);
+    auto  yearly_amt = plan.goal_quantity.amount / years / 2;
     return { yearly_amt, plan.goal_quantity.symbol };
 }
 
