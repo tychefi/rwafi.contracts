@@ -119,7 +119,7 @@ void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
     TRANSFER(plan_itr->reward_state.reward_token_contract, owner, total_claim, "stake claim: " + std::to_string(plan_id));
 }
 
-// --- 用户退款 ---
+// --- 质押凭证 ---
 void stakerwa::on_transfer_rwafi(const name& from, const name& to, const asset& quantity, const string& memo){
 
     if (from == get_self() || to != get_self()) return;

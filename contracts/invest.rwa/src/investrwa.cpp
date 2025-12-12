@@ -237,10 +237,22 @@ void investrwa::onshelf( const symbol& sym, const bool& onshelf ) {
     _db.set( token, _self );
 }
 
+void investrwa::on_rwafi_transfer( const name& from, const name& to, const asset& quantity, const string& memo)
+{
+    _token_transfer( from, to, quantity, memo );
+}
+
+void investrwa::on_sing_transfer( const name& from, const name& to, const asset& quantity, const string& memo)
+{
+    _token_transfer( from, to, quantity, memo );
+}
+
+
+
 // 支持两种格式：
 // ① memo: plan:<plan_id>
 // ② memo: refund:<plan_id>:<investor>
-void investrwa::on_transfer(const name& from,const name& to,const asset& quantity,const string& memo) {
+void investrwa::_token_transfer(const name& from,const name& to,const asset& quantity,const string& memo) {
     if (from == _self || to != _self) return;
 
     CHECKC(quantity.amount > 0,                                             err::NOT_POSITIVE, "quantity must be positive");
@@ -278,7 +290,7 @@ void investrwa::on_transfer(const name& from,const name& to,const asset& quantit
         CHECKC(parts.size() == 3,                                           err::INVALID_FORMAT, "expect memo format: refund:<id>:<user>");
         CHECKC(bank == plan.receipt_asset_contract,                         err::CONTRACT_MISMATCH,"refund must come from receipt contract: " +
                                                                                 bank.to_string() + " ≠ " + plan.receipt_asset_contract.to_string());
-        CHECKC(quantity.symbol == plan.receipt_symbol,                      err::SYMBOL_MISMATCH,"symbol mismatch for refund token");
+        CHECKC(quantity.symbol == plan.receipt_symbol,                      err::SYMBOL_MISMATCH, "symbol mismatch for refund token");
         CHECKC(plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED,
                                                                             err::INVALID_STATUS,"refund not allowed (plan status: " + plan.status.to_string() + ")");
         // --- 执行退款 ---

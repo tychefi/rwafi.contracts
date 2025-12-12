@@ -93,9 +93,11 @@ public:
 
     ACTION updatestatus(const name& submitter,const uint64_t& plan_id);
 
-    // Invest with some allowed token
-    [[eosio::on_notify("*::transfer")]]
-    void on_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
+    [[eosio::on_notify("rwafi.token::transfer")]]
+    void on_rwafi_transfer(const name& from, const name& to, const asset& quantity, const std::string& memo);
+
+    [[eosio::on_notify("sing.token::transfer")]]
+    void on_sing_transfer(const name& from, const name& to, const asset& quantity, const std::string& memo);
 
     ACTION init(const name& admin) {
         require_auth( _self );
@@ -107,11 +109,12 @@ public:
     using addtoken_action    = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
 
 private:
+
+    void _token_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
+
     void _process_refund( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
-
-    bool _check_guarantee(const fundplan_t& plan);
 
     asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
     asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );

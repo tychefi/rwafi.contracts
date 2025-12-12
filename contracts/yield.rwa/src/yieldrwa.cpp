@@ -132,7 +132,7 @@ void yieldrwa::on_transfer(const name& from, const name& to,const asset& quantit
     const name bank = get_first_receiver();
     _perform_distribution(bank, quantity, plan_id);
 }
-
+//未分配的那一部分收益，进行回购
 void yieldrwa::buyback(const name& submitter,const uint64_t& plan_id)
 {
     require_auth(submitter);
