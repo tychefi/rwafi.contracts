@@ -339,8 +339,8 @@ void guarantyrwa::guarantpay(const name& submitter,
                              const uint64_t& plan_id)
 {
     require_auth(submitter);
-    CHECKC(submitter == _gstate.admin, err::NO_AUTH,
-           "only admin can trigger guarantpay");
+    // CHECKC(submitter == _gstate.admin, err::NO_AUTH,
+    //        "only admin can trigger guarantpay");
 
     // 1) 读取计划
     fundplan_t::idx_t fundplans(_gstate.invest_contract,
@@ -447,10 +447,7 @@ void guarantyrwa::guarantpay(const name& submitter,
 }
 
 // 担保资金赎回入口
-void guarantyrwa::redeem(const name& guarantor,
-                         const uint64_t& plan_id,
-                         const asset& quantity)
-{
+void guarantyrwa::redeem(const name& guarantor, const uint64_t& plan_id, const asset& quantity){
     require_auth(guarantor);
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid redeem amount");
 
@@ -483,23 +480,17 @@ void guarantyrwa::redeem(const name& guarantor,
     const bool fundraising_ended = (now >= plan.end_time);
     const bool project_not_ended = (now < plan.return_end_time);
 
-    if (plan.status == PlanStatus::SUCCESS &&
-        fundraising_ended &&
-        project_not_ended)
+    if (plan.status == PlanStatus::SUCCESS && fundraising_ended &&  project_not_ended)
     {
         _redeem_in_progress(guarantor, plan, stats, quantity);
         return;
     }
 
-    CHECKC(false, err::INVALID_STATUS,"plan not redeemable at current stage, now=" + std::to_string(now.sec_since_epoch()));
+    CHECKC(false, err::INVALID_STATUS,"plan not redeemable at current stage"  );
 }
 
 // (1) 失败 / 取消项目：全部解锁，收益优先扣除
-void guarantyrwa::_redeem_failed_project(const name&       guarantor,
-                                         const fundplan_t& plan,
-                                         guaranty_stats_t& stats,
-                                         const asset&      quantity)
-{
+void guarantyrwa::_redeem_failed_project(const name& guarantor,const fundplan_t& plan, guaranty_stats_t& stats, const asset& quantity){
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid redeem amount");
     const symbol         sym = quantity.symbol;
     const int64_t        q   = quantity.amount;
@@ -558,8 +549,7 @@ void guarantyrwa::_redeem_failed_project(const name&       guarantor,
 // user_available = unlocked_pool * user_shares / total_shares
 // ========================================
 
-void guarantyrwa::_redeem_in_progress(const name& guarantor, const fundplan_t& plan, guaranty_stats_t& stats,const asset& quantity)
-{
+void guarantyrwa::_redeem_in_progress(const name& guarantor, const fundplan_t& plan,guaranty_stats_t& stats, const asset& quantity) {
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid redeem amount");
 
     const symbol         sym = quantity.symbol;
@@ -572,50 +562,85 @@ void guarantyrwa::_redeem_in_progress(const name& guarantor, const fundplan_t& p
     auto uit = stakes.find(guarantor.value);
     CHECKC(uit != stakes.end(), err::RECORD_NOT_FOUND, "guarantor not found");
     CHECKC(uit->total_stake.symbol == sym, err::SYMBOL_MISMATCH, "stake symbol mismatch");
-    CHECKC(uit->total_stake.amount > 0,   err::PARAM_ERROR,      "guarantor total_stake is zero");
+    CHECKC(uit->total_stake.amount > 0, err::PARAM_ERROR, "guarantor total_stake is zero");
 
-    // 汇总 total_stake（不再使用 shares）
-    int64_t total_stake_sum = 0;
-    for (auto& s : stakes) {
+    // 担保池符号检查
+    CHECKC(stats.total_guarantee_funds.symbol == sym, err::SYMBOL_MISMATCH, "guarantee stats symbol mismatch");
+    CHECKC(stats.total_guarantee_funds.amount >= q, err::QUANTITY_INSUFFICIENT, "guarantee pool insufficient");
+
+    // 汇总担保人总仓位（用于按比例分摊可赎回额度）
+    __int128 total_stake_sum = 0;
+    for (const auto& s : stakes) {
+        CHECKC(s.total_stake.symbol == sym, err::SYMBOL_MISMATCH, "stake symbol mismatch");
+        CHECKC(s.total_stake.amount >= 0,  err::PARAM_ERROR,     "invalid total_stake");
         total_stake_sum += s.total_stake.amount;
     }
     CHECKC(total_stake_sum > 0, err::PARAM_ERROR, "total_stake_sum is zero");
-    int64_t user_stake = uit->total_stake.amount;
 
-    // coverage（你最终确认的模型）
-    auto cov = _calc_coverage(plan, stats, sym);
-    int64_t unlocked_pool = cov.unlocked_pool;
-    CHECKC(unlocked_pool > 0, err::INVALID_STATUS, "no unlocked guarantee");
+    const int64_t user_stake = uit->total_stake.amount;
 
-    //    计算本用户应锁仓量 need_lock_user
-    //    全局需要锁仓 = max(0, H − coverage)
-    //    每个用户按 total_stake 占比承担
-    int64_t coverage   = cov.G + cov.investor_yield;   // = total_stake + investor_yield
-    int64_t half_goal  = cov.H;                         // = T/2
-    int64_t need_lock = std::max<int64_t>(0, half_goal - coverage);
+    // ------------------------------------------------------------
+    // 核心：安全线校验（用 investor_yield，不用 earned_yield）
+    // 目标：赎回后仍满足  G_after + investor_yield >= H
+    // ------------------------------------------------------------
+    const int64_t T = plan.total_raised_funds.amount;
+    CHECKC(T >= 0, err::PARAM_ERROR, "invalid total raised");
 
-    // 用户承担的锁仓（按 total_stake 比例）
-    int64_t user_lock = (int64_t)(((__int128)need_lock * user_stake) / total_stake_sum);
-    if (user_lock < 0) user_lock = 0;
-    if (user_lock > user_stake) user_lock = user_stake;
+    const int64_t H = T / 2;  // 50% 安全线（整数向下取整）
 
-    // 可提现额度 = user_stake − user_lock
-    int64_t user_available = user_stake - user_lock;
-    if (user_available < 0) user_available = 0;
+    // 累计投资人收益（来自 yield.rwa 日志）
+    const int64_t investor_yield = _calc_investor_yield_sum(plan_id, sym);
 
-    CHECKC(user_available >= q, err::QUANTITY_INSUFFICIENT,string("not enough unlocked stake: available=")
-                                                            + asset(user_available, sym).to_string() + ", required=" + quantity.to_string());
+    // 赎回后的担保池余额
+    const int64_t G_after = stats.total_guarantee_funds.amount - q;
+    CHECKC(G_after >= 0, err::QUANTITY_INSUFFICIENT, "guarantee pool would go negative");
 
-    // 扣减用户 total_stake（shares 不变）
+    // 赎回后是否仍满足安全线
+    CHECKC(
+        (__int128)G_after + (__int128)investor_yield >= (__int128)H,
+        err::INVALID_STATUS,
+        string("redeem not allowed: would break 50% safety line, ")
+            + "G_after=" + asset(G_after, sym).to_string()
+            + ", investor_yield=" + asset(investor_yield, sym).to_string()
+            + ", H=" + asset(H, sym).to_string()
+    );
+
+    // ------------------------------------------------------------
+    // 进一步：给单个担保人一个“按占比分摊”的可赎回上限
+    // 可赎回总额度 = (G + investor_yield) - H
+    // 用户可赎回额度 = 可赎回总额度 * user_stake / total_stake_sum
+    // ------------------------------------------------------------
+    const int64_t G_before = stats.total_guarantee_funds.amount;
+    __int128 total_unlock128 = (__int128)G_before + (__int128)investor_yield - (__int128)H;
+    int64_t total_unlock = (total_unlock128 > 0) ? (int64_t)total_unlock128 : 0;
+
+    // 用户份额可赎回额度
+    int64_t user_unlock = 0;
+    if (total_unlock > 0) {
+        user_unlock = (int64_t)(((__int128)total_unlock * (__int128)user_stake) / total_stake_sum);
+        if (user_unlock < 0) user_unlock = 0;
+    }
+
+    CHECKC(
+        user_unlock >= q,
+        err::QUANTITY_INSUFFICIENT,
+        string("not enough unlocked guarantee for this guarantor: ")
+            + "user_unlock=" + asset(user_unlock, sym).to_string()
+            + ", required=" + quantity.to_string()
+    );
+
+    // ------------------------------------------------------------
+    // 扣减担保人仓位 + 扣减担保池余额
+    // ------------------------------------------------------------
     stakes.modify(uit, same_payer, [&](auto& s) {
         s.total_stake.amount -= q;
+        if (s.total_stake.amount < 0) s.total_stake.amount = 0;
         s.withdrawn.amount   += q;
         s.updated_at          = now;
     });
 
-    // 扣减担保池统计（实际资金池）
-    CHECKC(stats.total_guarantee_funds.amount >= q,err::QUANTITY_INSUFFICIENT,"guarantee pool insufficient");
     stats.total_guarantee_funds.amount -= q;
+    if (stats.total_guarantee_funds.amount < 0) stats.total_guarantee_funds.amount = 0;
     stats.updated_at = now;
     _db.set(stats);
 

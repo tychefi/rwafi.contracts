@@ -194,21 +194,32 @@ void yieldrwa::setslippage(const name& submitter,const uint64_t& plan_id,const u
     });
 }
 
-double yieldrwa::_get_coverage_ratio(const uint64_t& plan_id)
-{
-    guaranty_stats_t::idx_t stats(GUARANTY_POOL, GUARANTY_POOL.value);
-    auto gs = stats.find(plan_id);
-    if (gs == stats.end()) return 0.0;
-
+double yieldrwa::_get_coverage_ratio(const uint64_t& plan_id){
+    // 1) 读计划：H = total_raised / 2
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
     if (p == plans.end()) return 0.0;
 
-    double required_half = (double)p->goal_quantity.amount / 2.0;
-    if (required_half <= 0) return 0.0;
+    const double H = (double)p->total_raised_funds.amount / 2.0;
+    if (H <= 0.0) return 0.0;
 
-    double cover = (double)gs->total_guarantee_funds.amount / required_half;
-    return std::max(0.0, std::min(1.0, cover));
+    // 2) 统计担保“初始本金” G0 = sum(shares)
+    guarantor_stake_t::idx_t stakes(GUARANTY_POOL, plan_id);
+
+    __int128 sum_shares = 0;
+    for (const auto& s : stakes) {
+        // shares 才是“担保本金”口径
+        sum_shares += s.shares.amount;
+    }
+    if (sum_shares <= 0) return 0.0;
+
+    double G0 = (double)sum_shares;
+
+    // 3) coverage progress
+    double ratio = G0 / H;
+    if (ratio < 0.0) ratio = 0.0;
+    if (ratio > 1.0) ratio = 1.0;
+    return ratio;
 }
 
 void yieldrwa::_perform_distribution(const name& bank,const asset& total,const uint64_t& plan_id)

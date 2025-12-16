@@ -16,7 +16,18 @@ using namespace wasm::db;
 using namespace flon;
 
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
+// ===== 时间基础单位 =====
+static constexpr uint64_t DAY_SECONDS        = 24 ;
+static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
 
+// ===== 业务周期定义 =====
+static constexpr uint64_t MONTHS_PER_YEAR    = 12;
+static constexpr uint64_t seconds_per_year   = MONTHS_PER_YEAR * seconds_per_month;
+
+// ===== 短期过期 / 宽限（⚠️ 非周期）=====
+static constexpr uint8_t  EXPIRY_HOURS       = 12;
+static constexpr uint32_t MAX_TITLE_SIZE     = 64;
+static constexpr uint64_t HIGH_PRECISION = 1'000'000'000'0; // 10^10
 
 namespace rwafi {
 

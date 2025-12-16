@@ -20,11 +20,17 @@ using namespace flon;
 
 static constexpr eosio::name active_perm{"active"_n};
 
-static constexpr uint64_t seconds_per_month     = 30 *  24 * 3600;
-static constexpr uint64_t seconds_per_year      = 365 * 24 * 3600;
-static constexpr uint64_t DAY_SECONDS           = 24 * 3600;
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
+// ===== 时间基础单位 =====
+static constexpr uint64_t DAY_SECONDS        = 24 ;
+static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
+
+// ===== 业务周期定义 =====
+static constexpr uint64_t MONTHS_PER_YEAR    = 12;
+static constexpr uint64_t seconds_per_year   = MONTHS_PER_YEAR * seconds_per_month;
+
+// ===== 短期过期 / 宽限（⚠️ 非周期）=====
+static constexpr uint8_t  EXPIRY_HOURS       = 12;
+static constexpr uint32_t MAX_TITLE_SIZE     = 64;
 
 
 #define TBL struct [[eosio::table, eosio::contract("guaranty.rwa")]]
@@ -35,8 +41,8 @@ static constexpr uint8_t  EXPIRY_HOURS          = 12;
  */
 NTBL("global") global_t {
     name            admin;                                      // 管理员
-    name            invest_contract     = "invest.rwa"_n;     // 投资/募资主合约
-    name            yield_contract      = "yield.rwa"_n;     // 收益日志/计算合约
+    name            invest_contract     = "invest.rwa"_n;       // 投资/募资主合约
+    name            yield_contract      = "yield.rwa"_n;        // 收益日志/计算合约
     name            stake_contract      = "stake.rwa"_n;        // 质押/分配合约（担保金转入目标）
 
     EOSLIB_SERIALIZE( global_t,

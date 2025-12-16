@@ -19,18 +19,28 @@ using namespace std;
 using namespace flon;
 
 static constexpr eosio::name active_perm        {"active"_n};
-static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
+// ===== 时间基础单位 =====
+static constexpr uint64_t DAY_SECONDS        = 24 ;
+static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
+
+// ===== 业务周期定义 =====
+static constexpr uint64_t MONTHS_PER_YEAR    = 12;
+static constexpr uint64_t seconds_per_year   = MONTHS_PER_YEAR * seconds_per_month;
+
+// ===== 短期过期 / 宽限（⚠️ 非周期）=====
+static constexpr uint8_t  EXPIRY_HOURS       = 12;
+static constexpr uint32_t MAX_TITLE_SIZE     = 64;
 static constexpr uint64_t HIGH_PRECISION = 1'000'000'000'0; // 10^10
 
 #ifndef DAY_SECONDS_FOR_TEST
-static constexpr uint64_t DAY_SECONDS           = 24 * 60 * 60;
 #else
 #warning "DAY_SECONDS_FOR_TEST should be used only for test!!!"
 static constexpr uint64_t DAY_SECONDS           = DAY_SECONDS_FOR_TEST;
 #endif // DAY_SECONDS_FOR_TEST
 
-static constexpr uint32_t MAX_TITLE_SIZE        = 64;
-static constexpr uint8_t  EXPIRY_HOURS          = 12;
+
+
+
 
 #define TBL struct [[eosio::table, eosio::contract("stake.rwa")]]
 #define NTBL(name) struct [[eosio::table(name), eosio::contract("stake.rwa")]]
@@ -71,11 +81,9 @@ enum class err: uint8_t {
 NTBL("global") global_t {
     name                admin               ;                       // 管理员账户
     name                investrwa_contract  ;                       // RWA 投资主合约
-    uint64_t            reward_id           = 0;                    // 奖励记录自增ID
-    uint64_t            stake_id            = 0;                    // 质押记录自增ID
 
     EOSLIB_SERIALIZE(global_t,
-        (admin)(investrwa_contract)(reward_id)(stake_id))
+        (admin)(investrwa_contract))
 };
 typedef eosio::singleton<"global"_n, global_t> global_singleton;
 struct stake_reward_st {

@@ -38,13 +38,14 @@ asset investrwa::_get_investor_stake_balance(const name& investor, const uint64_
 
 void investrwa::_process_investment(const name& from, const asset& quantity, fundplan_t& plan) {
 
-    _update_plan_status(plan);
+
     const time_point_sec now = time_point_sec(current_time_point());
 
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "investment must be positive");
     CHECKC(now >= plan.start_time, err::INVALID_STATUS, "fundraising not started");
     CHECKC(now <= plan.end_time,   err::INVALID_STATUS, "fundraising ended");
 
+    _update_plan_status(plan);
     // plan 状态门控
     CHECKC(plan.status == PlanStatus::PENDING ||plan.status == PlanStatus::RAISEACTIVE || plan.status == PlanStatus::SUCCESS,
                                                                             err::INVALID_STATUS,"plan not open for investment");
@@ -364,7 +365,7 @@ void investrwa::createplan(const name& creator,
     plan.start_time                = time_point_sec(start_time.sec_since_epoch());
     plan.end_time                  = time_point_sec(end_time.sec_since_epoch());
     plan.return_months             = return_months;
-    plan.return_end_time           = time_point_sec(start_time.sec_since_epoch() + return_months * seconds_per_month);
+    plan.return_end_time           = time_point_sec(end_time.sec_since_epoch() + return_months * seconds_per_month);
     plan.guaranteed_yield_apr      = guaranteed_yield_apr;
     plan.total_raised_funds        = asset(0, goal_quantity.symbol);
     plan.total_issued_receipts     = asset(0, receipt_quantity_per_unit.symbol);
