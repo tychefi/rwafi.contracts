@@ -106,19 +106,23 @@ public:
         _gstate.admin = admin;
     }
 
+    ACTION delplan(const uint64_t& plan_id);
+
     using addtoken_action    = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
 
 private:
 
     void _token_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    void _process_refund( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
-    void _process_investment( const name& from, const name& to, const asset& quantity, const string& memo, fundplan_t& plan );
+    void _process_refund( const name& from, const asset& quantity, const string& memo, fundplan_t& plan );
+    void _process_investment( const name& from, const asset& quantity, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
 
     asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
     asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );
-    // asset _get_collateral_stake_balance( const name& guanrantor, const uint64_t& plan_id );
+    asset _calc_refund_amount( const asset& receipt_qty,const fundplan_t& plan);
+
+    int64_t pow10(uint8_t p);
 
 };
 } // namespace rwafi

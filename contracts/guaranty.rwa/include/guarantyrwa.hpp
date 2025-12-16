@@ -68,7 +68,7 @@ public:
                      const asset& quantity,
                      const string& memo);
 
-    ACTION init(const name& admin);
+    ACTION init(const name& admin) ;
     ACTION guarantpay(const name& submitter,
                       const uint64_t& plan_id);
 

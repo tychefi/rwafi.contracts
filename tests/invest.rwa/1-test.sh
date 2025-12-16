@@ -2,7 +2,7 @@
 shopt -s expand_aliases
 source ~/.bashrc
 
-invest_con=investrwa112
+invest_con=invest.rwa
 mreg flon $invest_con flonian
 mtran flonian $invest_con "100 FLON"
 mset $invest_con invest.rwa
@@ -27,22 +27,27 @@ mpush $invest_con createplan '[
   "gahbnbehaskk",
   "plan tests",
   "sing.token",
-  "100.00000000 SING",
+  "10000.00000000 SING",
   "rwafi.token",
-  "1.0000 STRCPY",
+  "1.0000 STRDBY",
   60,
   120,
-  "2025-11-17T03:45:00",
-  "2025-11-17T07:08:00",
+  "2025-11-16T03:23:00",
+  "2025-12-16T03:30:00",
   18,
   1200
 ]' -p gahbnbehaskk
 
-#mpush $invest_con  cancelplan '["gahbnbehaskk",3]' -p gahbnbehaskk
+#mpush $invest_con  cancelplan '["gahbnbehaskk",6]' -p gahbnbehaskk
+mpush $invest_con  delplan '[1]' -p flonian
 
 
 
+mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "2000.00000000 SING", "plan:7"]' -p gahbnbehaskk
+mpush sing.token transfer '["flonian", "invest.rwa", "2000.00000000 SING", "plan:7"]' -p flonian
 
-mpush sing.token transfer '["gahbnbehaskk", "investrwa112", "120.00000000 SING", "plan:22"]' -p gahbnbehaskk
+mpush sing.token transfer '["mywallet2", "invest.rwa", "4000.00000000 SING", "plan:7"]' -p mywallet2
 
-mpush $invest_con updatestatus '["gahbnbehaskk",22]'  -p gahbnbehaskk
+
+
+mpush $invest_con updatestatus '["gahbnbehaskk",7]'  -p gahbnbehaskk

@@ -16,11 +16,17 @@ using namespace flon;
 static constexpr name RECEIPT_TOKEN_BANK{"rwafi.token"_n};
 static constexpr eosio::name active_perm  {"active"_n};
 
+int64_t investrwa::pow10(uint8_t p) {
+    int64_t v = 1;
+    while (p--) v *= 10;
+    return v;
+}
+
 // ------------------- Internal functions ------------------------------------------------------
-asset investrwa::_get_balance(const name& token_contract, const name& owner, const symbol& sym) {
-    eosio::multi_index<"accounts"_n, flon::token::account> account_tbl(token_contract, owner.value);
-    auto itr = account_tbl.find(sym.code().raw());
-    return itr == account_tbl.end() ? asset(0, sym) : itr->balance;
+asset investrwa::_get_balance(const name& token_contract, const name& owner, const symbol& sym){
+    eosio::multi_index<"accounts"_n, flon::token::account> acnts(token_contract, owner.value);
+    auto it = acnts.find(sym.code().raw());
+    return it == acnts.end() ? asset(0, sym) : it->balance;
 }
 
 asset investrwa::_get_investor_stake_balance(const name& investor, const uint64_t& plan_id) {
@@ -30,121 +36,112 @@ asset investrwa::_get_investor_stake_balance(const name& investor, const uint64_
     return itr->avl_staked;
 }
 
-void investrwa::_process_investment(const name& from, const name&, const asset& quantity,const string& memo,fundplan_t& plan) {
+void investrwa::_process_investment(const name& from, const asset& quantity, fundplan_t& plan) {
+
+    _update_plan_status(plan);
     const time_point_sec now = time_point_sec(current_time_point());
 
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "investment must be positive");
     CHECKC(now >= plan.start_time, err::INVALID_STATUS, "fundraising not started");
-    CHECKC(now <= plan.end_time, err::INVALID_STATUS, "fundraising period ended");
+    CHECKC(now <= plan.end_time,   err::INVALID_STATUS, "fundraising ended");
 
-    const name token_contract = get_first_receiver();
-    CHECKC(token_contract == plan.goal_asset_contract, err::CONTRACT_MISMATCH, "token contract mismatch");
-    CHECKC(quantity.symbol == plan.goal_quantity.symbol, err::SYMBOL_MISMATCH, "symbol mismatch");
-
-    // === 检查计划状态是否允许投资 ===
-    bool can_invest =   plan.status == PlanStatus::PENDING ||
-                        plan.status == PlanStatus::RAISEACTIVE ||
-                        plan.status == PlanStatus::SUCCESS;  // 募资成功仍可补充投资（未封顶）
-    CHECKC(can_invest, err::INVALID_STATUS,"plan not open for investment (status: " + plan.status.to_string() + ")");
-
-    // === 检查币种是否在白名单中 ===
-    allow_token_t::idx_t tokens(_self, _self.value);
-    auto token_itr = tokens.find(quantity.symbol.raw());
-    CHECKC(token_itr != tokens.end() && token_itr->token_contract == token_contract,err::TOKEN_NOT_ALLOWED,
-                                                          "token not allowed: " + quantity.symbol.code().to_string());
-
-    // === 计算可接受金额与硬顶 ===
-    const int64_t hard_cap  = plan.goal_quantity.amount * plan.hard_cap_percent / 100;
+    // plan 状态门控
+    CHECKC(plan.status == PlanStatus::PENDING ||plan.status == PlanStatus::RAISEACTIVE || plan.status == PlanStatus::SUCCESS,
+                                                                            err::INVALID_STATUS,"plan not open for investment");
+    // 硬顶控制
+    const uint128_t hard_cap128  = plan.goal_quantity.amount * plan.hard_cap_percent / 100;
+    CHECKC(hard_cap128 <= std::numeric_limits<int64_t>::max(),err::INVALID_FORMAT, "hard cap overflow");
+    const uint64_t hard_cap = (uint64_t)hard_cap128;
     const int64_t remaining = hard_cap - plan.total_raised_funds.amount;
     CHECKC(remaining > 0, err::INVALID_STATUS, "hard cap reached");
 
     asset accepted = quantity;
-    asset refund(0, quantity.symbol);
+    asset refund{0, quantity.symbol};
+
     if (quantity.amount > remaining) {
         accepted.amount = remaining;
-        refund.amount = quantity.amount - remaining;
+        refund.amount   = quantity.amount - remaining;
     }
 
-    // === 校验回执参数 ===
-    CHECKC(plan.receipt_quantity_per_unit.amount > 0,                       err::INVALID_FORMAT,    "invalid receipt ratio");
-    CHECKC(plan.receipt_quantity_per_unit.symbol == plan.receipt_symbol,    err::SYMBOL_MISMATCH,   "receipt symbol mismatch");
+    // === receipt 计算（整数安全）===
+    const int64_t goal_unit =  pow10(plan.goal_quantity.symbol.precision());
+    uint128_t issue_raw =(uint128_t)accepted.amount *(uint128_t)plan.receipt_quantity_per_unit.amount;
+    CHECKC(issue_raw % goal_unit == 0, err::INVALID_FORMAT, "receipt precision mismatch");
 
-    // === 精度安全计算 ===
-    auto _pow10 = [](uint8_t p) -> int64_t {
-            int64_t v = 1;
-            while (p-- > 0) v *= 10;
-            return v;
-    };
+    uint128_t issue_amt128 = issue_raw / goal_unit;
+    CHECKC(issue_amt128 > 0 &&issue_amt128 <= std::numeric_limits<int64_t>::max(),err::INVALID_FORMAT,"invalid receipt amount");
+    asset issued_receipt{(int64_t)issue_amt128,plan.receipt_symbol};
 
-    __int128 raw = (__int128)accepted.amount * plan.receipt_quantity_per_unit.amount;
-    int64_t issue_amount = (int64_t)(raw / _pow10(plan.goal_quantity.symbol.precision()));
-    CHECKC(issue_amount > 0, err::INVALID_FORMAT, "issued receipt amount too small");
-    asset issued_receipt(issue_amount, plan.receipt_symbol);
+    // === 发放 receipt 并立刻转入 stake ===
+    ISSUE(plan.receipt_asset_contract,get_self(), issued_receipt, "plan:" + std::to_string(plan.id));
+    TRANSFER(plan.receipt_asset_contract,_gstate.stake_contract,issued_receipt, "stake:" + std::to_string(plan.id) + ":" + from.to_string());
 
-    // === 更新募资统计 ===
+    // === 更新统计 ===
     plan.total_raised_funds    += accepted;
     plan.total_issued_receipts += issued_receipt;
-    // === 发放回执并转入 stake 池 ===
-    ISSUE(plan.receipt_asset_contract, get_self(), issued_receipt, "plan:" + std::to_string(plan.id));
-    TRANSFER(plan.receipt_asset_contract, _gstate.stake_contract, issued_receipt, "stake:" + std::to_string(plan.id) + ":" + from.to_string());
 
-    // === 处理超额退款 ===
     if (refund.amount > 0) {
-        TRANSFER(plan.goal_asset_contract, from, refund,"refund: exceed hard cap " + std::to_string(plan.id));
+        TRANSFER(plan.goal_asset_contract,from,refund,"refund:hardcap:" + std::to_string(plan.id));
     }
+
     _update_plan_status(plan);
     _db.set(plan, _self);
 }
 
-void investrwa::_process_refund(const name& from,const name&,const asset& quantity,const string& memo,fundplan_t& plan) {
-    // ===  基础检查 ===
+asset investrwa::_calc_refund_amount( const asset& receipt_qty,const fundplan_t& plan) {
+    CHECKC(receipt_qty.amount > 0, err::NOT_POSITIVE, "receipt must be positive");
+    const int64_t goal_unit = pow10(plan.goal_quantity.symbol.precision());
+
+    int128_t numerator = (int128_t)receipt_qty.amount * goal_unit;
+    int128_t denom     = (int128_t)plan.receipt_quantity_per_unit.amount;
+
+    CHECKC(denom > 0, err::PARAM_ERROR, "invalid receipt ratio");
+    CHECKC(numerator % denom == 0, err::PARAM_ERROR, "refund precision mismatch");
+
+    int128_t refund128 = numerator / denom;
+    CHECKC(refund128 > 0 && refund128 <= std::numeric_limits<int64_t>::max(),err::PARAM_ERROR, "refund overflow");
+
+    return asset((int64_t)refund128, plan.goal_quantity.symbol);
+}
+
+void investrwa::_process_refund( const name& from, const asset& quantity,const string& memo, fundplan_t& plan) {
+    // === 1. 基础校验 ===
+    _update_plan_status(plan);
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "refund must be positive");
-    CHECKC(plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED, err::INVALID_STATUS, "refund not allowed in current plan status");
     CHECKC(quantity.symbol == plan.receipt_symbol, err::SYMBOL_MISMATCH, "receipt symbol mismatch");
 
-    // ===  memo 解析: refund:<plan_id>:<investor> ===
+    CHECKC( plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED,
+                                    err::INVALID_STATUS, "refund not allowed in current plan status");
+
+    // === 2. memo 解析 ===
     auto parts = split(memo, ":");
-    CHECKC(parts.size() == 3 && parts[0] == "refund",err::INVALID_FORMAT, "invalid memo format, expect refund:<plan_id>:<investor>");
+    CHECKC(parts.size() == 3 && parts[0] == "refund", err::INVALID_FORMAT, "expect refund:<plan_id>:<investor>");
+
     uint64_t memo_plan_id = std::stoull(parts[1]);
-    CHECKC(memo_plan_id == plan.id, err::PARAM_ERROR, "plan_id mismatch in memo");
+    CHECKC(memo_plan_id == plan.id, err::PARAM_ERROR, "plan_id mismatch");
 
-    name investor = name(parts[2]);
-    CHECKC(is_account(investor), err::ACCOUNT_INVALID, "invalid investor account");
-    CHECKC(plan.receipt_quantity_per_unit.amount > 0, err::INVALID_FORMAT, "invalid receipt ratio");
-    CHECKC(plan.goal_quantity.amount > 0, err::INVALID_FORMAT, "invalid goal quantity");
+    name investor(parts[2]);
+    CHECKC(is_account(investor), err::ACCOUNT_INVALID, "invalid investor");
 
-    // ===  精度换算 ===
-    auto pow10 = [](int n)->int64_t {
-        int64_t v = 1;
-        while (n-- > 0) v *= 10;
-        return v;
-    };
+    // === 3. 计算退款金额（核心逻辑） ===
+    asset refund_amount = _calc_refund_amount(quantity, plan);
 
-    const int goal_precision   = plan.goal_quantity.symbol.precision();
-    const int receipt_precision = plan.receipt_symbol.precision();
-
-    int128_t q_rcp_min      = (int128_t)quantity.amount;
-    int128_t r_per_1g_min   = (int128_t)plan.receipt_quantity_per_unit.amount;
-    int64_t pow10G          = pow10(goal_precision);
-
-    // refund_min = 用户RCP × 10^goal_precision / 每1SING对应RCP
-    int128_t refund_min128 = (q_rcp_min * (int128_t)pow10G) / r_per_1g_min;
-    CHECKC(refund_min128 > 0 && refund_min128 <= std::numeric_limits<int64_t>::max(),err::PARAM_ERROR, "refund overflow or invalid ratio");
-    asset refund_amount((int64_t)refund_min128, plan.goal_quantity.symbol);
-
+    // === 4. 资金安全校验 ===
     CHECKC(plan.total_raised_funds.amount >= refund_amount.amount, err::QUANTITY_INSUFFICIENT, "insufficient raised funds");
-    CHECKC(plan.total_issued_receipts.amount >= quantity.amount,   err::QUANTITY_INSUFFICIENT, "insufficient issued receipts");
+    CHECKC(plan.total_issued_receipts.amount >= quantity.amount, err::QUANTITY_INSUFFICIENT, "insufficient issued receipts");
 
-    // ===  销毁 receipt（investrwa 已收回的收据），并且返还本金 ===
-    BURN(plan.receipt_asset_contract, quantity, "burn receipt for refund, plan:" + std::to_string(plan.id));
-    TRANSFER(plan.goal_asset_contract, investor, refund_amount,"refund principal for plan:" + std::to_string(plan.id));
-    plan.total_raised_funds.amount      =   std::max<int64_t>(0, plan.total_raised_funds.amount - refund_amount.amount);
-    plan.total_issued_receipts.amount   =   std::max<int64_t>(0, plan.total_issued_receipts.amount - quantity.amount);
+    // === 5. 执行退款 ===
+    BURN( plan.receipt_asset_contract, quantity, "burn receipt for refund, plan:" + std::to_string(plan.id));
+    TRANSFER( plan.goal_asset_contract, investor,refund_amount,"refund principal for plan:" + std::to_string(plan.id));
 
-    // ===  若所有退款完成 ===
+    // === 6. 状态更新 ===
+    plan.total_raised_funds.amount = std::max<int64_t>(0, plan.total_raised_funds.amount - refund_amount.amount);
+    plan.total_issued_receipts.amount = std::max<int64_t>(0, plan.total_issued_receipts.amount - quantity.amount);
+
     if (plan.total_raised_funds.amount == 0 && plan.total_issued_receipts.amount == 0) {
         plan.status = PlanStatus::REFUNDED;
     }
+
     _db.set(plan, _self);
 }
 
@@ -237,17 +234,13 @@ void investrwa::onshelf( const symbol& sym, const bool& onshelf ) {
     _db.set( token, _self );
 }
 
-void investrwa::on_rwafi_transfer( const name& from, const name& to, const asset& quantity, const string& memo)
-{
+void investrwa::on_rwafi_transfer( const name& from, const name& to, const asset& quantity, const string& memo){
     _token_transfer( from, to, quantity, memo );
 }
 
-void investrwa::on_sing_transfer( const name& from, const name& to, const asset& quantity, const string& memo)
-{
+void investrwa::on_sing_transfer( const name& from, const name& to, const asset& quantity, const string& memo){
     _token_transfer( from, to, quantity, memo );
 }
-
-
 
 // 支持两种格式：
 // ① memo: plan:<plan_id>
@@ -282,7 +275,7 @@ void investrwa::_token_transfer(const name& from,const name& to,const asset& qua
                                                         plan.goal_quantity.symbol.code().to_string() + ", got " + quantity.symbol.code().to_string());
 
         // --- 执行投资 ---
-        _process_investment(from, to, quantity, memo, plan);
+        _process_investment(from, quantity, plan);
         return;
     }
     // === 退款逻辑 ===
@@ -294,7 +287,7 @@ void investrwa::_token_transfer(const name& from,const name& to,const asset& qua
         CHECKC(plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED,
                                                                             err::INVALID_STATUS,"refund not allowed (plan status: " + plan.status.to_string() + ")");
         // --- 执行退款 ---
-        _process_refund(from, to, quantity, memo, plan);
+        _process_refund(from, quantity, memo, plan);
         return;
     }
 
@@ -347,10 +340,14 @@ void investrwa::createplan(const name& creator,
 
     uint128_t G_hard                = (uint128_t)goal_quantity.amount * hard_cap_percent / 100;         // 募资硬顶
     uint128_t R                     = (uint128_t)receipt_quantity_per_unit.amount;                      // 每单位目标资产对应 receipt 单位
+
+    CHECKC(G_hard >= goal_unit,err::INVALID_FORMAT,"hard cap too small relative to goal unit");
+    CHECKC((G_hard * R) % goal_unit == 0,err::INVALID_FORMAT,"receipt max supply not divisible by goal unit");
     uint128_t max_amt128            = (G_hard * R) / goal_unit;
+    CHECKC(max_amt128 <= std::numeric_limits<int64_t>::max(),err::INVALID_FORMAT,"receipt max supply overflow");
     int64_t max_amt                 = (int64_t)max_amt128;
 
-    CHECKC(max_amt > 0,                                                     err::INVALID_FORMAT, "computed max supply invalid");
+    CHECKC(max_amt > 0, err::INVALID_FORMAT, "computed max supply invalid");
 
     // ===  创建 Receipt Token ===
     CREATE(RECEIPT_TOKEN_BANK, _self, asset(max_amt, receipt_quantity_per_unit.symbol));
@@ -382,45 +379,51 @@ void investrwa::createplan(const name& creator,
     _db.set(plan, _self);
 }
 
-void investrwa::cancelplan(const name& creator, const uint64_t& plan_id) {
-    require_auth(creator);
+void investrwa::cancelplan(const name& caller, const uint64_t& plan_id) {
+    require_auth(caller);
 
-    // === 读取计划 ===
-    fundplan_t plan(plan_id);
-    CHECKC(_db.get(plan),  err::RECORD_NOT_FOUND, "no such fund plan id: " + std::to_string(plan_id));
-    CHECKC(plan.creator == creator,  err::NO_AUTH, "no auth to cancel this plan");
+    fundplan_t::idx_t _fundplans(_self, _self.value);
+    auto itr = _fundplans.find(plan_id);
+    CHECKC(itr != _fundplans.end(), err::RECORD_NOT_FOUND, "no such fund plan id: " + std::to_string(plan_id));
 
-    // === 校验状态合法性 ===
-    const time_point_sec now = time_point_sec(current_time_point());
-    CHECKC(now < plan.end_time,err::INVALID_STATUS,"cannot cancel: fundraising already ended");
-    // === 募资期内的所有状态都允许取消 ===
-    CHECKC(
-        plan.status == PlanStatus::PENDING ||
-        plan.status == PlanStatus::RAISEACTIVE ||
-        plan.status == PlanStatus::SUCCESS,   // ✔ 即使达到 soft cap 也允许取消，因为 still before end_time
-        err::INVALID_STATUS,
-        "cannot cancel in current status: " + plan.status.to_string()
-    );
+    const bool is_admin   = (caller == _gstate.admin);
+    const bool is_creator = (caller == itr->creator);
+    CHECKC(is_admin || is_creator, err::NO_AUTH, "only creator or admin can cancel");
 
+    _fundplans.modify(itr, _self, [&](auto& p){
+        _update_plan_status(p);
+        const time_point_sec now = time_point_sec(current_time_point());
+        CHECKC(!(now >= p.end_time && (p.status == PlanStatus::SUCCESS || p.status == PlanStatus::COMPLETED)),
+               err::INVALID_STATUS, "cannot cancel: plan already succeeded");
 
-    // === 更新状态为 CANCELLED ===
-    plan.status = PlanStatus::CANCELLED;
-    _db.set(plan, _self);
+        p.status = PlanStatus::CANCELLED;
+    });
 
-    // === 触发 stake 合约执行批量退款 ===
+    // 执行 stake 合约操作
     rwafi::stakerwa::batchunstake_action{
         _gstate.stake_contract,
         { permission_level{ get_self(), "active"_n } }
     }.send(plan_id);
-
 }
+
+
+void investrwa::delplan(const uint64_t& plan_id) {
+    require_auth(_gstate.admin);
+    fundplan_t::idx_t _fundplans(_self, _self.value);
+    auto itr = _fundplans.find(plan_id);
+    CHECKC(itr != _fundplans.end(), err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(itr->status == PlanStatus::CANCELLED || itr->status == PlanStatus::FAILED,
+           err::INVALID_STATUS, "only cancelled or failed plans can be erased");
+    _fundplans.erase(itr);
+}
+
 
 
 void investrwa::updatestatus(const name& submitter,const uint64_t& plan_id){
     require_auth(submitter);
 
     fundplan_t plan(plan_id);
-    CHECKC(_db.get(plan),                                                   err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
 
     _update_plan_status(plan);
 }

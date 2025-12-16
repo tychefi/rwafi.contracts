@@ -20,7 +20,7 @@ using namespace flon;
 
 static constexpr eosio::name active_perm        {"active"_n};
 static constexpr uint64_t seconds_per_month     = 24 * 3600 * 30;
-static constexpr int128_t HIGH_PRECISION = 1'000'000'000'000'000'000; // 10^18
+static constexpr uint64_t HIGH_PRECISION = 1'000'000'000'0; // 10^10
 
 #ifndef DAY_SECONDS_FOR_TEST
 static constexpr uint64_t DAY_SECONDS           = 24 * 60 * 60;

@@ -4,17 +4,27 @@
 
 namespace rwafi {
 
-int128_t stakerwa::calc_reward_per_share_delta(const asset& rewards, const asset& total_staked) {
+uint64_t stakerwa::calc_reward_per_share_delta(const asset& rewards,const asset& total_staked) {
     if (rewards.amount <= 0 || total_staked.amount <= 0) return 0;
-    int128_t delta = (int128_t)rewards.amount * HIGH_PRECISION / total_staked.amount;
-    return delta;
+
+    uint128_t num =(uint128_t)rewards.amount * (uint128_t)HIGH_PRECISION;
+    uint128_t den =(uint128_t)total_staked.amount;
+    uint128_t delta128 = num / den;
+    CHECKC(delta128 <= std::numeric_limits<uint64_t>::max(), err::INCORRECT_AMOUNT,"reward_per_share overflow");
+
+    return (uint64_t)delta128;
 }
 
-asset stakerwa::calc_user_reward(const asset& staked, const int128_t& reward_per_share_delta, const symbol& reward_symbol) {
-    if (staked.amount <= 0 || reward_per_share_delta <= 0) return asset(0, reward_symbol);
-    int128_t reward_amt = (int128_t)staked.amount * reward_per_share_delta / HIGH_PRECISION;
-    CHECKC(reward_amt <= std::numeric_limits<int64_t>::max(), err::INCORRECT_AMOUNT, "overflow in reward calc");
-    return asset((int64_t)reward_amt, reward_symbol);
+asset stakerwa::calc_user_reward(const asset& staked,const uint64_t& reward_per_share_delta,const symbol& reward_symbol) {
+    if (staked.amount <= 0 || reward_per_share_delta == 0) {
+        return asset(0, reward_symbol);
+    }
+
+    uint128_t reward128 =(uint128_t)staked.amount * (uint128_t)reward_per_share_delta / (uint128_t)HIGH_PRECISION;
+
+    CHECKC(reward128 <= std::numeric_limits<int64_t>::max(), err::INCORRECT_AMOUNT,"overflow in reward calc");
+
+    return asset((int64_t)reward128, reward_symbol);
 }
 
 void stakerwa::init(const name& admin, const name& investrwa_contract) {
@@ -78,10 +88,12 @@ void stakerwa::delplan(const uint64_t& plan_id) {
 void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
     require_auth(owner);
 
+    // === 1. 读取 stake plan ===
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
     auto plan_itr = stakeplans.find(plan_id);
     CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
 
+    // === 2. 读取 staker ===
     staker_t::tbl_t stakers(get_self(), plan_id);
     auto user_itr = stakers.find(owner.value);
     CHECKC(user_itr != stakers.end(), err::RECORD_NOT_FOUND, "user not found in plan");
@@ -89,34 +101,53 @@ void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
 
     auto pool_rps = plan_itr->reward_state.reward_per_share;
     auto user_rps = user_itr->stake_reward.last_reward_per_share;
+    auto reward_sym = plan_itr->reward_state.reward_symbol;
 
+    // === 3. 是否有新奖励 ===
     if (pool_rps <= user_rps && user_itr->stake_reward.unclaimed_rewards.amount == 0) {
         CHECKC(false, err::ACTION_REDUNDANT, "no new rewards to claim");
     }
 
-    // 1. 计算差分奖励
-    int128_t reward_per_share_delta = pool_rps - user_rps;
-    asset new_reward = calc_user_reward(user_itr->avl_staked, reward_per_share_delta, plan_itr->reward_state.reward_symbol);
+    // === 4. 计算新增奖励 ===
+    auto delta_rps = pool_rps - user_rps;
+    asset new_reward = calc_user_reward(user_itr->avl_staked, delta_rps, reward_sym);
 
-    // 2. 汇总总奖励（含之前未领取）
-    asset total_claim = new_reward + user_itr->stake_reward.unclaimed_rewards;
+    // === 5. normalize unclaimed_rewards（防历史脏 symbol）===
+    asset unclaimed = user_itr->stake_reward.unclaimed_rewards;
+    if (unclaimed.symbol != reward_sym) {
+        unclaimed = asset(unclaimed.amount, reward_sym);
+    }
 
-    CHECKC(total_claim.amount > 0, err::INCORRECT_AMOUNT, "no claimable reward");
+    asset total_claim = new_reward + unclaimed;
+    CHECKC(total_claim.amount > 0,err::INCORRECT_AMOUNT, "no claimable reward");
 
-    // 3. 更新用户与池
     stakers.modify(user_itr, get_self(), [&](auto& u) {
-        u.stake_reward.unclaimed_rewards = asset(0, total_claim.symbol);
+
+        if (u.stake_reward.claimed_rewards.symbol != reward_sym) {
+            u.stake_reward.claimed_rewards =
+                asset(u.stake_reward.claimed_rewards.amount, reward_sym);
+        }
+        if (u.stake_reward.unclaimed_rewards.symbol != reward_sym) {
+            u.stake_reward.unclaimed_rewards =
+                asset(u.stake_reward.unclaimed_rewards.amount, reward_sym);
+        }
+
+        u.stake_reward.unclaimed_rewards = asset(0, reward_sym);
         u.stake_reward.claimed_rewards  += total_claim;
         u.stake_reward.last_reward_per_share = pool_rps;
+
+        u.stake_reward.reward_id =plan_itr->reward_state.reward_id;
         u.last_claim_at = time_point_sec(current_time_point());
     });
 
     stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
+        if (p.reward_state.claimed_rewards.symbol != reward_sym) {
+            p.reward_state.claimed_rewards = asset(p.reward_state.claimed_rewards.amount, reward_sym);
+        }
         p.reward_state.claimed_rewards += total_claim;
     });
 
-    // 4. 转账发放奖励
-    TRANSFER(plan_itr->reward_state.reward_token_contract, owner, total_claim, "stake claim: " + std::to_string(plan_id));
+    TRANSFER(plan_itr->reward_state.reward_token_contract,owner,total_claim,"stake claim:" + std::to_string(plan_id));
 }
 
 // --- 质押凭证 ---
@@ -135,7 +166,7 @@ void stakerwa::on_transfer_rwafi(const name& from, const name& to, const asset& 
            err::MEMO_FORMAT_ERROR,
            "invalid memo format, expect stake:<plan_id>:<user>");
 
-    uint64_t plan_id = std::stoull(parts[1]);
+    auto plan_id = std::stoull(parts[1]);
     name user = name(parts[2]);
     CHECKC(is_account(user), err::ACCOUNT_INVALID, "invalid stake user");
 
@@ -225,46 +256,108 @@ void stakerwa::batchunstake(const uint64_t& plan_id) {
 // ⚙️ 内部逻辑实现
 // ==============================
 
-void stakerwa::_on_stake(const name& from, const asset& quantity, const uint64_t& plan_id) {
+void stakerwa::_on_stake(const name& from,const asset& quantity,const uint64_t& plan_id) {
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "must stake positive amount");
 
-    // ✅ 从 stakeplans 表中读取
+    // === 1. load stake plan ===
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
     auto plan_itr = stakeplans.find(plan_id);
     CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
 
+    const auto& reward_sym = plan_itr->reward_state.reward_symbol;
+
+    // === 2. load staker table ===
     staker_t::tbl_t stakers(get_self(), plan_id);
     auto itr = stakers.find(from.value);
 
     if (itr == stakers.end()) {
-        // New staker
+        // === 3A. new staker ===
         stakers.emplace(get_self(), [&](auto& s) {
-            s.owner = from;
-            s.plan_id = plan_id;
+            s.owner      = from;
+            s.plan_id    = plan_id;
             s.cum_staked = quantity;
             s.avl_staked = quantity;
-            s.stake_reward.last_reward_per_share = plan_itr->reward_state.reward_per_share;
-            s.stake_reward.unclaimed_rewards = asset(0, plan_itr->reward_state.reward_symbol);
+
+            // reward state init (IMPORTANT)
+            s.stake_reward.last_reward_per_share =
+                plan_itr->reward_state.reward_per_share;
+
+            s.stake_reward.unclaimed_rewards = asset(0, reward_sym);
+            s.stake_reward.claimed_rewards   = asset(0, reward_sym);
+            s.stake_reward.total_rewards     = asset(0, reward_sym);
+            s.stake_reward.last_rewards      = asset(0, reward_sym);
+            s.stake_reward.unalloted_rewards = asset(0, reward_sym);
+
             s.created_at = time_point_sec(current_time_point());
         });
+
     } else {
-        // Existing staker: settle pending rewards first
-        int128_t delta = plan_itr->reward_state.reward_per_share - itr->stake_reward.last_reward_per_share;
-        asset pending = calc_user_reward(itr->avl_staked, delta, plan_itr->reward_state.reward_symbol);
+        // === 3B. existing staker ===
+
+        // 3B-1. settle pending rewards first
+        CHECKC(
+            plan_itr->reward_state.reward_per_share >=
+                itr->stake_reward.last_reward_per_share,
+            err::INCORRECT_AMOUNT,
+            "reward_per_share regression"
+        );
+
+        auto delta =
+            plan_itr->reward_state.reward_per_share
+          - itr->stake_reward.last_reward_per_share;
+
+        asset pending =
+            calc_user_reward(
+                itr->avl_staked,
+                delta,
+                reward_sym
+            );
 
         stakers.modify(itr, get_self(), [&](auto& s) {
-            s.stake_reward.unclaimed_rewards += pending;
-            s.stake_reward.last_reward_per_share = plan_itr->reward_state.reward_per_share;
+
+            // === normalize legacy reward symbols (CRITICAL) ===
+            if (s.stake_reward.unclaimed_rewards.symbol != reward_sym) {
+                s.stake_reward.unclaimed_rewards =
+                    asset(s.stake_reward.unclaimed_rewards.amount, reward_sym);
+            }
+            if (s.stake_reward.claimed_rewards.symbol != reward_sym) {
+                s.stake_reward.claimed_rewards =
+                    asset(s.stake_reward.claimed_rewards.amount, reward_sym);
+            }
+            if (s.stake_reward.total_rewards.symbol != reward_sym) {
+                s.stake_reward.total_rewards =
+                    asset(s.stake_reward.total_rewards.amount, reward_sym);
+            }
+            if (s.stake_reward.last_rewards.symbol != reward_sym) {
+                s.stake_reward.last_rewards =
+                    asset(s.stake_reward.last_rewards.amount, reward_sym);
+            }
+            if (s.stake_reward.unalloted_rewards.symbol != reward_sym) {
+                s.stake_reward.unalloted_rewards =
+                    asset(s.stake_reward.unalloted_rewards.amount, reward_sym);
+            }
+
+            // === apply pending reward ===
+            if (pending.amount > 0) {
+                s.stake_reward.unclaimed_rewards += pending;
+                s.stake_reward.total_rewards     += pending;
+            }
+
+            // === update reward cursor ===
+            s.stake_reward.last_reward_per_share =
+                plan_itr->reward_state.reward_per_share;
+
+            // === update stake amounts ===
             s.cum_staked += quantity;
             s.avl_staked += quantity;
             s.last_stake_at = time_point_sec(current_time_point());
         });
     }
 
-    // update plan totals
+    // === 4. update plan totals ===
     stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
         p.total_staked += quantity;
-        p.cum_staked += quantity;
+        p.cum_staked   += quantity;
     });
 }
 
@@ -279,7 +372,14 @@ void stakerwa::_on_reward_in(const name& from, const asset& quantity, const uint
     CHECKC(plan_itr->total_staked.amount > 0, err::INCORRECT_AMOUNT, "no staked tokens in pool");
 
     auto now = time_point_sec(current_time_point());
-    int128_t delta_rps = calc_reward_per_share_delta(quantity, plan_itr->total_staked);
+    // check(false,
+    // std::string("DEBUG reward_in | ")
+    // + "reward.amount=" + std::to_string(quantity.amount)
+    // + ", reward.symbol=" + quantity.symbol.code().to_string()
+    // + ", total_staked.amount=" + std::to_string(plan_itr->total_staked.amount)
+    // + ", total_staked.symbol=" + plan_itr->total_staked.symbol.code().to_string()
+    // );
+    auto delta_rps = calc_reward_per_share_delta(quantity, plan_itr->total_staked);
 
     stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
         auto& r = p.reward_state;

@@ -2,7 +2,7 @@
 shopt -s expand_aliases
 source ~/.bashrc
 
-guaranty_con=guaranty1111
+guaranty_con=guaranty.rwa
 mreg flon $guaranty_con flonian
 mtran flonian $guaranty_con "100 FLON"
 mset $guaranty_con guaranty.rwa
@@ -16,8 +16,8 @@ mpush   $guaranty_con init  '["flonian"]' -p $guaranty_con
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "guaranty1111", "300.00000000 SING", "guaranty:22"]' -p gahbnbehaskk
-mpush sing.token transfer '["flonian", "guaranty1111", "300.00000000 SING", "guaranty:21"]' -p flonian
+mpush sing.token transfer '["gahbnbehaskk", "guaranty.rwa", "20.00000000 SING", "guaranty:6"]' -p gahbnbehaskk
+mpush sing.token transfer '["flonian", "guaranty.rwa", "20.00000000 SING", "guaranty:6"]' -p flonian
 
 mpush $guaranty_con redeem '["flonian",21,"5.00000000 SING"]' -p flonian
 

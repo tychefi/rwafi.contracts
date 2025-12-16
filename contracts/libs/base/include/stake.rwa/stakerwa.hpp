@@ -47,8 +47,6 @@ public:
      */
     ACTION claim(const name& owner, const uint64_t& plan_id);
 
-    ACTION unstake(const name& owner, const uint64_t& plan_id, const asset& quantity) ;
-
     ACTION batchunstake(const uint64_t& plan_id);
 
     using claim_action      = eosio::action_wrapper<"claim"_n, &stakerwa::claim>;

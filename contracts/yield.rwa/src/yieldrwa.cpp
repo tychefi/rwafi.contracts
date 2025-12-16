@@ -218,10 +218,11 @@ void yieldrwa::_perform_distribution(const name& bank,const asset& total,const u
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
 
     auto p = plans.find(plan_id);
-    CHECKC(p != plans.end(),                                            err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(p->status == "success"_n,                                    err::INVALID_FORMAT,"plan not in yield stage");
+    CHECKC(p != plans.end(),  err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(p->status == PlanStatus::SUCCESS, err::INVALID_FORMAT, "plan not in yield stage");
     CHECKC(time_point_sec(current_time_point()) < p->return_end_time,   err::EXPIRED,"plan already ended, no further yield accepted");
-    CHECKC(total.symbol == p->goal_quantity.symbol,                     err::SYMBOL_MISMATCH, "symbol mismatch");
+    CHECKC(time_point_sec(current_time_point()) >= p->end_time, err::INVALID_STATUS,"yield not started yet");
+    CHECKC(total.symbol == p->goal_quantity.symbol,   err::SYMBOL_MISMATCH, "symbol mismatch");
 
     auto& cfg = _gstate.yield_split_conf;
     CHECKC(cfg.count(STAKE_POOL) &&cfg.count(GUARANTY_POOL) &&cfg.count(SWAP_POOL),err::PARAM_ERROR, "yield config missing keys");

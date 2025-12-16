@@ -103,12 +103,12 @@ private:
     /**
      * 计算 reward_per_share 增量
      */
-    static int128_t calc_reward_per_share_delta(const asset& rewards, const asset& total_staked);
+    static uint64_t calc_reward_per_share_delta(const asset& rewards, const asset& total_staked);
 
     /**
      * 计算单个用户应得奖励
      */
-    static asset calc_user_reward(const asset& staked, const int128_t& reward_per_share_delta, const symbol& reward_symbol);
+    static asset calc_user_reward(const asset& staked, const uint64_t& reward_per_share_delta, const symbol& reward_symbol);
 
 
 private:

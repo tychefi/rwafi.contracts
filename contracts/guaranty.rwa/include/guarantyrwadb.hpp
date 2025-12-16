@@ -35,9 +35,9 @@ static constexpr uint8_t  EXPIRY_HOURS          = 12;
  */
 NTBL("global") global_t {
     name            admin;                                      // 管理员
-    name            invest_contract     = "investrwa112"_n;     // 投资/募资主合约
-    name            yield_contract      = "yieldrwa1111"_n;     // 收益日志/计算合约
-    name            stake_contract      = "stake1111"_n;        // 质押/分配合约（担保金转入目标）
+    name            invest_contract     = "invest.rwa"_n;     // 投资/募资主合约
+    name            yield_contract      = "yield.rwa"_n;     // 收益日志/计算合约
+    name            stake_contract      = "stake.rwa"_n;        // 质押/分配合约（担保金转入目标）
 
     EOSLIB_SERIALIZE( global_t,
         (admin)(invest_contract)(yield_contract)(stake_contract))

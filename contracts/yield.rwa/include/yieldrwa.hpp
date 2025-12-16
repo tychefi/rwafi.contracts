@@ -25,7 +25,8 @@ enum class err: uint8_t {
    PARAM_ERROR           = 12,
    STATUS_ERROR          = 13,
    INCORRECT_AMOUNT      = 14,
-   NO_AUTH               = 15
+   NO_AUTH               = 15,
+   INVALID_STATUS        = 16
 };
 
 namespace rwafi {
