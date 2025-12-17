@@ -43,7 +43,8 @@ public:
     // === External Query ===
     asset get_yearly_yield(const uint64_t& plan_id, const uint64_t& year, const string& type = "total") const;
 
-
+    ACTION recordyield(const uint64_t& plan_id,const asset&    total_yield);
+    using recordyield_action    = eosio::action_wrapper<"recordyield"_n, &yieldrwa::recordyield>;
 };
 
 } // namespace rwafi

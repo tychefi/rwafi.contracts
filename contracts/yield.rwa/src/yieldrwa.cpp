@@ -355,3 +355,57 @@ asset yieldrwa::get_yearly_yield(const uint64_t& plan_id,const uint64_t& year,co
 {
     return _calc_yearly_yield_core(plan_id, year, type);
 }
+
+
+
+void yieldrwa::recordyield(const uint64_t& plan_id,const asset&    total_yield) {
+    require_auth(get_self());
+
+    CHECKC(total_yield.amount > 0, err::NOT_POSITIVE, "yield must be positive");
+
+    // 1. 读取 plan（只读 invest.rwa）
+    fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
+    auto p = plans.find(plan_id);
+    CHECKC(p != plans.end(), err::RECORD_NOT_FOUND, "plan not found");
+
+    CHECKC(p->status == PlanStatus::SUCCESS || p->status == PlanStatus::COMPLETED,
+           err::INVALID_STATUS, "plan not in yield stage");
+
+    CHECKC(total_yield.symbol == p->goal_quantity.symbol,
+           err::SYMBOL_MISMATCH, "symbol mismatch");
+
+    // 2. 计算 period（UTC YYYYMM）
+    const uint64_t period = []() {
+        const time_t t = (time_t) current_time_point().sec_since_epoch();
+        const tm* g = gmtime(&t);
+        return ((g->tm_year + 1900) * 100 + (g->tm_mon + 1));
+    }();
+
+    // 3. 打开 yield_log 表（⚠️ code = yield.rwa）
+    yield_log_t::idx_t logs(get_self(), plan_id);
+
+    asset cumulative_prev(0, total_yield.symbol);
+    if (auto it = logs.rbegin(); it != logs.rend()) {
+        cumulative_prev = it->cumulative_yield;
+    }
+
+    const time_point_sec now = time_point_sec(current_time_point());
+
+    auto itr = logs.find(period);
+    if (itr == logs.end()) {
+        logs.emplace(get_self(), [&](auto& y) {
+            y.period           = period;
+            y.period_yield     = total_yield;
+            y.cumulative_yield = cumulative_prev + total_yield;
+            y.investor_yield   = asset(0, total_yield.symbol); // 拆分由 yield.rwa 内部逻辑做
+            y.created_at       = now;
+            y.updated_at       = now;
+        });
+    } else {
+        logs.modify(itr, get_self(), [&](auto& y) {
+            y.period_yield     += total_yield;
+            y.cumulative_yield += total_yield;
+            y.updated_at        = now;
+        });
+    }
+}

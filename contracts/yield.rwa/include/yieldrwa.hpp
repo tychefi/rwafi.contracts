@@ -66,6 +66,9 @@ public:
 
     ACTION setslippage(const name& submitter,const uint64_t& plan_id, const uint16_t& max_slippage);
 
+    ACTION recordyield(const uint64_t& plan_id,const asset&    total_yield);
+    using recordyield_action    = eosio::action_wrapper<"recordyield"_n, &yieldrwa::recordyield>;
+
 private:
     // ========== Internal Helpers ==========
 
