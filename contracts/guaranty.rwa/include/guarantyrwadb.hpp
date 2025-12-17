@@ -21,7 +21,7 @@ using namespace flon;
 static constexpr eosio::name active_perm{"active"_n};
 
 // ===== 时间基础单位 =====
-static constexpr uint64_t DAY_SECONDS        = 24 ;
+static constexpr uint64_t DAY_SECONDS        = 1; //  24 * 3600;
 static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
 
 // ===== 业务周期定义 =====
@@ -70,6 +70,14 @@ TBL guaranty_stats_t {
     typedef eosio::multi_index<"guarantystat"_n, guaranty_stats_t> idx_t;
 
     EOSLIB_SERIALIZE(guaranty_stats_t,(plan_id)(total_guarantee_funds)(used_guarantee_funds)(cumulative_yield)(created_at)(updated_at))
+};
+
+struct redeem_cap_t {
+    int64_t total_unlock_cap = 0;   // 个人累计可解封上限（按 shares 分摊）
+    int64_t remaining_unlock = 0;   // 个人当前剩余可解封（扣掉 withdrawn）
+    int64_t global_unlock    = 0;   // 全局可解封总量（G + investor_yield - H）
+    int64_t investor_yield   = 0;   // 累计投资人收益
+    int64_t H                = 0;   // 半仓安全线
 };
 
 /**

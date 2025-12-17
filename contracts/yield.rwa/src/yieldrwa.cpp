@@ -359,8 +359,13 @@ asset yieldrwa::get_yearly_yield(const uint64_t& plan_id,const uint64_t& year,co
 
 
 void yieldrwa::recordyield(const uint64_t& plan_id,const asset&    total_yield) {
-    require_auth(get_self());
-
+    if (has_auth(get_self())) {
+        // ok
+    } else if (has_auth(_gstate.admin)) {
+        require_auth(_gstate.admin);
+    } else {
+        require_auth(GUARANTY_POOL);
+    }
     CHECKC(total_yield.amount > 0, err::NOT_POSITIVE, "yield must be positive");
 
     // 1. 读取 plan（只读 invest.rwa）

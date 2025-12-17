@@ -13,5 +13,5 @@ mcli set account permission $stake_con active --add-code
 
 mpush $stake_con init '["flonian","invest.rwa"]' -p $stake_con
 
-mpush stake.rwa claim '["gahbnbehaskk",5]' -p gahbnbehaskk
+mpush stake.rwa claim '["gahbnbehaskk",7]' -p gahbnbehaskk
 

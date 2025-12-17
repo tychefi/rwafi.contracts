@@ -27,13 +27,13 @@ mpush $invest_con createplan '[
   "gahbnbehaskk",
   "plan tests",
   "sing.token",
-  "10000.00000000 SING",
+  "1000.00000000 SING",
   "rwafi.token",
-  "1.0000 STRDEY",
+  "1.0000 STRDNY",
   60,
   120,
-  "2025-11-16T09:55:00",
-  "2025-12-16T10:05:00",
+  "2025-12-17T08:01:00",
+  "2025-12-17T08:05:00",
   36,
   1200
 ]' -p gahbnbehaskk
@@ -43,8 +43,8 @@ mpush $invest_con  delplan '[1]' -p flonian
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "4000.00000000 SING", "plan:9"]' -p gahbnbehaskk
-mpush sing.token transfer '["flonian", "invest.rwa", "2000.00000000 SING", "plan:9"]' -p flonian
+mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "400.00000000 SING", "plan:18"]' -p gahbnbehaskk
+mpush sing.token transfer '["flonian", "invest.rwa", "200.00000000 SING", "plan:18"]' -p flonian
 
 mpush sing.token transfer '["mywallet2", "invest.rwa", "4000.00000000 SING", "plan:8"]' -p mywallet2
 

@@ -192,6 +192,7 @@ void stakerwa::on_transfer_reward(const name& from, const name& to, const asset&
 
     uint64_t plan_id = std::stoull(params[1]);
     _on_reward_in(from, quantity, plan_id);
+
 }
 
 void stakerwa::batchunstake(const uint64_t& plan_id) {
@@ -264,7 +265,13 @@ void stakerwa::_on_stake(const name& from,const asset& quantity,const uint64_t& 
     auto plan_itr = stakeplans.find(plan_id);
     CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
 
-    const auto& reward_sym = plan_itr->reward_state.reward_symbol;
+    allow_token_t::idx_t tokens(_gstate.investrwa_contract, _gstate.investrwa_contract.value);
+    auto it = std::find_if(tokens.begin(), tokens.end(), [](const auto& t){
+        return t.onshelf;
+    });
+
+    CHECKC(it != tokens.end(),err::RECORD_NOT_FOUND,"no onshelf reward token");
+    symbol reward_sym = it->token_symbol;
 
     // === 2. load staker table ===
     staker_t::tbl_t stakers(get_self(), plan_id);

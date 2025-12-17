@@ -130,6 +130,16 @@ private:
     // -------
     uint64_t _current_period_yyyymm();
 
+
+    redeem_cap_t _calc_guarantor_redeemable_in_progress(
+        uint64_t plan_id,
+        const fundplan_t& plan,
+        guaranty_stats_t& stats,
+        const symbol& sym,
+        const guarantor_stake_t& user_row,
+        int64_t redeem_q
+    ) const;
+
 private:
     dbc              _db;           ///< 本合约数据库
     global_singleton _global;       ///< 全局配置
