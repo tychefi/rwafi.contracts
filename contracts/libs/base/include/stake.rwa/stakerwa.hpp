@@ -32,7 +32,7 @@ public:
      * @param plan_id 对应 invest.rwa 的 fundplan.id
      * @param receipt_sym 质押凭证币符号（如 RWA1）
      */
-    ACTION addplan(const uint64_t& plan_id, const symbol& receipt_sym);
+    ACTION addplan(const uint64_t& plan_id,const symbol& receipt_symbol,const name& reward_token_contract,const symbol& reward_symbol);
 
     /**
      * 删除质押计划（需池为空）

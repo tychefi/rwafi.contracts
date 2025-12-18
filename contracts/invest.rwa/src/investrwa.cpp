@@ -376,7 +376,7 @@ void investrwa::createplan(const name& creator,
     rwafi::stakerwa::addplan_action{
         _gstate.stake_contract,
         { permission_level{ get_self(), "active"_n } }
-    }.send(plan_id, receipt_quantity_per_unit.symbol);
+    }.send(plan_id, receipt_quantity_per_unit.symbol,goal_asset_contract,goal_quantity.symbol);
     _db.set(plan, _self);
 }
 

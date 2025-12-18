@@ -50,8 +50,13 @@ public:
      * 添加质押计划（由管理员调用）
      * @param plan_id 对应 invest.rwa 的 fundplan.id
      * @param receipt_sym 质押凭证币符号（如 RWA1）
+     * @param reward_token_contract  投资币合约
+     * @param reward_symbol  投资币符号
      */
-    ACTION addplan(const uint64_t& plan_id, const symbol& receipt_sym);
+    ACTION addplan(const uint64_t& plan_id,
+               const symbol&   receipt_symbol,
+               const name&     reward_token_contract,
+               const symbol&   reward_symbol);
 
     /**
      * 删除质押计划（需池为空）
@@ -65,6 +70,8 @@ public:
      * @param plan_id 质押池ID
      */
     ACTION claim(const name& owner, const uint64_t& plan_id);
+    //提取凭证
+    ACTION unstake(const name& owner,const uint64_t& plan_id,const asset& receipt_quantity);
     //任务失败批量退款
     ACTION batchunstake(const uint64_t& plan_id);
     // ========== 监听转账 ==========
@@ -93,12 +100,14 @@ private:
     /**
      * 处理用户质押
      */
-    void _on_stake(const name& from, const asset& quantity, const uint64_t& plan_id);
+    void _on_stake(const name& from,const asset& quantity,const uint64_t& plan_id,const stake_plan_t& plan);
 
     /**
      * 处理奖励注入
      */
     void _on_reward_in(const name& from, const asset& quantity, const uint64_t& plan_id);
+
+    void _claim(const name& owner, const uint64_t& plan_id,bool strict);
 
     /**
      * 计算 reward_per_share 增量

@@ -17,7 +17,7 @@ using namespace flon;
 
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 // ===== 时间基础单位 =====
-static constexpr uint64_t DAY_SECONDS        = 1; //  24 * 3600;
+static constexpr uint64_t DAY_SECONDS        = 3; //  24 * 3600;
 static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
 
 // ===== 业务周期定义 =====

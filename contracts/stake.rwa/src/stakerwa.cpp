@@ -37,30 +37,49 @@ void stakerwa::init(const name& admin, const name& investrwa_contract) {
     _gstate.investrwa_contract = investrwa_contract;
 }
 
-void stakerwa::addplan(const uint64_t& plan_id, const symbol& receipt_sym) {
-    CHECKC(
-        has_auth(_gstate.admin) || has_auth(_gstate.investrwa_contract),
-        err::NO_AUTH, "missing required auth"
-    );
+void stakerwa::addplan(const uint64_t& plan_id,const symbol& receipt_symbol,const name& reward_token_contract,const symbol& reward_symbol) {
+    CHECKC(has_auth(_gstate.admin) || has_auth(_gstate.investrwa_contract),err::NO_AUTH,"missing required auth");
 
+    // ------------------------------------------------------------
+    // 1) 校验 invest.rwa 中的 fundplan
+    // ------------------------------------------------------------
     fundplan_t::idx_t fundplans(_gstate.investrwa_contract, _gstate.investrwa_contract.value);
-    auto fund_itr = fundplans.find(plan_id);
-    CHECKC(fund_itr != fundplans.end(), err::RECORD_NOT_FOUND, "fundplan not found in investrwa");
-    CHECKC(fund_itr->receipt_symbol == receipt_sym, err::SYMBOL_MISMATCH, "receipt symbol mismatch with fundplan");
 
-    // === 2. 检查是否已存在于 stakerwa ===
+    auto fund_itr = fundplans.find(plan_id);
+    CHECKC(fund_itr != fundplans.end(),err::RECORD_NOT_FOUND, "fundplan not found in investrwa");
+    CHECKC(fund_itr->receipt_symbol == receipt_symbol, err::SYMBOL_MISMATCH, "receipt symbol mismatch with fundplan");
+
+    // ------------------------------------------------------------
+    // 2) 检查 stake.rwa 是否已存在
+    // ------------------------------------------------------------
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
     auto itr = stakeplans.find(plan_id);
-    CHECKC(itr == stakeplans.end(), err::RECORD_EXISTING, "plan already exists");
+    CHECKC(itr == stakeplans.end(),err::RECORD_EXISTING, "stake plan already exists");
 
-    // === 3. 新建质押池 ===
+    // ------------------------------------------------------------
+    // 3) 创建 stake_plan（关键：完整初始化 reward_state）
+    // ------------------------------------------------------------
     stakeplans.emplace(get_self(), [&](auto& p) {
         p.plan_id        = plan_id;
-        p.receipt_symbol = receipt_sym;
-        p.cum_staked     = asset(0, receipt_sym);
-        p.total_staked   = asset(0, receipt_sym);
-        p.reward_state   = stake_reward_st{};
-        p.created_at     = time_point_sec(current_time_point());
+        p.receipt_symbol = receipt_symbol;
+
+        p.cum_staked   = asset(0, receipt_symbol);
+        p.total_staked = asset(0, receipt_symbol);
+
+        // === reward_state 必须显式初始化 ===
+        p.reward_state.reward_token_contract = reward_token_contract;
+        p.reward_state.reward_symbol         = reward_symbol;
+
+        p.reward_state.total_rewards     = asset(0, reward_symbol);
+        p.reward_state.last_rewards      = asset(0, reward_symbol);
+        p.reward_state.unclaimed_rewards = asset(0, reward_symbol);
+        p.reward_state.claimed_rewards   = asset(0, reward_symbol);
+        p.reward_state.unalloted_rewards = asset(0, reward_symbol);
+
+        p.reward_state.reward_per_share      = 0;
+        p.reward_state.last_reward_per_share = 0;
+
+        p.created_at = time_point_sec(current_time_point());
     });
 }
 
@@ -84,9 +103,13 @@ void stakerwa::delplan(const uint64_t& plan_id) {
     //  删除质押计划
     stakeplans.erase(plan_itr);
 }
-
 void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
     require_auth(owner);
+    _claim(owner, plan_id,true);
+}
+
+
+void stakerwa::_claim(const name& owner, const uint64_t& plan_id,bool strict) {
 
     // === 1. 读取 stake plan ===
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
@@ -105,7 +128,13 @@ void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
 
     // === 3. 是否有新奖励 ===
     if (pool_rps <= user_rps && user_itr->stake_reward.unclaimed_rewards.amount == 0) {
-        CHECKC(false, err::ACTION_REDUNDANT, "no new rewards to claim");
+
+        if (strict) {
+            CHECKC(false, err::ACTION_REDUNDANT, "no new rewards to claim");
+        } else {
+            // unstake 场景：无奖励直接返回
+            return;
+        }
     }
 
     // === 4. 计算新增奖励 ===
@@ -151,35 +180,28 @@ void stakerwa::claim(const name& owner, const uint64_t& plan_id) {
 }
 
 // --- 质押凭证 ---
-void stakerwa::on_transfer_rwafi(const name& from, const name& to, const asset& quantity, const string& memo){
-
+void stakerwa::on_transfer_rwafi(const name& from,const name& to,const asset& quantity,const string& memo) {
     if (from == get_self() || to != get_self()) return;
 
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "must transfer positive amount");
+    // CHECKC(from == INVEST_POOL, err::NO_AUTH, "only invest.rwa contract can stake receipts");
 
-    // ✅ 只接受来自 INVEST_POOL（investrwa）的质押转入
-    CHECKC(from == INVEST_POOL,err::NO_AUTH,"only invest.rwa contract can stake receipts");
-
-    // ✅ memo = stake:<plan_id>:<user>
+    // memo = stake:<plan_id>:<user>
     auto parts = split(memo, ":");
-    CHECKC(parts.size() == 3 && parts[0] == "stake",
-           err::MEMO_FORMAT_ERROR,
-           "invalid memo format, expect stake:<plan_id>:<user>");
+    CHECKC(parts.size() == 3 && parts[0] == "stake", err::MEMO_FORMAT_ERROR,"invalid memo format, expect stake:<plan_id>:<user>");
 
-    auto plan_id = std::stoull(parts[1]);
+    uint64_t plan_id = std::stoull(parts[1]);
     name user = name(parts[2]);
     CHECKC(is_account(user), err::ACCOUNT_INVALID, "invalid stake user");
 
-    // ✅ 校验符号匹配当前 plan 的 receipt_symbol，防止乱币充进来
+    // 1) stake plan
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
     auto plan_itr = stakeplans.find(plan_id);
+
     CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
-
-    CHECKC(quantity.symbol == plan_itr->receipt_symbol,
-           err::SYMBOL_MISMATCH,
-           "stake symbol mismatch with plan receipt");
-
-    _on_stake(user, quantity, plan_id);
+    CHECKC(quantity.symbol == plan_itr->receipt_symbol,err::SYMBOL_MISMATCH,"stake symbol mismatch with plan receipt");
+    // 2) 执行 staking
+    _on_stake(user, quantity, plan_id, *plan_itr);
 }
 
 // --- 管理员充值奖励 ---
@@ -193,6 +215,54 @@ void stakerwa::on_transfer_reward(const name& from, const name& to, const asset&
     uint64_t plan_id = std::stoull(params[1]);
     _on_reward_in(from, quantity, plan_id);
 
+}
+//提取凭证
+void stakerwa::unstake(const name& owner, const uint64_t& plan_id, const asset& receipt_quantity) {
+    require_auth(owner);
+    CHECKC(receipt_quantity.amount > 0, err::NOT_POSITIVE, "invalid unstake amount");
+    const time_point_sec now = time_point_sec(current_time_point());
+
+    // 0) fund plan 校验
+    fundplan_t::idx_t fundplans(_gstate.investrwa_contract, _gstate.investrwa_contract.value);
+    auto fund_itr = fundplans.find(plan_id);
+    CHECKC(fund_itr != fundplans.end(), err::RECORD_NOT_FOUND, "fund plan not found");
+    CHECKC(fund_itr->status == PlanStatus::SUCCESS || fund_itr->status == PlanStatus::COMPLETED,
+           err::INVALID_STATUS, "unstake only allowed for successful or completed fund plan");
+    CHECKC(now >= fund_itr->end_time, err::INVALID_STATUS, "unstake only allowed after fundraising end");
+
+    // 1️⃣ 先结算奖励（这里会 modify stakers）
+    _claim(owner, plan_id,false);
+
+    // 2️⃣ stake plan
+    stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
+    auto plan_itr = stakeplans.find(plan_id);
+    CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
+    CHECKC(receipt_quantity.symbol == plan_itr->receipt_symbol,err::SYMBOL_MISMATCH, "receipt symbol mismatch");
+
+    // 3️⃣ staker —— ⚠️ 一定要重新 find
+    staker_t::tbl_t stakers(get_self(), plan_id);
+    auto itr = stakers.find(owner.value);
+    CHECKC(itr != stakers.end(), err::RECORD_NOT_FOUND, "staker not found");
+    CHECKC(itr->avl_staked.amount >= receipt_quantity.amount, err::QUANTITY_INSUFFICIENT, "insufficient staked amount");
+
+    // 4️⃣ 扣 staker
+    if (itr->avl_staked.amount == receipt_quantity.amount) {
+        stakers.erase(itr);
+    } else {
+        stakers.modify(itr, get_self(), [&](auto& s) {
+            s.avl_staked.amount -= receipt_quantity.amount;
+            s.cum_staked.amount -= receipt_quantity.amount;
+            s.last_stake_at     = now;
+        });
+    }
+
+    // 5️⃣ 扣全局 total_staked
+    stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
+        p.total_staked.amount -= receipt_quantity.amount;
+    });
+
+    // 6️⃣ 退回 receipt
+    TRANSFER(RECEIPT_BANK, owner, receipt_quantity, "unstake receipt");
 }
 
 void stakerwa::batchunstake(const uint64_t& plan_id) {
@@ -252,116 +322,82 @@ void stakerwa::batchunstake(const uint64_t& plan_id) {
     }
 }
 
-
-// ==============================
-// ⚙️ 内部逻辑实现
-// ==============================
-
-void stakerwa::_on_stake(const name& from,const asset& quantity,const uint64_t& plan_id) {
+void stakerwa::_on_stake(const name& from,const asset& quantity,const uint64_t& plan_id,const stake_plan_t& plan) {
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "must stake positive amount");
 
-    // === 1. load stake plan ===
-    stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
-    auto plan_itr = stakeplans.find(plan_id);
-    CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
+    const time_point_sec now = time_point_sec(current_time_point());
 
-    allow_token_t::idx_t tokens(_gstate.investrwa_contract, _gstate.investrwa_contract.value);
-    auto it = std::find_if(tokens.begin(), tokens.end(), [](const auto& t){
-        return t.onshelf;
-    });
+    // 0) reward symbol 必须来自 plan（由 addplan 写入）
+    const symbol reward_sym = plan.reward_state.reward_symbol;
+    CHECKC(reward_sym.is_valid(), err::SYMBOL_MISMATCH, "plan reward_symbol not initialized");
 
-    CHECKC(it != tokens.end(),err::RECORD_NOT_FOUND,"no onshelf reward token");
-    symbol reward_sym = it->token_symbol;
-
-    // === 2. load staker table ===
+    // 1) staker table
     staker_t::tbl_t stakers(get_self(), plan_id);
     auto itr = stakers.find(from.value);
 
     if (itr == stakers.end()) {
-        // === 3A. new staker ===
+        // 首次 stake：创建 staker（这是正确且必须的）
         stakers.emplace(get_self(), [&](auto& s) {
             s.owner      = from;
             s.plan_id    = plan_id;
             s.cum_staked = quantity;
             s.avl_staked = quantity;
 
-            // reward state init (IMPORTANT)
+            // 对齐游标：从当前 plan.reward_per_share 开始计
             s.stake_reward.last_reward_per_share =
-                plan_itr->reward_state.reward_per_share;
+                plan.reward_state.reward_per_share;
 
+            // reward 资产统一使用 plan 的 reward_sym（此时已确定）
             s.stake_reward.unclaimed_rewards = asset(0, reward_sym);
             s.stake_reward.claimed_rewards   = asset(0, reward_sym);
             s.stake_reward.total_rewards     = asset(0, reward_sym);
             s.stake_reward.last_rewards      = asset(0, reward_sym);
             s.stake_reward.unalloted_rewards = asset(0, reward_sym);
 
-            s.created_at = time_point_sec(current_time_point());
+            s.created_at    = now;
+            s.last_stake_at = now;
         });
 
     } else {
-        // === 3B. existing staker ===
-
-        // 3B-1. settle pending rewards first
+        // 非首次 stake：先结算 pending，再增加仓位
         CHECKC(
-            plan_itr->reward_state.reward_per_share >=
-                itr->stake_reward.last_reward_per_share,
+            plan.reward_state.reward_per_share >= itr->stake_reward.last_reward_per_share,
             err::INCORRECT_AMOUNT,
             "reward_per_share regression"
         );
 
-        auto delta =
-            plan_itr->reward_state.reward_per_share
-          - itr->stake_reward.last_reward_per_share;
+        const auto delta =
+            plan.reward_state.reward_per_share - itr->stake_reward.last_reward_per_share;
 
-        asset pending =
-            calc_user_reward(
-                itr->avl_staked,
-                delta,
-                reward_sym
-            );
+        const asset pending =
+            calc_user_reward(itr->avl_staked, delta, reward_sym);
 
         stakers.modify(itr, get_self(), [&](auto& s) {
-
-            // === normalize legacy reward symbols (CRITICAL) ===
-            if (s.stake_reward.unclaimed_rewards.symbol != reward_sym) {
-                s.stake_reward.unclaimed_rewards =
-                    asset(s.stake_reward.unclaimed_rewards.amount, reward_sym);
-            }
-            if (s.stake_reward.claimed_rewards.symbol != reward_sym) {
-                s.stake_reward.claimed_rewards =
-                    asset(s.stake_reward.claimed_rewards.amount, reward_sym);
-            }
-            if (s.stake_reward.total_rewards.symbol != reward_sym) {
-                s.stake_reward.total_rewards =
-                    asset(s.stake_reward.total_rewards.amount, reward_sym);
-            }
-            if (s.stake_reward.last_rewards.symbol != reward_sym) {
-                s.stake_reward.last_rewards =
-                    asset(s.stake_reward.last_rewards.amount, reward_sym);
-            }
-            if (s.stake_reward.unalloted_rewards.symbol != reward_sym) {
-                s.stake_reward.unalloted_rewards =
-                    asset(s.stake_reward.unalloted_rewards.amount, reward_sym);
-            }
-
-            // === apply pending reward ===
+            // pending reward
             if (pending.amount > 0) {
                 s.stake_reward.unclaimed_rewards += pending;
                 s.stake_reward.total_rewards     += pending;
+                s.stake_reward.last_rewards      = pending;   // 可选：保留本次增量
+            } else {
+                s.stake_reward.last_rewards      = asset(0, reward_sym);
             }
 
-            // === update reward cursor ===
+            // 游标推进
             s.stake_reward.last_reward_per_share =
-                plan_itr->reward_state.reward_per_share;
+                plan.reward_state.reward_per_share;
 
-            // === update stake amounts ===
+            // 增加仓位
             s.cum_staked += quantity;
             s.avl_staked += quantity;
-            s.last_stake_at = time_point_sec(current_time_point());
+            s.last_stake_at = now;
         });
     }
 
-    // === 4. update plan totals ===
+    // 2) 更新 stake plan 汇总
+    stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
+    auto plan_itr = stakeplans.find(plan_id);
+    CHECKC(plan_itr != stakeplans.end(), err::RECORD_NOT_FOUND, "stake plan not found");
+
     stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
         p.total_staked += quantity;
         p.cum_staked   += quantity;
@@ -369,7 +405,6 @@ void stakerwa::_on_stake(const name& from,const asset& quantity,const uint64_t& 
 }
 
 void stakerwa::_on_reward_in(const name& from, const asset& quantity, const uint64_t& plan_id) {
-    // 如果此函数由 [[eosio::on_notify("sing.token::transfer")]] 调用，则不需要 require_auth
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid reward amount");
 
     stake_plan_t::tbl_t stakeplans(get_self(), get_self().value);
@@ -379,19 +414,11 @@ void stakerwa::_on_reward_in(const name& from, const asset& quantity, const uint
     CHECKC(plan_itr->total_staked.amount > 0, err::INCORRECT_AMOUNT, "no staked tokens in pool");
 
     auto now = time_point_sec(current_time_point());
-    // check(false,
-    // std::string("DEBUG reward_in | ")
-    // + "reward.amount=" + std::to_string(quantity.amount)
-    // + ", reward.symbol=" + quantity.symbol.code().to_string()
-    // + ", total_staked.amount=" + std::to_string(plan_itr->total_staked.amount)
-    // + ", total_staked.symbol=" + plan_itr->total_staked.symbol.code().to_string()
-    // );
     auto delta_rps = calc_reward_per_share_delta(quantity, plan_itr->total_staked);
 
     stakeplans.modify(plan_itr, get_self(), [&](auto& p) {
         auto& r = p.reward_state;
 
-        // 防御性修正：如果 total_rewards 还是默认 symbol，主动重建为 reward_symbol
         if (r.total_rewards.amount == 0 && r.total_rewards.symbol.raw() == 0) {
             r.total_rewards     = asset(0, r.reward_symbol);
             r.last_rewards      = asset(0, r.reward_symbol);

@@ -62,19 +62,12 @@ public:
         _global.set(_gstate, get_self());
     }
 
-    [[eosio::on_notify("*::transfer")]]
-    void on_transfer(const name& from,
-                     const name& to,
-                     const asset& quantity,
-                     const string& memo);
+    [[eosio::on_notify("sing.token::transfer")]]
+    void on_transfer(const name& from,const name& to,const asset& quantity, const string& memo);
 
     ACTION init(const name& admin) ;
-    ACTION guarantpay(const name& submitter,
-                      const uint64_t& plan_id);
-
-    ACTION redeem(const name& guarantor,
-                  const uint64_t& plan_id,
-                  const asset& quantity);
+    ACTION guarantpay(const name& submitter,const uint64_t& plan_id);
+    ACTION redeem(const name& guarantor, const uint64_t& plan_id, const asset& quantity);
     struct CoverageInfo {
         int64_t G;               // guarantee pool
         int64_t investor_yield;  // accumulated investor yield
@@ -84,32 +77,14 @@ public:
 
 
 private:
-    void _handle_guaranty_transfer(const name& from,
-                                   const fundplan_t& plan,
-                                   const asset& quantity);
-
-    void _handle_reward_transfer(const fundplan_t& plan,
-                                 const asset& quantity);
+    void _handle_guaranty_transfer(const name& from,const fundplan_t& plan, const asset& quantity);
+    void _handle_reward_transfer(const fundplan_t& plan, const asset& quantity);
 
     // ------- redeem flows -------
-    void _redeem_failed_project(const name& guarantor,
-                                const fundplan_t& plan,
-                                guaranty_stats_t& stats,
-                                const asset& quantity);
-
-    void _redeem_in_progress(const name& guarantor,
-                             const fundplan_t& plan,
-                             guaranty_stats_t& stats,
-                             const asset& quantity);
-
-    void _redeem_project_end(const name& guarantor,
-                             const fundplan_t& plan,
-                             guaranty_stats_t& stats,
-                             const asset& quantity);
-
-    // ------- guarantee pool cost allocation -------
-    void _deduct_from_guarantors(uint64_t plan_id,
-                                 const asset& pay);
+    void _redeem_failed_project(const name& guarantor,const fundplan_t& plan, guaranty_stats_t& stats,const asset& quantity);
+    void _redeem_in_progress(const name& guarantor, const fundplan_t& plan, guaranty_stats_t& stats,const asset& quantity);
+    void _redeem_project_end(const name& guarantor,const fundplan_t& plan,guaranty_stats_t& stats,const asset& quantity);
+    void _deduct_from_guarantors(uint64_t plan_id, const asset& pay);
 
     // ------- common getters -------
     guarantor_stake_t::idx_t _get_stake_tbl(uint64_t plan_id) const;
@@ -121,24 +96,9 @@ private:
     uint32_t _years_passed(const fundplan_t& plan) const;
     int64_t _calc_investor_yield_sum(uint64_t plan_id, const symbol& sym) const;
 
-    CoverageInfo _calc_coverage(const fundplan_t& plan,
-                                const guaranty_stats_t& stats,
-                                const symbol& sym) const;
-
-    // -------
-    // misc
-    // -------
+    CoverageInfo _calc_coverage(const fundplan_t& plan, const guaranty_stats_t& stats, const symbol& sym) const;
     uint64_t _current_period_yyyymm();
-
-
-    redeem_cap_t _calc_guarantor_redeemable_in_progress(
-        uint64_t plan_id,
-        const fundplan_t& plan,
-        guaranty_stats_t& stats,
-        const symbol& sym,
-        const guarantor_stake_t& user_row,
-        int64_t redeem_q
-    ) const;
+    redeem_cap_t _calc_guarantor_redeemable_in_progress(uint64_t plan_id,const fundplan_t& plan,guaranty_stats_t& stats,const symbol& sym,const guarantor_stake_t& user_row,int64_t redeem_q) const;
 
 private:
     dbc              _db;           ///< 本合约数据库

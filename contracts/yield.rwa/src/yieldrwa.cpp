@@ -10,6 +10,7 @@
 #include <invest.rwa/investrwadb.hpp>
 #include <guaranty.rwa/guarantyrwadb.hpp>
 #include <flon.swap/flon.swap.db.hpp>
+#include <stake.rwa/stakerwadb.hpp>
 
 using namespace eosio;
 using namespace rwafi;
@@ -222,6 +223,7 @@ double yieldrwa::_get_coverage_ratio(const uint64_t& plan_id){
     return ratio;
 }
 
+//如果stake中计划总量是0的话，分红划给swap
 void yieldrwa::_perform_distribution(const name& bank,const asset& total,const uint64_t& plan_id)
 {
     CHECKC(total.amount > 0,    err::NOT_POSITIVE, "zero total");
@@ -231,7 +233,6 @@ void yieldrwa::_perform_distribution(const name& bank,const asset& total,const u
     auto p = plans.find(plan_id);
     CHECKC(p != plans.end(),  err::RECORD_NOT_FOUND, "plan not found");
     CHECKC(p->status == PlanStatus::SUCCESS, err::INVALID_FORMAT, "plan not in yield stage");
-    CHECKC(time_point_sec(current_time_point()) < p->return_end_time,   err::EXPIRED,"plan already ended, no further yield accepted");
     CHECKC(time_point_sec(current_time_point()) >= p->end_time, err::INVALID_STATUS,"yield not started yet");
     CHECKC(total.symbol == p->goal_quantity.symbol,   err::SYMBOL_MISMATCH, "symbol mismatch");
 
@@ -254,6 +255,15 @@ void yieldrwa::_perform_distribution(const name& bank,const asset& total,const u
     asset stake{ stake_amt, total.symbol };
     asset guar { guar_amt,  total.symbol };
     asset swap { total.amount - stake_amt - guar_amt, total.symbol };
+
+    // === 没人 stake 时，stake 份额并入 swap ===
+    stake_plan_t::tbl_t stakeplans(STAKE_POOL, STAKE_POOL.value);
+    auto sitr = stakeplans.find(plan_id);
+    CHECKC(sitr != stakeplans.end(),err::RECORD_NOT_FOUND, "stake plan not found");
+    if (sitr->total_staked.amount == 0 && stake.amount > 0) {
+        swap += stake;
+        stake.amount = 0;
+    }
 
     if (stake.amount > 0)
         TRANSFER(bank, STAKE_POOL, stake, "reward:" + std::to_string(plan_id));
