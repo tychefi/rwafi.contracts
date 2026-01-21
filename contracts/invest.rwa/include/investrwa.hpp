@@ -36,7 +36,8 @@ enum class err: uint8_t {
    CONTRACT_MISMATCH    = 32,
    PARAM_ERROR          = 33,
    INVALID_SYMBOL       = 34,
-   TOKEN_NOT_ALLOWED    = 35
+   TOKEN_NOT_ALLOWED    = 35,
+   SYSTEM_ERROR         = 36
 };
 
 enum class investrwa_type: uint8_t {
@@ -80,6 +81,7 @@ public:
                         const string& title,
                         const name& goal_asset_contract,
                         const asset& goal_quantity,
+                        const asset& min_investment,
                         const name& receipt_asset_contract,
                         const asset& receipt_quantity_per_unit,
                         const uint8_t& soft_cap_percent,
@@ -90,8 +92,8 @@ public:
                         const uint32_t& guaranteed_yield_apr  );
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
-
     ACTION updatestatus(const name& submitter,const uint64_t& plan_id);
+    ACTION liquidity(const uint64_t& plan_id,const name& tpcode );
 
     [[eosio::on_notify("rwafi.token::transfer")]]
     void on_rwafi_transfer(const name& from, const name& to, const asset& quantity, const std::string& memo);
@@ -108,7 +110,8 @@ public:
 
     ACTION delplan(const uint64_t& plan_id);
 
-    using addtoken_action    = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
+    using addtoken_action       = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
+    using liquidity_action      = eosio::action_wrapper<"liquidity"_n, &investrwa::liquidity>;
 
 private:
 
@@ -117,6 +120,11 @@ private:
     void _process_refund( const name& from, const asset& quantity, const string& memo, fundplan_t& plan );
     void _process_investment( const name& from, const asset& quantity, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
+    void _maybe_create_liquidity(const fundplan_t& plan, const name& submitter);
+    void _create_liquidity(const fundplan_t& plan);
+
+    asset _calc_receipt_liq_from_goal(const asset& goal_liq, const fundplan_t& plan);
+    asset _convert_precision(const asset& src, const symbol& dst_sym);
 
     asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
     asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );

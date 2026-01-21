@@ -17,7 +17,7 @@ using namespace flon;
 
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 // ===== 时间基础单位 =====
-static constexpr uint64_t DAY_SECONDS        = 24 * 3600;
+static constexpr uint64_t DAY_SECONDS        = 2;  //     24 * 3600;
 static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
 
 // ===== 业务周期定义 =====
@@ -84,6 +84,7 @@ TBL fundplan_t {                                    //scope: _self
     // === 募资目标 ===
     name                goal_asset_contract;        //goal asset issuing contract (FRC20)
     asset               goal_quantity;              //goal quantity to raise (FRC20)
+    asset               min_investment;             //minimum investment per transfer
     time_point          created_at;                 //create time
 
     // === 投资凭证 ===
@@ -118,7 +119,7 @@ TBL fundplan_t {                                    //scope: _self
 
     typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
 
-    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(created_at)
+    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(min_investment)(created_at)
                                         (receipt_asset_contract)(receipt_symbol)(receipt_quantity_per_unit)
                                         (soft_cap_percent)(hard_cap_percent)
                                         (start_time)(end_time)
@@ -126,6 +127,24 @@ TBL fundplan_t {                                    //scope: _self
                                         (guaranteed_yield_apr)
                                         (total_raised_funds)(total_issued_receipts)(status) )
 
+};
+
+// liquidity creation record per plan
+TBL planliq_t {                                     //scope: _self
+    uint64_t            plan_id;                    // PK: fund plan id
+    name                tpcode;                     // swap pair name
+    asset               sing_added;                 // SING amount added
+    asset               receipt_added;              // receipt token amount added
+    time_point          created_at;                 // creation time
+
+    uint64_t primary_key() const { return plan_id; }
+
+    planliq_t() {}
+    planliq_t(const uint64_t& pid): plan_id(pid) {}
+
+    typedef eosio::multi_index<"planliqs"_n, planliq_t> idx_t;
+
+    EOSLIB_SERIALIZE(planliq_t, (plan_id)(tpcode)(sing_added)(receipt_added)(created_at))
 };
 
 } // namespace rwafi

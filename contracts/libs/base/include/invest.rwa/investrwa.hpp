@@ -36,7 +36,8 @@ enum class err: uint8_t {
    CONTRACT_MISMATCH    = 32,
    PARAM_ERROR          = 33,
    INVALID_SYMBOL       = 34,
-   TOKEN_NOT_ALLOWED    = 35
+   TOKEN_NOT_ALLOWED    = 35,
+   SYSTEM_ERROR         = 36
 };
 
 enum class investrwa_type: uint8_t {
@@ -59,6 +60,7 @@ public:
                         const string& title,
                         const name& goal_asset_contract,
                         const asset& goal_quantity,
+                        const asset& min_investment,
                         const name& receipt_asset_contract,
                         const asset& receipt_quantity_per_unit,
                         const uint8_t& soft_cap_percent,

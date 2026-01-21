@@ -8,6 +8,7 @@
 
 #include "safe.hpp"
 #include "errno.h"
+#include <cctype>
 
 using namespace std;
 
@@ -32,6 +33,64 @@ using namespace std;
 
 #define TRACE_L(...) TRACE(__VA_ARGS__, "\n")
 
+
+
+/**
+ * @brief 根据两种交易 token 的 symbol，生成唯一 LP Token symbol 名称
+ *
+ * 命名逻辑：
+ *   symtype = 1: L + 前缀(symbol0, 3) + 前缀(symbol1, 3)       → e.g., LUSDETH
+ *   symtype = 2: L + 前缀(symbol0, 3) + 后缀(symbol1, 3)       → e.g., LUSDETH
+ *   symtype = 3: L + 后缀(symbol0, 3) + 前缀(symbol1, 3)       → e.g., LDTETH
+ *   symtype = 4: L + 后缀(symbol0, 3) + 后缀(symbol1, 3)       → e.g., LDTETH
+ *
+ * 最终 symbol name 限制为不超过 12 个字符
+ *
+ * @param symbol0 第一个交易币种
+ * @param symbol1 第二个交易币种
+ * @param symtype 命名方式（取值 1~4）
+ * @return std::string 生成的 LP symbol name
+ */
+inline std::string add_symbol(const symbol& symbol0, const symbol& symbol1, int symtype) {
+    const std::string& code0 = symbol0.code().to_string();
+    const std::string& code1 = symbol1.code().to_string();
+
+    const int len0 = code0.length();
+    const int len1 = code1.length();
+
+    // 安全截取 prefix/suffix 最多3字符
+    auto prefix0 = code0.substr(0, std::min(3, len0));
+    auto prefix1 = code1.substr(0, std::min(3, len1));
+    auto suffix0 = code0.substr(len0 >= 3 ? len0 - 3 : 0, 3);
+    auto suffix1 = code1.substr(len1 >= 3 ? len1 - 3 : 0, 3);
+
+    std::string code = "L";  // LP 前缀
+
+    switch (symtype) {
+        case 1: code += prefix0 + prefix1; break;
+        case 2: code += prefix0 + suffix1; break;
+        case 3: code += suffix0 + prefix1; break;
+        case 4: code += suffix0 + suffix1; break;
+        default:
+            check(false, "invalid symtype");
+    }
+
+    // 控制最大长度，避免超过 symbol 限制
+    if (code.length() > 12) {
+        code = code.substr(0, 12);
+    }
+
+    return code;
+}
+
+inline name pool_symbol(symbol symbol0, symbol symbol1) {
+    std::string code0 =  symbol0.code().to_string();
+    std::string code1 =  symbol1.code().to_string();
+    transform(code0.begin(), code0.end(), code0.begin(), ::tolower);
+    transform(code1.begin(), code1.end(), code1.begin(), ::tolower);
+    std::string code =   code0 + "." + code1;
+    return name(code);
+}
 
 template<typename T>
 int128_t multiply(int128_t a, int128_t b) {

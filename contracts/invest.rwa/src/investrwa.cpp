@@ -7,6 +7,16 @@
 #include <eosio/crypto.hpp>
 #include "guaranty.rwa/guarantyrwadb.hpp"
 #include "flon/flon.token.hpp"
+#include "flon.swap/flon.swap.db.hpp"
+#include "flon.swap/flon.swap.hpp"
+#include "flon/utils.hpp"
+
+
+#define SWAPCREATE(contract, user, sym1, contract1, sym2, contract2, liq_sym) \
+{ \
+    flonswap::swapcreate_action act{ contract, { {user, active_perm} } }; \
+    act.send(user, sym1, contract1, sym2, contract2, liq_sym); \
+}
 
 using std::chrono::system_clock;
 using namespace wasm;
@@ -20,6 +30,38 @@ int64_t investrwa::pow10(uint8_t p) {
     int64_t v = 1;
     while (p--) v *= 10;
     return v;
+}
+
+std::string   _to_lower_str(const symbol_code &sym_code) {
+    auto str = sym_code.to_string();
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+name calc_swap_tpcode(const symbol& s1, const symbol& s2) {
+
+    auto c1 = _to_lower_str(s1.code());
+    auto c2 = _to_lower_str(s2.code());
+
+    bool is1_whitelisted = pool_token_whitelist.count(c1);
+    bool is2_whitelisted = pool_token_whitelist.count(c2);
+
+    symbol left;
+    symbol right;
+
+    if (is2_whitelisted) {
+        left = s1; right = s2;
+    } else if (is1_whitelisted) {
+        left = s2; right = s1;
+    } else {
+        if (c1 < c2) {
+            left = s2; right = s1;
+        } else {
+            left = s1; right = s2;
+        }
+    }
+
+    return pool_symbol(left, right);
 }
 
 // ------------------- Internal functions ------------------------------------------------------
@@ -55,6 +97,11 @@ void investrwa::_process_investment(const name& from, const asset& quantity, fun
     const uint64_t hard_cap = (uint64_t)hard_cap128;
     const int64_t remaining = hard_cap - plan.total_raised_funds.amount;
     CHECKC(remaining > 0, err::INVALID_STATUS, "hard cap reached");
+    CHECKC(plan.min_investment.amount > 0, err::PARAM_ERROR, "plan min investment invalid");
+    if (quantity.amount < plan.min_investment.amount) {
+        CHECKC(remaining < plan.min_investment.amount && quantity.amount >= remaining,
+               err::PARAM_ERROR, "investment below minimum");
+    }
 
     asset accepted = quantity;
     asset refund{0, quantity.symbol};
@@ -187,9 +234,7 @@ void investrwa::_update_plan_status(fundplan_t& plan) {
 
         // 2.2 募资期结束
         else {
-            plan.status = (raised >= soft_cap)
-                ? PlanStatus::SUCCESS
-                : PlanStatus::FAILED;
+            plan.status = (raised >= soft_cap) ? PlanStatus::SUCCESS : PlanStatus::FAILED;
         }
     }
 
@@ -205,6 +250,122 @@ void investrwa::_update_plan_status(fundplan_t& plan) {
     // === 写入数据库 ===
     if (plan.status != old_status) {
         _db.set(plan, get_self());
+    }
+}
+
+asset investrwa::_calc_receipt_liq_from_goal(const asset& goal_liq, const fundplan_t& plan) {
+    CHECKC(goal_liq.amount > 0, err::NOT_POSITIVE, "goal liquidity must be positive");
+
+    const int64_t goal_unit = pow10(plan.goal_quantity.symbol.precision());
+    uint128_t issue_raw = (uint128_t)goal_liq.amount * (uint128_t)plan.receipt_quantity_per_unit.amount;
+    CHECKC(issue_raw % goal_unit == 0, err::INVALID_FORMAT, "receipt liquidity precision mismatch");
+
+    uint128_t issue_amt128 = issue_raw / goal_unit;
+    CHECKC(issue_amt128 > 0 && issue_amt128 <= std::numeric_limits<int64_t>::max(),
+           err::INVALID_FORMAT, "receipt liquidity amount invalid");
+
+    return asset((int64_t)issue_amt128, plan.receipt_symbol);
+}
+
+asset investrwa::_convert_precision(const asset& src, const symbol& dst_sym) {
+    int8_t from_p = src.symbol.precision();
+    int8_t to_p = dst_sym.precision();
+
+    int128_t amount = src.amount;
+    if (to_p > from_p) {
+        int64_t factor = pow10((uint8_t)(to_p - from_p));
+        amount = amount * factor;
+    } else if (to_p < from_p) {
+        int64_t factor = pow10((uint8_t)(from_p - to_p));
+        amount = amount / factor;
+    }
+
+    CHECKC(amount > 0 && amount <= std::numeric_limits<int64_t>::max(), err::INVALID_FORMAT, "precision conversion overflow");
+
+    return asset((int64_t)amount, dst_sym);
+}
+
+void investrwa::_create_liquidity(const fundplan_t& plan) {
+
+    // 0. 状态 & 幂等校验
+    const time_point_sec now = time_point_sec(current_time_point());
+    CHECKC(now >= plan.end_time, err::INVALID_STATUS, "liquidity only after fundraising end");
+    CHECKC(plan.status == PlanStatus::SUCCESS || plan.status == PlanStatus::COMPLETED,
+           err::INVALID_STATUS, "liquidity only for successful plans");
+
+    auto tpcode = flon::flonswap::pool_symbol(plan.receipt_symbol ,SING_SYM);
+
+    market_t::idx_t markets(SWAP_POOL, SWAP_POOL.value);
+    auto itr = markets.find(tpcode.value);
+    CHECKC(itr == markets.end(), err::PARAM_ERROR, "market already exists");
+
+    // 2. 查 / 建 swap market（不要依赖 tpcode）
+    bool exists = flon::flonswap::is_exists_pool( extended_symbol(SING_SYM, SING_BANK), extended_symbol(plan.receipt_symbol, plan.receipt_asset_contract)   );
+
+    if (!exists) {
+        string lp_symbol_str = add_symbol(SING_SYM, plan.receipt_symbol, 1);
+        SWAPCREATE(SWAP_POOL,_self,SING_SYM, SING_BANK,plan.receipt_symbol, plan.receipt_asset_contract,symbol_code(lp_symbol_str) );
+    }
+
+    investrwa::liquidity_action mine{ get_self(), { get_self(), "active"_n } };
+    mine.send(plan.id,tpcode);
+}
+
+// 3) 真正注入流动性（独立 action 调用）
+void investrwa::liquidity(const uint64_t& plan_id,const name& tpcode ) {
+    require_auth(_self);
+
+    // 0. 状态 & 幂等校验
+    fundplan_t plan(plan_id);
+    CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
+
+    const time_point_sec now = time_point_sec(current_time_point());
+    CHECKC(now >= plan.end_time, err::INVALID_STATUS, "liquidity only after fundraising end");
+    CHECKC(plan.status == PlanStatus::SUCCESS || plan.status == PlanStatus::COMPLETED,
+           err::INVALID_STATUS, "liquidity only for successful plans");
+
+    CHECKC(plan.total_raised_funds.amount > 0, err::NOT_POSITIVE, "no raised funds");
+
+    // 1. 计算注入数量（你确认这段没问题）
+    int64_t goal_liq_amount = plan.total_raised_funds.amount / 100; // 1%
+    CHECKC(goal_liq_amount > 0, err::PARAM_ERROR, "liquidity amount too small");
+
+    asset goal_liq(goal_liq_amount, plan.total_raised_funds.symbol);
+    asset receipt_liq = _calc_receipt_liq_from_goal(goal_liq, plan);
+    asset sing_liq    = _convert_precision(receipt_liq, SING_SYM);
+
+    // 2. 读 market（必须存在）
+    market_t::idx_t markets(SWAP_POOL, SWAP_POOL.value);
+    auto itr = markets.find(tpcode.value);
+    CHECKC(itr != markets.end(), err::RECORD_NOT_FOUND, "market not found");
+    const auto& market = *itr;
+
+    // 3. 校验 market 的 token 构成（contract + symbol）
+    bool left_is_sing = (market.left_pool_quant.contract == SING_BANK &&
+                        market.left_pool_quant.quantity.symbol == SING_SYM);
+    bool right_is_sing = (market.right_pool_quant.contract == SING_BANK &&
+                         market.right_pool_quant.quantity.symbol == SING_SYM);
+
+    bool left_is_receipt = (market.left_pool_quant.contract == plan.receipt_asset_contract &&
+                           market.left_pool_quant.quantity.symbol == plan.receipt_symbol);
+    bool right_is_receipt = (market.right_pool_quant.contract == plan.receipt_asset_contract &&
+                            market.right_pool_quant.quantity.symbol == plan.receipt_symbol);
+
+    CHECKC( (left_is_sing && right_is_receipt) || (right_is_sing && left_is_receipt),err::SYSTEM_ERROR, "market token mismatch");
+
+    // 4. mint 注入（按 market 的左右顺序转）,先补发行 receipt_liq
+    ISSUE(plan.receipt_asset_contract, get_self(), receipt_liq, "liquidity:plan:" + std::to_string(plan.id));
+
+    const uint64_t nonce = plan.id; // plan.id 最稳
+    const string memo1 = "mint:" + market.tpcode.to_string() + ":1:" + std::to_string(nonce) + ":" + _self.to_string();
+    const string memo2 = "mint:" + market.tpcode.to_string() + ":2:" + std::to_string(nonce) + ":" + _self.to_string();
+
+    if (left_is_sing) {
+        TRANSFER(plan.goal_asset_contract,     SWAP_POOL, sing_liq,    memo1);
+        TRANSFER(plan.receipt_asset_contract,  SWAP_POOL, receipt_liq, memo2);
+    } else {
+        TRANSFER(plan.receipt_asset_contract,  SWAP_POOL, receipt_liq, memo1);
+        TRANSFER(plan.goal_asset_contract,     SWAP_POOL, sing_liq,    memo2);
     }
 }
 
@@ -299,6 +460,7 @@ void investrwa::createplan(const name& creator,
                                         const string& title,
                                         const name& goal_asset_contract,
                                         const asset& goal_quantity,
+                                        const asset& min_investment,
                                         const name& receipt_asset_contract,
                                         const asset& receipt_quantity_per_unit,
                                         const uint8_t& soft_cap_percent,
@@ -312,6 +474,9 @@ void investrwa::createplan(const name& creator,
     // ===  基础参数校验 ===
     CHECKC(!title.empty() && title.size() <= MAX_TITLE_SIZE,                err::INVALID_FORMAT, "invalid title");
     CHECKC(goal_quantity.amount > 0 && receipt_quantity_per_unit.amount > 0,err::NOT_POSITIVE, "invalid asset quantities");
+    CHECKC(min_investment.amount > 0,                                      err::NOT_POSITIVE, "min investment must be positive");
+    CHECKC(min_investment.symbol == goal_quantity.symbol,                  err::SYMBOL_MISMATCH, "min investment symbol mismatch");
+    CHECKC(min_investment.amount <= goal_quantity.amount,                  err::INVALID_FORMAT, "min investment exceeds goal");
     CHECKC(soft_cap_percent >= 60 && soft_cap_percent <= 100,               err::INVALID_FORMAT, "soft cap percent invalid");
 
     CHECKC(hard_cap_percent >= soft_cap_percent,                            err::INVALID_FORMAT, "hard cap percent invalid");
@@ -347,6 +512,8 @@ void investrwa::createplan(const name& creator,
     uint128_t max_amt128            = (G_hard * R) / goal_unit;
     CHECKC(max_amt128 <= std::numeric_limits<int64_t>::max(),err::INVALID_FORMAT,"receipt max supply overflow");
     int64_t max_amt                 = (int64_t)max_amt128;
+    int64_t extra_liq_amt            = max_amt / 100; // 1% for liquidity
+    max_amt += extra_liq_amt;
 
     CHECKC(max_amt > 0, err::INVALID_FORMAT, "computed max supply invalid");
 
@@ -357,6 +524,7 @@ void investrwa::createplan(const name& creator,
     plan.creator                   = creator;
     plan.goal_asset_contract       = goal_asset_contract;
     plan.goal_quantity             = goal_quantity;
+    plan.min_investment            = min_investment;
     plan.receipt_asset_contract    = RECEIPT_TOKEN_BANK;
     plan.receipt_symbol            = receipt_quantity_per_unit.symbol;
     plan.receipt_quantity_per_unit = receipt_quantity_per_unit;
@@ -413,8 +581,7 @@ void investrwa::delplan(const uint64_t& plan_id) {
     fundplan_t::idx_t _fundplans(_self, _self.value);
     auto itr = _fundplans.find(plan_id);
     CHECKC(itr != _fundplans.end(), err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(itr->status == PlanStatus::CANCELLED || itr->status == PlanStatus::FAILED,
-           err::INVALID_STATUS, "only cancelled or failed plans can be erased");
+    CHECKC(itr->status == PlanStatus::CANCELLED || itr->status == PlanStatus::FAILED, err::INVALID_STATUS, "only cancelled or failed plans can be erased");
     _fundplans.erase(itr);
 }
 
@@ -427,4 +594,5 @@ void investrwa::updatestatus(const name& submitter,const uint64_t& plan_id){
     CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
 
     _update_plan_status(plan);
+    _create_liquidity(plan);
 }

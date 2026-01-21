@@ -170,6 +170,15 @@ namespace flon {
          typedef eosio::multi_index< "accounts"_n, account > accounts;
          typedef eosio::multi_index< "stat"_n, currency_stats > stats;
 
+         static bool token_is_exists(const name &token_contract_account, const symbol_code &sym_code) {
+            stats statstable(token_contract_account, sym_code.raw());
+            if (statstable.find(sym_code.raw()) == statstable.end()) {
+               return false;
+            }
+            return true;
+   }
+
+
          void sub_balance( const name& owner, const asset& value );
          void add_balance( const name& owner, const asset& value, const name& ram_payer );
    };

@@ -42,7 +42,14 @@ struct [[eosio::table, eosio::contract("flon.swap")]] market_t {
             indexed_by<"by.poolidx"_n, const_mem_fun<market_t, uint128_t, &market_t::get_pool>>
       >idx_t;
 };
-
+using swap_markets = eosio::multi_index<
+    "markets"_n,
+    flon::market_t,
+    eosio::indexed_by<
+        "by.poolidx"_n,
+        eosio::const_mem_fun<flon::market_t, uint128_t, &flon::market_t::get_pool>
+    >
+>;
 
 
 } // namespace flon

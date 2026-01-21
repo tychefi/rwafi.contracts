@@ -60,6 +60,7 @@ TBL fundplan_t {                                    //scope: _self
     // === 募资目标 ===
     name                goal_asset_contract;        //goal asset issuing contract (FRC20)
     asset               goal_quantity;              //goal quantity to raise (FRC20)
+    asset               min_investment;             //minimum investment per transfer
     time_point          created_at;                 //create time
 
     // === 投资凭证 ===
@@ -94,7 +95,7 @@ TBL fundplan_t {                                    //scope: _self
 
     typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
 
-    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(created_at)
+    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(min_investment)(created_at)
                                         (receipt_asset_contract)(receipt_symbol)(receipt_quantity_per_unit)
                                         (soft_cap_percent)(hard_cap_percent)
                                         (start_time)(end_time)
