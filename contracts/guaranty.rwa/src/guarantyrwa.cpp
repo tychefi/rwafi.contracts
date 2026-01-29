@@ -1,7 +1,6 @@
 #include "guarantyrwa.hpp"
 #include "yield.rwa/yieldrwa.hpp"
 #include "stake.rwa/stakerwadb.hpp"
-
 #include <flon/flon.token.hpp>
 #include <flon/utils.hpp>
 #include <flon/consts.hpp>
@@ -10,6 +9,18 @@ using namespace rwafi;
 using namespace eosio;
 using namespace flon;
 using std::string;
+
+namespace {
+void refresh_plan_status(const name& investrwa_contract, const name& submitter, uint64_t plan_id) {
+    eosio::action(
+        permission_level{ submitter, active_perm },
+        investrwa_contract,
+        "refreshstat"_n,
+        std::make_tuple(submitter, plan_id)
+    ).send();
+
+}
+} // namespace
 
 // 当前年月（YYYYMM）
 uint64_t guarantyrwa::_current_period_yyyymm() {
@@ -133,11 +144,14 @@ void guarantyrwa::on_transfer(const name& from, const name& to, const asset& qua
     if (from == get_self() || to != get_self()) return;
 
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "invalid transfer amount");
+    CHECKC(quantity.symbol.precision() == SING_SYM.precision(),
+           err::INVALID_FORMAT, "precision mismatch");
     auto parts = split(memo, ":");
     CHECKC(parts.size() == 2, err::INVALID_FORMAT, "memo must be <type>:<plan_id>");
 
     const string   action  = parts[0];
     const uint64_t plan_id = std::stoull(parts[1]);
+    refresh_plan_status(_gstate.invest_contract, get_self(), plan_id);
 
     // 读取 plan
     fundplan_t::idx_t plans( _gstate.invest_contract,_gstate.invest_contract.value);
@@ -299,6 +313,7 @@ void guarantyrwa::_handle_reward_transfer(const fundplan_t& plan, const asset&  
 
 void guarantyrwa::guarantpay(const name& submitter, const uint64_t& plan_id){
     require_auth(submitter);
+    refresh_plan_status(_gstate.invest_contract, get_self(), plan_id);
 
     // --------------------------------------------------------
     // 1) 读取计划
@@ -391,6 +406,7 @@ void guarantyrwa::guarantpay(const name& submitter, const uint64_t& plan_id){
 void guarantyrwa::redeem(const name& guarantor, const uint64_t& plan_id, const asset& quantity){
     require_auth(guarantor);
     CHECKC(quantity.amount > 0,err::NOT_POSITIVE,"invalid redeem amount");
+    refresh_plan_status(_gstate.invest_contract, get_self(), plan_id);
 
     // 读取计划
     fundplan_t::idx_t plans( _gstate.invest_contract, _gstate.invest_contract.value);

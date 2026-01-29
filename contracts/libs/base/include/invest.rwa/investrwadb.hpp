@@ -62,6 +62,7 @@ TBL fundplan_t {                                    //scope: _self
     asset               goal_quantity;              //goal quantity to raise (FRC20)
     asset               min_investment;             //minimum investment per transfer
     time_point          created_at;                 //create time
+    time_point          updated_at;                 //last status update time
 
     // === 投资凭证 ===
     name                receipt_asset_contract;     //receipt issuing contract (FRC20)
@@ -86,6 +87,7 @@ TBL fundplan_t {                                    //scope: _self
     // === 实时状态 ===
     asset               total_raised_funds;        // 已募集数量
     asset               total_issued_receipts;     // 已发凭证数量
+    asset               withdrawn_funds;          // 已提现数量（创建人）
     name                status = PlanStatus::PENDING; //募资计划状态
 
     uint64_t primary_key() const { return id; }
@@ -95,13 +97,13 @@ TBL fundplan_t {                                    //scope: _self
 
     typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
 
-    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(min_investment)(created_at)
+    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(min_investment)(created_at)(updated_at)
                                         (receipt_asset_contract)(receipt_symbol)(receipt_quantity_per_unit)
                                         (soft_cap_percent)(hard_cap_percent)
                                         (start_time)(end_time)
                                         (return_months)(return_end_time)
                                         (guaranteed_yield_apr)
-                                        (total_raised_funds)(total_issued_receipts)(status) )
+                                        (total_raised_funds)(total_issued_receipts)(withdrawn_funds)(status))
 
 };
 

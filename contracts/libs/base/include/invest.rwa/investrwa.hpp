@@ -1,6 +1,7 @@
 #include "investrwadb.hpp"
 #include "flon/flon.token.hpp"
 #include "flon/utils.hpp"
+#include <set>
 
 using namespace std;
 using namespace wasm::db;
@@ -58,7 +59,6 @@ public:
     ACTION createplan(
                         const name& creator,
                         const string& title,
-                        const name& goal_asset_contract,
                         const asset& goal_quantity,
                         const asset& min_investment,
                         const name& receipt_asset_contract,
@@ -71,9 +71,14 @@ public:
                         const uint32_t& guaranteed_yield_apr  );
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
+    ACTION refreshstat(const name& submitter,const uint64_t& plan_id);
+    ACTION setoracle(const name& account, const bool& enabled);
+    ACTION delglobal();
+    ACTION withdraw(const name& creator, const uint64_t& plan_id, const name& to, const asset& quantity);
 
-    using addtoken_action    = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
-
+    using addtoken_action           = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
+    using refreshstat_action        = eosio::action_wrapper<"refreshstat"_n, &investrwa::refreshstat>;
+    using withdraw_action      = eosio::action_wrapper<"withdraw"_n, &investrwa::withdraw>;
 
 };
 } // namespace rwafi

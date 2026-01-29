@@ -1,6 +1,8 @@
 #include "investrwadb.hpp"
 #include "flon/flon.token.hpp"
 #include "flon/utils.hpp"
+#include <initializer_list>
+#include <set>
 
 using namespace std;
 using namespace wasm::db;
@@ -65,13 +67,12 @@ public:
         _global(_self, _self.value)
     {
         _gstate = _global.exists() ? _global.get() : global_t{};
-
-        _db_stake = dbc( _gstate.stake_contract );
     }
 
     ~investrwa() {
-        _global.set(_gstate, get_self());
+            _global.set(_gstate, get_self());
     }
+
 
     ACTION addtoken( const name& contract, const symbol& sym );
     ACTION deltoken( const symbol& sym );
@@ -79,7 +80,6 @@ public:
     ACTION createplan(
                         const name& creator,
                         const string& title,
-                        const name& goal_asset_contract,
                         const asset& goal_quantity,
                         const asset& min_investment,
                         const name& receipt_asset_contract,
@@ -92,8 +92,10 @@ public:
                         const uint32_t& guaranteed_yield_apr  );
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
-    ACTION updatestatus(const name& submitter,const uint64_t& plan_id);
+    ACTION refreshstat(const name& submitter,const uint64_t& plan_id);
+    ACTION setoracle(const name& account, const bool& enabled);
     ACTION liquidity(const uint64_t& plan_id,const name& tpcode );
+    ACTION withdraw(const name& creator, const uint64_t& plan_id, const name& to, const asset& quantity);
 
     [[eosio::on_notify("rwafi.token::transfer")]]
     void on_rwafi_transfer(const name& from, const name& to, const asset& quantity, const std::string& memo);
@@ -104,33 +106,32 @@ public:
     ACTION init(const name& admin) {
         require_auth( _self );
         CHECKC( is_account(admin), err::ACCOUNT_INVALID, "account invalid" );
-
         _gstate.admin = admin;
+
     }
 
     ACTION delplan(const uint64_t& plan_id);
 
-    using addtoken_action       = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
-    using liquidity_action      = eosio::action_wrapper<"liquidity"_n, &investrwa::liquidity>;
-
+    using addtoken_action           = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
+    using liquidity_action          = eosio::action_wrapper<"liquidity"_n, &investrwa::liquidity>;
+    using refreshstat_action        = eosio::action_wrapper<"refreshstat"_n, &investrwa::refreshstat>;
+    using withdraw_action      = eosio::action_wrapper<"withdraw"_n, &investrwa::withdraw>;
 private:
 
     void _token_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    void _process_refund( const name& from, const asset& quantity, const string& memo, fundplan_t& plan );
+    void _process_refund( const name& from, const asset& quantity, fundplan_t& plan, const name& investor );
     void _process_investment( const name& from, const asset& quantity, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
-    void _maybe_create_liquidity(const fundplan_t& plan, const name& submitter);
-    void _create_liquidity(const fundplan_t& plan);
+    void _refresh_and_require_status(fundplan_t& plan, std::initializer_list<eosio::name> allowed, const char* err_msg);
 
+    void _create_liquidity(fundplan_t& plan);
     asset _calc_receipt_liq_from_goal(const asset& goal_liq, const fundplan_t& plan);
     asset _convert_precision(const asset& src, const symbol& dst_sym);
 
-    asset _get_balance(const name& token_contract, const name& owner, const symbol& sym);
-    asset _get_investor_stake_balance( const name& investor, const uint64_t& plan_id );
     asset _calc_refund_amount( const asset& receipt_qty,const fundplan_t& plan);
-
     int64_t pow10(uint8_t p);
+    int64_t _goal_unit(const fundplan_t& plan);
 
 };
 } // namespace rwafi

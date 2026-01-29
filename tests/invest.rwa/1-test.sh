@@ -13,10 +13,17 @@ mpush $invest_con init '["flonian"]' -p $invest_con
 
 mpush $invest_con addtoken '["sing.token","8,SING"]' -p $invest_con
 
+mpush $invest_con setoracle '["flonian", true]' -p $invest_con
+mpush $invest_con setoracle '["testtest", true]' -p $invest_con
+mpush $invest_con setoracle '["stake.rwa", true]' -p $invest_con
+mpush $invest_con setoracle '["yield.rwa", true]' -p $invest_con
+mpush $invest_con setoracle '["guaranty.rwa", true]' -p $invest_con
+
+
 # mpush $invest_con deltoken '["8,SING"]' -p $invest_con
 
 # 参数含义:
-# creator, title, goal_asset_contract, goal_quantity,
+# creator, title, goal_quantity, min_investment,
 # receipt_asset_contract, receipt_quantity_per_unit,
 # soft_cap_percent, hard_cap_percent,
 # start_time, end_time, return_months, guaranteed_yield_apr
@@ -25,35 +32,77 @@ mpush $invest_con addtoken '["sing.token","8,SING"]' -p $invest_con
 # 募资窗口今天开始到+30天；回执代币由 rwafi.token 托管，symbol("STRCP", 4）。
 mpush $invest_con createplan '[
   "gahbnbehaskk",
-  "plan tests",
-  "sing.token",
+  "2Z 未来 10年收益权:5.4",
   "1000.00000000 SING",
+  "100.00000000 SING",
   "rwafi.token",
-  "1.0000 STRDXM",
+  "1.0000 ZZSSING",
+  60,
+  120,
+  "2026-01-29T02:40:00",
+  "2026-01-29T10:52:00",
+  36,
+  1200
+]' -p gahbnbehaskk
+
+# 负例：goal_quantity 精度不匹配（应为 8 位）
+if mpush $invest_con createplan '[
+  "gahbnbehaskk",
+  "plan bad precision",
+  "1000.0000 SING",
+  "100.0000 SING",
+  "rwafi.token",
+  "1.0000 STRBADP",
   60,
   120,
   "2026-01-20T06:00:00",
   "2026-01-20T06:15:00",
   36,
   1200
-]' -p gahbnbehaskk
+]' -p gahbnbehaskk; then
+  echo "unexpected success: createplan should fail with SING precision mismatch"
+fi
+
+# 负例：receipt_asset_contract 不是 rwafi.token
+if mpush $invest_con createplan '[
+  "gahbnbehaskk",
+  "plan bad receipt",
+  "1000.00000000 SING",
+  "100.00000000 SING",
+  "bad.token",
+  "1.0000 STRBAD",
+  60,
+  120,
+  "2026-01-20T06:00:00",
+  "2026-01-20T06:15:00",
+  36,
+  1200
+]' -p gahbnbehaskk; then
+  echo "unexpected success: createplan should fail with bad receipt contract"
+fi
 
 #mpush $invest_con  cancelplan '["gahbnbehaskk",6]' -p gahbnbehaskk
 mpush $invest_con  delplan '[1]' -p flonian
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "400.00000000 SING", "plan:37"]' -p gahbnbehaskk
+mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "1200.00000000 SING", "plan:53"]' -p gahbnbehaskk
 mpush sing.token transfer '["flonian", "invest.rwa", "400.00000000 SING", "plan:37"]' -p flonian
 
-mpush sing.token transfer '["mywallet2", "invest.rwa", "4000.00000000 SING", "plan:35"]' -p mywallet2
+mpush sing.token transfer '["mywallet2", "invest.rwa", "4000.00000000 SING", "plan:53"]' -p mywallet2
+
+
+mpush $invest_con setoracle '["gahbnbehaskk", true]' -p $invest_con
+mpush $invest_con refreshstat '["gahbnbehaskk",52]'  -p gahbnbehaskk
+
+# 负例：refreshstat 不存在的 plan_id
+if mpush $invest_con refreshstat '["gahbnbehaskk",999999]' -p gahbnbehaskk; then
+  echo "unexpected success: refreshstat should fail for missing plan"
+fi
 
 
 
-mpush $invest_con updatestatus '["gahbnbehaskk",37]'  -p gahbnbehaskk
 
 
+mpush $invest_con delplan '[42]' -p flonian
 
-
-
-mpush $invest_con delplan '[1]' -p flonian

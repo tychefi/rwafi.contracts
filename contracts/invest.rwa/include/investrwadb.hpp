@@ -7,6 +7,7 @@
 #include <eosio/system.hpp>
 #include <eosio/time.hpp>
 #include <flon/wasm_db.hpp>
+#include <set>
 #include "flon/consts.hpp"
 
 using namespace eosio;
@@ -17,7 +18,7 @@ using namespace flon;
 
 #define SYMBOL(sym_code, precision) symbol(symbol_code(sym_code), precision)
 // ===== 时间基础单位 =====
-static constexpr uint64_t DAY_SECONDS        = 2;  //     24 * 3600;
+static constexpr uint64_t DAY_SECONDS        = 10;  //     24 * 3600;
 static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
 
 // ===== 业务周期定义 =====
@@ -48,16 +49,17 @@ namespace PlanStatus {
 }
 
 
-NTBL("global") global_t {
+NTBL("globals") global_t {
     name            admin;
     name            stake_contract      = STAKE_POOL;
     name            yield_contract      = YIELD_POOL;
     name            guaranty_contract   = GUARANTY_POOL;
     uint64_t        last_plan_id        = 0;
+    std::set<name>  oracles;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guaranty_contract)(last_plan_id) )
+    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guaranty_contract)(last_plan_id)(oracles) )
 };
-typedef eosio::singleton< "global"_n, global_t > global_singleton;
+typedef eosio::singleton< "globals"_n, global_t > global_singleton;
 
 // whitlisted investment tokens
 //
@@ -86,6 +88,7 @@ TBL fundplan_t {                                    //scope: _self
     asset               goal_quantity;              //goal quantity to raise (FRC20)
     asset               min_investment;             //minimum investment per transfer
     time_point          created_at;                 //create time
+    time_point          updated_at;                 //last status update time
 
     // === 投资凭证 ===
     name                receipt_asset_contract;     //receipt issuing contract (FRC20)
@@ -110,6 +113,7 @@ TBL fundplan_t {                                    //scope: _self
     // === 实时状态 ===
     asset               total_raised_funds;        // 已募集数量
     asset               total_issued_receipts;     // 已发凭证数量
+    asset               withdrawn_funds;          // 已提现数量（创建人）
     name                status = PlanStatus::PENDING; //募资计划状态
 
     uint64_t primary_key() const { return id; }
@@ -119,32 +123,14 @@ TBL fundplan_t {                                    //scope: _self
 
     typedef eosio::multi_index<"fundplans"_n, fundplan_t> idx_t;
 
-    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(min_investment)(created_at)
+    EOSLIB_SERIALIZE( fundplan_t, (id)(title)(creator)(goal_asset_contract)(goal_quantity)(min_investment)(created_at)(updated_at)
                                         (receipt_asset_contract)(receipt_symbol)(receipt_quantity_per_unit)
                                         (soft_cap_percent)(hard_cap_percent)
                                         (start_time)(end_time)
                                         (return_months)(return_end_time)
                                         (guaranteed_yield_apr)
-                                        (total_raised_funds)(total_issued_receipts)(status) )
+                                        (total_raised_funds)(total_issued_receipts)(withdrawn_funds)(status) )
 
-};
-
-// liquidity creation record per plan
-TBL planliq_t {                                     //scope: _self
-    uint64_t            plan_id;                    // PK: fund plan id
-    name                tpcode;                     // swap pair name
-    asset               sing_added;                 // SING amount added
-    asset               receipt_added;              // receipt token amount added
-    time_point          created_at;                 // creation time
-
-    uint64_t primary_key() const { return plan_id; }
-
-    planliq_t() {}
-    planliq_t(const uint64_t& pid): plan_id(pid) {}
-
-    typedef eosio::multi_index<"planliqs"_n, planliq_t> idx_t;
-
-    EOSLIB_SERIALIZE(planliq_t, (plan_id)(tpcode)(sing_added)(receipt_added)(created_at))
 };
 
 } // namespace rwafi

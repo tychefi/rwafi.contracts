@@ -43,6 +43,7 @@ void stakerwa::addplan(const uint64_t& plan_id,const symbol& receipt_symbol,cons
     // ------------------------------------------------------------
     // 1) 校验 invest.rwa 中的 fundplan
     // ------------------------------------------------------------
+    CHECKC(reward_symbol == SING_SYM, err::SYMBOL_MISMATCH, "reward symbol must be SING");
     fundplan_t::idx_t fundplans(_gstate.investrwa_contract, _gstate.investrwa_contract.value);
 
     auto fund_itr = fundplans.find(plan_id);

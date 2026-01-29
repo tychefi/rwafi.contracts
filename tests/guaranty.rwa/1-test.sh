@@ -19,6 +19,11 @@ mpush   $guaranty_con init  '["flonian"]' -p $guaranty_con
 mpush sing.token transfer '["gahbnbehaskk", "guaranty.rwa", "200.00000000 SING", "guaranty:35"]' -p gahbnbehaskk
 mpush sing.token transfer '["flonian", "guaranty.rwa", "200.00000000 SING", "guaranty:35"]' -p flonian
 
+# 负例：SING 精度不匹配（应为 8 位）
+if mpush sing.token transfer '["flonian", "guaranty.rwa", "1.0000 SING", "guaranty:35"]' -p flonian; then
+  echo "unexpected success: guaranty transfer should fail with precision mismatch"
+fi
+
 mpush $guaranty_con redeem '["gahbnbehaskk",18,"10.00000000 SING"]' -p gahbnbehaskk
 
 

@@ -20,7 +20,7 @@ using namespace flon;
 
 static constexpr eosio::name active_perm        {"active"_n};
 // ===== 时间基础单位 =====
-static constexpr uint64_t DAY_SECONDS        = 2;  // 24 * 3600;
+static constexpr uint64_t DAY_SECONDS        = 10;  // 24 * 3600;
 static constexpr uint64_t seconds_per_month  = 30 * DAY_SECONDS;
 
 // ===== 业务周期定义 =====

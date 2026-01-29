@@ -24,29 +24,32 @@ static uint64_t current_period_yyyymm() {
     return (uint64_t)((g->tm_year + 1900) * 100 + (g->tm_mon + 1));
 }
 
-double get_amm_price(const asset& in_pool, const asset& out_pool)
-{
-    uint64_t in_amount = in_pool.amount;
-    uint64_t out_amount = out_pool.amount;
-
-    uint64_t in_boost = power10(in_pool.symbol.precision());
-    uint64_t out_boost = power10(out_pool.symbol.precision());
-
-    return (double)out_amount * in_boost / (in_amount * out_boost);
+static void refresh_plan_status(const name& investrwa_contract, const name& submitter, uint64_t plan_id) {
+    eosio::action(
+        permission_level{ submitter, "active"_n },
+        investrwa_contract,
+        "refreshstat"_n,
+        std::make_tuple(submitter, plan_id)
+    ).send();
 }
 
-uint64_t calc_min_received(double min_price, const asset& input, const symbol& output_symbol)
+int64_t calc_min_received(const asset& input, const asset& in_pool, const asset& out_pool, uint16_t slippage_bp)
 {
-    uint64_t in_boost  = power10(input.symbol.precision());
-    uint64_t out_boost = power10(output_symbol.precision());
+    CHECKC(in_pool.amount > 0 && out_pool.amount > 0, err::PARAM_ERROR, "invalid pool amounts");
+    CHECKC(slippage_bp <= 10000, err::PARAM_ERROR, "invalid slippage");
 
-    auto out = input.amount * min_price * out_boost / in_boost;
-    return out;
+    uint128_t numerator = (uint128_t)input.amount * (uint128_t)out_pool.amount;
+    uint128_t denom = (uint128_t)in_pool.amount;
+    uint128_t out = numerator / denom;
+    out = out * (uint128_t)(10000 - slippage_bp) / 10000;
+
+    CHECKC(out <= std::numeric_limits<int64_t>::max(), err::PARAM_ERROR, "min amount overflow");
+    return (int64_t)out;
 }
 
-string build_swap_memo(const extended_asset& input,const name& pair_name,double slippage,const name& swap_contract)
+string build_swap_memo(const extended_asset& input,const name& pair_name,uint16_t slippage_bp,const name& swap_contract)
 {
-    CHECKC(slippage >= 0 && slippage <= 1, err::PARAM_ERROR, "invalid slippage");
+    CHECKC(slippage_bp <= 10000, err::PARAM_ERROR, "invalid slippage");
 
     flon::market_t::idx_t markets(swap_contract, swap_contract.value);
     auto itr = markets.find(pair_name.value);
@@ -68,10 +71,7 @@ string build_swap_memo(const extended_asset& input,const name& pair_name,double 
     extended_asset in_pool  = is_left_input ? left  : right;
     extended_asset out_pool = is_left_input ? right : left;
 
-    double price = get_amm_price(in_pool.quantity, out_pool.quantity);
-    double min_price = price * (1.0 - slippage);
-
-    uint64_t min_amt = calc_min_received(min_price, input.quantity, out_pool.quantity.symbol);
+    int64_t min_amt = calc_min_received(input.quantity, in_pool.quantity, out_pool.quantity, slippage_bp);
 
     return string("swap:") + asset(min_amt, out_pool.quantity.symbol).to_string()
            + ":" + pair_name.to_string();
@@ -116,12 +116,15 @@ void yieldrwa::on_transfer(const name& from, const name& to,const asset& quantit
 {
     if (from == get_self() || to != get_self()) return;
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive");
+    CHECKC(quantity.symbol.precision() == SING_SYM.precision(),
+           err::INVALID_FORMAT, "precision mismatch");
 
     auto parts = split(memo, ":");
     CHECKC(parts.size() == 2 && parts[0] == "plan",
            err::INVALID_FORMAT, "memo must be plan:<id>");
 
     uint64_t plan_id = std::stoull(parts[1]);
+    refresh_plan_status(INVEST_POOL, get_self(), plan_id);
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
@@ -137,11 +140,12 @@ void yieldrwa::on_transfer(const name& from, const name& to,const asset& quantit
 void yieldrwa::buyback(const name& submitter,const uint64_t& plan_id)
 {
     require_auth(submitter);
+    refresh_plan_status(INVEST_POOL, get_self(), plan_id);
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
     CHECKC(p != plans.end(), err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(p->status == "success"_n, err::STATUS_ERROR, "plan not in success state");
+    CHECKC(p->status == "success"_n || p->status == "completed"_n, err::STATUS_ERROR, "plan not in success/completed state");
 
     plan_buyback_t::pl_tbl tbl(get_self(), get_self().value);
     auto it = tbl.find(plan_id);
@@ -157,12 +161,10 @@ void yieldrwa::buyback(const name& submitter,const uint64_t& plan_id)
 
     name pair = find_pair_by_symbols(sing, voucher, SWAP_POOL);
 
-    double slip_rate = (double)it->max_slippage / 10000.0;
-
     string memo = build_swap_memo(
         extended_asset(remaining, bank),
         pair,
-        slip_rate,
+        it->max_slippage,
         SWAP_POOL
     );
 
@@ -377,6 +379,9 @@ void yieldrwa::recordyield(const uint64_t& plan_id,const asset&    total_yield) 
         require_auth(GUARANTY_POOL);
     }
     CHECKC(total_yield.amount > 0, err::NOT_POSITIVE, "yield must be positive");
+    CHECKC(total_yield.symbol.precision() == SING_SYM.precision(),
+           err::INVALID_FORMAT, "precision mismatch");
+    refresh_plan_status(INVEST_POOL, get_self(), plan_id);
 
     // 1. 读取 plan（只读 invest.rwa）
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
