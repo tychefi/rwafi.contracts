@@ -27,6 +27,16 @@ asset stakerwa::calc_user_reward(const asset& staked,const uint64_t& reward_per_
     return asset((int64_t)reward128, reward_symbol);
 }
 
+void stakerwa::notify(const name& contract,
+                            const name& from,
+                            const name& to,
+                            const asset& quantity,
+                            const string& memo,
+                            const string& type,
+                            const uint64_t& plan_id) {
+    require_auth(get_self());
+}
+
 void stakerwa::init(const name& admin, const name& investrwa_contract) {
     require_auth(get_self());
 
@@ -177,7 +187,12 @@ void stakerwa::_claim(const name& owner, const uint64_t& plan_id,bool strict) {
         p.reward_state.claimed_rewards += total_claim;
     });
 
-    TRANSFER(plan_itr->reward_state.reward_token_contract,owner,total_claim,"stake claim:" + std::to_string(plan_id));
+    TRANSFER(plan_itr->reward_state.reward_token_contract,owner,total_claim,"stakeclaim:" + std::to_string(plan_id));
+    //
+    stakerwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+    act.send(_self, _self, owner, total_claim, "stakeclaim:" + std::to_string(plan_id), "ClaimRewards",plan_id);
+
+
 }
 
 // --- 质押凭证 ---
@@ -264,6 +279,10 @@ void stakerwa::unstake(const name& owner, const uint64_t& plan_id, const asset& 
 
     // 6️⃣ 退回 receipt
     TRANSFER(RECEIPT_BANK, owner, receipt_quantity, "unstake receipt");
+
+    stakerwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+    act.send(_self, _self, owner, receipt_quantity, "unstake receipt:" + std::to_string(plan_id), "Unstake",plan_id);
+
 }
 
 void stakerwa::batchunstake(const uint64_t& plan_id) {
@@ -309,6 +328,10 @@ void stakerwa::batchunstake(const uint64_t& plan_id) {
 
         // === 资金流：stake.rwa → invest.rwa（退回 receipt token）===
         TRANSFER("rwafi.token"_n, INVEST_POOL, refund_amount, memo);
+
+
+        stakerwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+        act.send(_self, _self, INVEST_POOL, refund_amount, memo, "Refund",plan_id);
 
         // === 减少池中已质押数量 ===
         stakeplans.modify(plan_itr, get_self(), [&](auto& p) {

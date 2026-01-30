@@ -98,6 +98,15 @@ name yieldrwa::find_pair_by_symbols(const symbol& in_sym,const symbol& out_sym,c
     return name{0};
 }
 
+void yieldrwa::notify(const name& contract,
+                            const name& from,
+                            const name& to,
+                            const asset& quantity,
+                            const string& memo,
+                            const string& type) {
+    require_auth(get_self());
+}
+
 void yieldrwa::init(const name& admin) {
     require_auth(get_self());
     CHECKC(is_account(admin), err::ACCOUNT_INVALID, "invalid admin account");
@@ -234,7 +243,7 @@ void yieldrwa::_perform_distribution(const name& bank,const asset& total,const u
 
     auto p = plans.find(plan_id);
     CHECKC(p != plans.end(),  err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(p->status == PlanStatus::SUCCESS, err::INVALID_FORMAT, "plan not in yield stage");
+    CHECKC(p->status == PlanStatus::SUCCESS || p->status == PlanStatus::COMPLETED, err::INVALID_FORMAT, "plan not in yield stage");
     CHECKC(time_point_sec(current_time_point()) >= p->end_time, err::INVALID_STATUS,"yield not started yet");
     CHECKC(total.symbol == p->goal_quantity.symbol,   err::SYMBOL_MISMATCH, "symbol mismatch");
 

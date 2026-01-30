@@ -41,7 +41,7 @@ namespace PlanStatus {
     static constexpr eosio::name RAISEACTIVE = "raiseactive"_n;  // 募资中
     static constexpr eosio::name SOFTCAPHIT  = "softcaphit"_n;   // 达到软顶（待担保）
     static constexpr eosio::name HARDCAPHIT  = "hardcaphit"_n;   // 达到硬顶（封顶未担保）
-    static constexpr eosio::name SUCCESS     = "success"_n;      // 担保完成（进入收益期）
+    static constexpr eosio::name SUCCESS     = "success"_n;      // 担保完成（即将进入收益期，等募资时间结束）
     static constexpr eosio::name COMPLETED   = "completed"_n;    // 收益期结束
     static constexpr eosio::name FAILED      = "failed"_n;       // 未达软顶或超期未担保
     static constexpr eosio::name CANCELLED   = "cancelled"_n;    // 手动取消

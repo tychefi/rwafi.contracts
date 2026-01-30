@@ -36,14 +36,17 @@ mpush $invest_con createplan '[
   "1000.00000000 SING",
   "100.00000000 SING",
   "rwafi.token",
-  "1.0000 ZZSSING",
+  "1.0000 ZAASING",
   60,
   120,
-  "2026-01-29T02:40:00",
-  "2026-01-29T10:52:00",
+  "2026-01-30T07:50:00",
+  "2026-01-30T07:55:00",
   36,
   1200
 ]' -p gahbnbehaskk
+
+
+
 
 # 负例：goal_quantity 精度不匹配（应为 8 位）
 if mpush $invest_con createplan '[
@@ -86,14 +89,19 @@ mpush $invest_con  delplan '[1]' -p flonian
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "1200.00000000 SING", "plan:53"]' -p gahbnbehaskk
-mpush sing.token transfer '["flonian", "invest.rwa", "400.00000000 SING", "plan:37"]' -p flonian
+mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "200.00000000 SING", "plan:68"]' -p gahbnbehaskk
+mpush sing.token transfer '["flonian", "invest.rwa", "600.00000000 SING", "plan:67"]' -p flonian
 
 mpush sing.token transfer '["mywallet2", "invest.rwa", "4000.00000000 SING", "plan:53"]' -p mywallet2
 
 
 mpush $invest_con setoracle '["gahbnbehaskk", true]' -p $invest_con
-mpush $invest_con refreshstat '["gahbnbehaskk",52]'  -p gahbnbehaskk
+mpush $invest_con refreshstat '["gahbnbehaskk",68]'  -p gahbnbehaskk
+
+mpush $invest_con batchrefresh '["gahbnbehaskk",[66,59,61]]'  -p gahbnbehaskk
+
+
+
 
 # 负例：refreshstat 不存在的 plan_id
 if mpush $invest_con refreshstat '["gahbnbehaskk",999999]' -p gahbnbehaskk; then

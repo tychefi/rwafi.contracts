@@ -35,7 +35,7 @@ mpush  $yield_con setslippage  '["flonian",8,200]' -p flonian
 mpush sing.token transfer '["flonian", "yield.rwa", "100.00000000 SING", "plan:1"]' -p flonian
 
 #测试成功的计划是否可以发分红
-mpush sing.token transfer '["flonian", "yield.rwa", "100.00000000 SING", "plan:53"]' -p flonian
+mpush sing.token transfer '["flonian", "yield.rwa", "100.00000000 SING", "plan:60"]' -p flonian
 
 # 负例：SING 精度不匹配（应为 8 位）
 if mpush sing.token transfer '["flonian", "yield.rwa", "1.0000 SING", "plan:35"]' -p flonian; then

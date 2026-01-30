@@ -3,6 +3,7 @@
 #include "flon/utils.hpp"
 #include <initializer_list>
 #include <set>
+#include <vector>
 
 using namespace std;
 using namespace wasm::db;
@@ -93,9 +94,13 @@ public:
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
     ACTION refreshstat(const name& submitter,const uint64_t& plan_id);
+    ACTION batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids);
     ACTION setoracle(const name& account, const bool& enabled);
     ACTION liquidity(const uint64_t& plan_id,const name& tpcode );
     ACTION withdraw(const name& creator, const uint64_t& plan_id, const name& to, const asset& quantity);
+
+    ACTION notify(const name& contract,const name& from,const name& to,const asset& quantity,const string& memo,const string& type,const uint64_t& plan_id);
+
 
     [[eosio::on_notify("rwafi.token::transfer")]]
     void on_rwafi_transfer(const name& from, const name& to, const asset& quantity, const std::string& memo);
@@ -115,12 +120,14 @@ public:
     using addtoken_action           = eosio::action_wrapper<"addtoken"_n, &investrwa::addtoken>;
     using liquidity_action          = eosio::action_wrapper<"liquidity"_n, &investrwa::liquidity>;
     using refreshstat_action        = eosio::action_wrapper<"refreshstat"_n, &investrwa::refreshstat>;
-    using withdraw_action      = eosio::action_wrapper<"withdraw"_n, &investrwa::withdraw>;
+    using withdraw_action           = eosio::action_wrapper<"withdraw"_n, &investrwa::withdraw>;
+    using notify_action             = eosio::action_wrapper<"notify"_n, &investrwa::notify>;
+
 private:
 
     void _token_transfer(const name& from, const name& to, const asset& quantity, const string& memo);
 
-    void _process_refund( const name& from, const asset& quantity, fundplan_t& plan, const name& investor );
+    void _process_refund( const name& investor, const asset& quantity, fundplan_t& plan );
     void _process_investment( const name& from, const asset& quantity, fundplan_t& plan );
     void _update_plan_status( fundplan_t& plan );
     void _refresh_and_require_status(fundplan_t& plan, std::initializer_list<eosio::name> allowed, const char* err_msg);

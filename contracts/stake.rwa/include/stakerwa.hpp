@@ -39,6 +39,14 @@ public:
         _global.set(_gstate, get_self());
     }
 
+    ACTION notify(const name& contract,
+                    const name& from,
+                    const name& to,
+                    const asset& quantity,
+                    const string& memo,
+                    const string& type,
+                    const uint64_t& plan_id);
+
     /**
      * 初始化（仅一次）
      * @param admin 管理员账户
@@ -90,9 +98,10 @@ public:
     void on_transfer_reward(const name& from, const name& to, const asset& quantity, const std::string& memo);
 
 
-    using claim_action      = eosio::action_wrapper<"claim"_n, &stakerwa::claim>;
-    using addplan_action    = eosio::action_wrapper<"addplan"_n, &stakerwa::addplan>;
-    using batchunstake_action    = eosio::action_wrapper<"batchunstake"_n, &stakerwa::batchunstake>;
+    using claim_action              = eosio::action_wrapper<"claim"_n, &stakerwa::claim>;
+    using addplan_action            = eosio::action_wrapper<"addplan"_n, &stakerwa::addplan>;
+    using batchunstake_action       = eosio::action_wrapper<"batchunstake"_n, &stakerwa::batchunstake>;
+    using notify_action             = eosio::action_wrapper<"notify"_n, &stakerwa::notify>;
 
 private:
     // ========== 内部逻辑函数 ==========

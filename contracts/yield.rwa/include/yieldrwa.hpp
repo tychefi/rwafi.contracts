@@ -52,6 +52,13 @@ public:
         _global.set(_gstate, get_self());
     }
 
+    ACTION notify(const name& contract,
+                            const name& from,
+                            const name& to,
+                            const asset& quantity,
+                            const string& memo,
+                            const string& type);
+
     // ========== Actions ==========
     ACTION init(const name& admin);
     ACTION updateconfig(const name& key, const uint8_t& value);
@@ -67,7 +74,8 @@ public:
     ACTION setslippage(const name& submitter,const uint64_t& plan_id, const uint16_t& max_slippage);
 
     ACTION recordyield(const uint64_t& plan_id,const asset&    total_yield);
-    using recordyield_action    = eosio::action_wrapper<"recordyield"_n, &yieldrwa::recordyield>;
+    using recordyield_action            = eosio::action_wrapper<"recordyield"_n, &yieldrwa::recordyield>;
+    using notify_action                 = eosio::action_wrapper<"notify"_n, &yieldrwa::notify>;
 
 private:
     // ========== Internal Helpers ==========

@@ -166,6 +166,15 @@ void investrwa::_refresh_and_require_status(fundplan_t& plan,
     CHECKC(false, err::INVALID_STATUS, err_msg);
 }
 
+void investrwa::notify(const name& contract,
+                            const name& from,
+                            const name& to,
+                            const asset& quantity,
+                            const string& memo,
+                            const string& type,
+                            const uint64_t& plan_id) {
+    require_auth(get_self());
+}
 
 // ------------------- Plan Lifecycle -------------------
 void investrwa::createplan(const name& creator,
@@ -324,6 +333,42 @@ void investrwa::refreshstat(const name& submitter,const uint64_t& plan_id){
     }
 }
 
+void investrwa::batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids) {
+    require_auth(submitter);
+    CHECKC(is_oracle(_gstate, submitter), err::NO_AUTH, "submitter not in oracle list");
+    CHECKC(!plan_ids.empty(), err::PARAM_ERROR, "plan_ids empty");
+
+    for (const auto& plan_id : plan_ids) {
+        fundplan_t plan(plan_id);
+        CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
+
+        const time_point_sec now = current_time_sec();
+        const auto old_status = plan.status;
+        _update_plan_status(plan);
+        if (plan.status != old_status) {
+            plan.updated_at = time_point(current_time_point());
+            _db.set(plan, _self);
+        }
+
+        if (plan.status == old_status) {
+            _db.set(plan, _self);
+        }
+
+        if (plan.status == PlanStatus::FAILED && old_status != PlanStatus::FAILED) {
+            rwafi::stakerwa::batchunstake_action{
+                _gstate.stake_contract,
+                { permission_level{ get_self(), "active"_n } }
+            }.send(plan_id);
+        }
+
+        if (now >= plan.end_time && now < plan.return_end_time &&
+            plan.status == PlanStatus::SUCCESS &&
+            !liquidity_market_exists(plan)) {
+            _create_liquidity(plan);
+        }
+    }
+}
+
 void investrwa::withdraw(const name& caller, const uint64_t& plan_id, const name& to, const asset& quantity) {
     require_auth(caller);
     CHECKC(is_account(to), err::ACCOUNT_INVALID, "invalid recipient");
@@ -363,7 +408,11 @@ void investrwa::withdraw(const name& caller, const uint64_t& plan_id, const name
     plan.updated_at = time_point(current_time_point());
     _db.set(plan, _self);
 
-    TRANSFER(plan.goal_asset_contract, to, quantity, "withdraw:plan:" + std::to_string(plan.id));
+    TRANSFER(plan.goal_asset_contract, to, quantity, "withdraw:" + std::to_string(plan.id));
+    // === 通知提现操作 ===
+    investrwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+    act.send(_self, _self, to, quantity, "withdraw:" + std::to_string(plan.id), "Withdraw",plan.id);
+
 }
 
 void investrwa::setoracle(const name& account, const bool& enabled) {
@@ -473,8 +522,8 @@ void investrwa::_token_transfer(const name& from,const name& to,const asset& qua
         CHECKC(memo_plan_id == plan.id, err::PARAM_ERROR, "plan_id mismatch");
         name investor(parts[2]);
         CHECKC(is_account(investor), err::ACCOUNT_INVALID, "invalid investor");
-        CHECKC(investor == from, err::NO_AUTH, "refund must be sent by investor");
-        _process_refund(from, quantity, plan, investor);
+
+        _process_refund(investor,quantity, plan);
         return;
     }
 
@@ -521,9 +570,17 @@ void investrwa::_process_investment(const name& from, const asset& quantity, fun
     ISSUE(plan.receipt_asset_contract,get_self(), issued_receipt, "plan:" + std::to_string(plan.id));
     TRANSFER(plan.receipt_asset_contract,_gstate.stake_contract,issued_receipt, "stake:" + std::to_string(plan.id) + ":" + from.to_string());
 
+    // === 通知 stake 合约同步投资记录 ===
+    investrwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+    act.send(_self, _self, _gstate.stake_contract, issued_receipt, "stake:" + std::to_string(plan.id) + ":" + from.to_string(), "Staking", plan.id);
+
     // === 更新统计 ===
     plan.total_raised_funds    += accepted;
     plan.total_issued_receipts += issued_receipt;
+
+    // === 通知投资成功 ===
+    investrwa::notify_action act2{ get_self(), { {get_self(), "active"_n} } };
+    act2.send(_self, from, _self, accepted, "plan:" + std::to_string(plan.id) , "Investment",plan.id);
 
     if (refund.amount > 0) {
         TRANSFER(plan.goal_asset_contract,from,refund,"refund:hardcap:" + std::to_string(plan.id));
@@ -551,14 +608,12 @@ asset investrwa::_calc_refund_amount( const asset& receipt_qty,const fundplan_t&
 }
 
 
-void investrwa::_process_refund( const name& from, const asset& quantity, fundplan_t& plan, const name& investor ) {
+void investrwa::_process_refund(const name& investor,const asset& quantity, fundplan_t& plan ) {
     // === 1. 基础校验 ===
     _update_plan_status(plan);
     CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "refund must be positive");
     CHECKC(quantity.symbol == plan.receipt_symbol, err::SYMBOL_MISMATCH, "receipt symbol mismatch");
-
-    CHECKC(investor == from, err::NO_AUTH, "refund must be sent by investor");
-    CHECKC( plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED,
+    CHECKC(plan.status == PlanStatus::CANCELLED || plan.status == PlanStatus::FAILED,
                                     err::INVALID_STATUS, "refund not allowed in current plan status");
 
     // === 2. memo 已由调用方校验并解析 ===
@@ -572,7 +627,11 @@ void investrwa::_process_refund( const name& from, const asset& quantity, fundpl
 
     // === 5. 执行退款 ===
     BURN( plan.receipt_asset_contract, quantity, "burn receipt for refund, plan:" + std::to_string(plan.id));
-    TRANSFER( plan.goal_asset_contract, investor,refund_amount,"refund principal for plan:" + std::to_string(plan.id));
+    TRANSFER( plan.goal_asset_contract, investor,refund_amount,"refund:" + std::to_string(plan.id));
+
+    // === 通知退款操作 ===
+    investrwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+    act.send(_self, _self, investor, quantity, "refund:" + std::to_string(plan.id) , "Refund",plan.id);
 
     // === 6. 状态更新 ===
     plan.total_raised_funds.amount = std::max<int64_t>(0, plan.total_raised_funds.amount - refund_amount.amount);
@@ -639,10 +698,17 @@ void investrwa::_create_liquidity(fundplan_t& plan) {
 
     if (!exists) {
         string lp_symbol_str = add_symbol(plan.receipt_symbol,SING_SYM, 1);
-        // CHECKC(false, err::PARAM_ERROR, "lp_symbol_str=" + lp_symbol_str);
+        // CHECKC(false, err::PARAM_ERROR,
+        //        "swapcreate params: contract=" + SWAP_POOL.to_string() +
+        //        ", user=" + _self.to_string() +
+        //        ", sym1=" + plan.receipt_symbol.code().to_string() +
+        //        ", contract1=" + plan.receipt_asset_contract.to_string() +
+        //        ", sym2=" + SING_SYM.code().to_string() +
+        //        ", contract2=" + SING_BANK.to_string() +
+        //        ", liq_sym=" + lp_symbol_str);
         SWAPCREATE(SWAP_POOL,_self,plan.receipt_symbol, plan.receipt_asset_contract,SING_SYM, SING_BANK,symbol_code(lp_symbol_str) );
     }
-
+    // CHECKC(false, err::PARAM_ERROR, "tpcode=" + tpcode.to_string());
     investrwa::liquidity_action mine{ get_self(), { get_self(), "active"_n } };
     mine.send(plan.id,tpcode);
 }
@@ -703,10 +769,24 @@ void investrwa::liquidity(const uint64_t& plan_id,const name& tpcode ) {
 
     if (left_is_sing) {
         TRANSFER(plan.goal_asset_contract,     SWAP_POOL, sing_liq,    memo1);
+        // === 通知流动性注入操作 ===
+        investrwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+        act.send(_self, _self, SWAP_POOL, sing_liq, memo1 , "LPPrimary",plan.id);
+
         TRANSFER(plan.receipt_asset_contract,  SWAP_POOL, receipt_liq, memo2);
+        // === 通知流动性注入操作 ===
+        investrwa::notify_action act2{ get_self(), { {get_self(), "active"_n} } };
+        act2.send(_self, _self, SWAP_POOL, receipt_liq, memo2 , "LPSecondary",plan.id);
     } else {
         TRANSFER(plan.receipt_asset_contract,  SWAP_POOL, receipt_liq, memo1);
+        // === 通知流动性注入操作 ===
+        investrwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };
+        act.send(_self, _self, SWAP_POOL, receipt_liq, memo1 , "LPSecondary",plan.id);
+
         TRANSFER(plan.goal_asset_contract,     SWAP_POOL, sing_liq,    memo2);
+        // === 通知流动性注入操作 ===
+        investrwa::notify_action act2{ get_self(), { {get_self(), "active"_n} } };
+        act2.send(_self, _self, SWAP_POOL, sing_liq, memo2 , "LPPrimary",plan.id);
     }
 
     if (plan.withdrawn_funds.symbol != plan.goal_quantity.symbol) {
