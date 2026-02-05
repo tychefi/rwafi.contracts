@@ -333,16 +333,17 @@ void investrwa::refreshstat(const name& submitter,const uint64_t& plan_id){
     }
 }
 
-void investrwa::batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids) {
+void investrwa::batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids, const uint64_t& now_ts) {
     require_auth(submitter);
-    CHECKC(is_oracle(_gstate, submitter), err::NO_AUTH, "submitter not in oracle list");
+    // CHECKC(is_oracle(_gstate, submitter), err::NO_AUTH, "submitter not in oracle list");
     CHECKC(!plan_ids.empty(), err::PARAM_ERROR, "plan_ids empty");
+
+    const time_point_sec now = time_point_sec(now_ts);
 
     for (const auto& plan_id : plan_ids) {
         fundplan_t plan(plan_id);
         CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
 
-        const time_point_sec now = current_time_sec();
         const auto old_status = plan.status;
         _update_plan_status(plan);
         if (plan.status != old_status) {

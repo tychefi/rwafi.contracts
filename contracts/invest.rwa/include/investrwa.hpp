@@ -94,7 +94,7 @@ public:
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
     ACTION refreshstat(const name& submitter,const uint64_t& plan_id);
-    ACTION batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids);
+    ACTION batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids, const uint64_t& now_ts);
     ACTION setoracle(const name& account, const bool& enabled);
     ACTION liquidity(const uint64_t& plan_id,const name& tpcode );
     ACTION withdraw(const name& creator, const uint64_t& plan_id, const name& to, const asset& quantity);
