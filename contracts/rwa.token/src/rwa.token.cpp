@@ -1,4 +1,4 @@
-#include <rwafi.token/rwafi.token.hpp>
+#include <rwa.token/rwa.token.hpp>
 #include <flon/consts.hpp>
 
 #ifdef ENABLE_CONTRACT_VERSION

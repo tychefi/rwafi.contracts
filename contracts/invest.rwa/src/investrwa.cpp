@@ -23,7 +23,7 @@ using namespace wasm;
 using namespace eosio;
 using namespace rwafi;
 using namespace flon;
-static constexpr name RECEIPT_TOKEN_BANK{"rwafi.token"_n};
+static constexpr name RECEIPT_TOKEN_BANK{"rwa.token"_n};
 static constexpr name GOAL_ASSET_CONTRACT{"sing.token"_n};
 static constexpr eosio::name active_perm  {"active"_n};
 
@@ -50,7 +50,7 @@ void validate_createplan_inputs(const string& title,
     CHECKC(end_time > start_time,                                           err::INVALID_FORMAT, "end time must follow start");
     CHECKC(return_months > 0,                                               err::INVALID_FORMAT, "invalid return months");
     CHECKC(guaranteed_yield_apr > 0,                                        err::INVALID_FORMAT, "yield apr must be positive");
-    CHECKC(receipt_asset_contract == RECEIPT_TOKEN_BANK,                    err::CONTRACT_MISMATCH, "receipt must be issued by rwafi.token");
+    CHECKC(receipt_asset_contract == RECEIPT_TOKEN_BANK,                    err::CONTRACT_MISMATCH, "receipt must be issued by rwa.token");
 }
 
 asset calc_receipt_amount_from_goal_amount(int64_t goal_amount,

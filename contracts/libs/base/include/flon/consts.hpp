@@ -5,7 +5,7 @@
 namespace flon {
 
 static constexpr eosio::name USDT_BANK              {"flon.mtoken"_n};
-static constexpr eosio::name RECEIPT_BANK           {"rwafi.token"_n};   // 凭证币发行合约
+static constexpr eosio::name RECEIPT_BANK           {"rwa.token"_n};   // 凭证币发行合约
 static constexpr eosio::name SING_BANK              {"sing.token"_n};    // SING 代币合约
 
 static constexpr eosio::symbol SING_SYM             = eosio::symbol("SING", 8);

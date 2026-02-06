@@ -29,18 +29,18 @@ mpush $invest_con setoracle '["guaranty.rwa", true]' -p $invest_con
 # start_time, end_time, return_months, guaranteed_yield_apr
 
 # 示例：目标筹 1000 RWA，分红期 18 个月，年化保底 12% (1200 bp)，
-# 募资窗口今天开始到+30天；回执代币由 rwafi.token 托管，symbol("STRCP", 4）。
+# 募资窗口今天开始到+30天；回执代币由 rwa.token 托管，symbol("STRCP", 4）。
 mpush $invest_con createplan '[
   "gahbnbehaskk",
   "2Z 未来 10年收益权:5.4",
   "1000.00000000 SING",
   "100.00000000 SING",
-  "rwafi.token",
-  "1.0000 ZACSING",
+  "rwa.token",
+  "1.0000 ZADSING",
   60,
   120,
-  "2026-02-05T10:45:00",
-  "2026-02-05T14:45:00",
+  "2026-02-06T8:00:00",
+  "2026-02-06T14:45:00",
   36,
   1200
 ]' -p gahbnbehaskk
@@ -54,7 +54,7 @@ if mpush $invest_con createplan '[
   "plan bad precision",
   "1000.0000 SING",
   "100.0000 SING",
-  "rwafi.token",
+  "rwa.token",
   "1.0000 STRBADP",
   60,
   120,
@@ -66,7 +66,7 @@ if mpush $invest_con createplan '[
   echo "unexpected success: createplan should fail with SING precision mismatch"
 fi
 
-# 负例：receipt_asset_contract 不是 rwafi.token
+# 负例：receipt_asset_contract 不是 rwa.token
 if mpush $invest_con createplan '[
   "gahbnbehaskk",
   "plan bad receipt",
@@ -89,14 +89,14 @@ mpush $invest_con  delplan '[1]' -p flonian
 
 
 
-mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "1200.00000000 SING", "plan:73"]' -p gahbnbehaskk
+mpush sing.token transfer '["gahbnbehaskk", "invest.rwa", "1200.00000000 SING", "plan:76"]' -p gahbnbehaskk
 mpush sing.token transfer '["flonian", "invest.rwa", "600.00000000 SING", "plan:67"]' -p flonian
 
 mpush sing.token transfer '["mywallet2", "invest.rwa", "4000.00000000 SING", "plan:53"]' -p mywallet2
 
 
 mpush $invest_con setoracle '["gahbnbehaskk", true]' -p $invest_con
-mpush $invest_con refreshstat '["gahbnbehaskk",68]'  -p gahbnbehaskk
+mpush $invest_con refreshstat '["gahbnbehaskk",76]'  -p gahbnbehaskk
 
 mpush $invest_con batchrefresh '["gahbnbehaskk",[66,59,61]]'  -p gahbnbehaskk
 
@@ -109,7 +109,7 @@ if mpush $invest_con refreshstat '["gahbnbehaskk",999999]' -p gahbnbehaskk; then
 fi
 
 
-mpush $invest_con endraisegain '["gahbnbehaskk",73]' -p gahbnbehaskk
+mpush $invest_con endraisegain '["gahbnbehaskk",76]' -p gahbnbehaskk
 
 
 mpush $invest_con delplan '[42]' -p flonian

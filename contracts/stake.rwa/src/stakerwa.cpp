@@ -327,7 +327,7 @@ void stakerwa::batchunstake(const uint64_t& plan_id) {
         string memo = "refund:" + std::to_string(plan_id) + ":" + investor.to_string();
 
         // === 资金流：stake.rwa → invest.rwa（退回 receipt token）===
-        TRANSFER("rwafi.token"_n, INVEST_POOL, refund_amount, memo);
+        TRANSFER("rwa.token"_n, INVEST_POOL, refund_amount, memo);
 
 
         stakerwa::notify_action act{ get_self(), { {get_self(), "active"_n} } };

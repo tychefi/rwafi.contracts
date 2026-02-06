@@ -19,7 +19,7 @@ using namespace wasm::db;
  * 合约：stakerwa
  * 功能：RWA 质押奖励系统
  * 说明：
- *   - 用户通过 rwafi.token 转账质押（on_transfer_rwafi）
+ *   - 用户通过 rwa.token 转账质押（on_transfer_rwafi）
  *   - 管理员通过 sing.token 转账注入奖励（on_transfer_reward）
  *   - 用户通过 claim 领取 SING 奖励
  */
@@ -84,10 +84,10 @@ public:
     ACTION batchunstake(const uint64_t& plan_id);
     // ========== 监听转账 ==========
     /**
-     * 用户质押（监听 rwafi.token 转账）
+     * 用户质押（监听 rwa.token 转账）
      * memo 格式： "stake:<plan_id>:user"
      */
-    [[eosio::on_notify("rwafi.token::transfer")]]
+    [[eosio::on_notify("rwa.token::transfer")]]
     void on_transfer_rwafi(const name& from, const name& to, const asset& quantity, const std::string& memo);
 
     /**

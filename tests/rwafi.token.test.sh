@@ -1,4 +1,4 @@
-rwafi_token=rwafi.token
+rwafi_token=rwa.token
 mreg flon $rwafi_token flonian
 mtran flonian $rwafi_token "100 FLON"
 mset $rwafi_token flon.token

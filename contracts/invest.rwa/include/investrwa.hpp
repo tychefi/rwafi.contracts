@@ -103,7 +103,7 @@ public:
     ACTION notify(const name& contract,const name& from,const name& to,const asset& quantity,const string& memo,const string& type,const uint64_t& plan_id);
 
 
-    [[eosio::on_notify("rwafi.token::transfer")]]
+    [[eosio::on_notify("rwa.token::transfer")]]
     void on_rwafi_transfer(const name& from, const name& to, const asset& quantity, const std::string& memo);
 
     [[eosio::on_notify("sing.token::transfer")]]

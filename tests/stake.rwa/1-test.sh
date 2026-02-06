@@ -26,5 +26,5 @@ mpush stake.rwa unstake '["gahbnbehaskk",26,"400.0000 STRDXB"]' -p gahbnbehaskk
 
 
 
-mpush rwafi.token transfer '["flonian","stake.rwa","400.0000 STRDXB","stake:26:flonian"]' -p flonian
+mpush rwa.token transfer '["flonian","stake.rwa","400.0000 STRDXB","stake:26:flonian"]' -p flonian
 
