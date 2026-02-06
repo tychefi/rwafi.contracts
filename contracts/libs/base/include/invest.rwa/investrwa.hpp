@@ -71,6 +71,7 @@ public:
                         const uint32_t& guaranteed_yield_apr  );
 
     ACTION cancelplan( const name& creator, const uint64_t& plan_id );
+    ACTION endraisegain( const name& caller, const uint64_t& plan_id );
     ACTION refreshstat(const name& submitter,const uint64_t& plan_id);
     ACTION refreshstatbatch(const name& submitter, const std::vector<uint64_t>& plan_ids);
     ACTION setoracle(const name& account, const bool& enabled);

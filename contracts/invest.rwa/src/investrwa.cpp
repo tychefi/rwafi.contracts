@@ -286,6 +286,36 @@ void investrwa::cancelplan(const name& caller, const uint64_t& plan_id) {
         { permission_level{ get_self(), "active"_n } }
     }.send(plan_id);
 }
+//提前结束募资进入收益期
+void investrwa::endraisegain(const name& caller, const uint64_t& plan_id) {
+    require_auth(caller);
+
+    fundplan_t plan(plan_id);
+    CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
+
+    const bool is_creator = (caller == plan.creator);
+    CHECKC( is_creator, err::NO_AUTH, "only creator can end fundraising");
+
+    const time_point_sec now = current_time_sec();
+    CHECKC(now >= plan.start_time, err::INVALID_STATUS, "fundraising not started");
+    CHECKC(now < plan.end_time, err::INVALID_STATUS, "fundraising already ended");
+
+    _update_plan_status(plan);
+    CHECKC(plan.status == PlanStatus::SUCCESS, err::INVALID_STATUS, "plan must be success");
+
+    plan.end_time = now;
+    plan.return_end_time = time_point_sec(now.sec_since_epoch() + plan.return_months * seconds_per_month);
+
+    _update_plan_status(plan);
+    plan.updated_at = time_point(current_time_point());
+    _db.set(plan, _self);
+
+    if (now >= plan.end_time && now < plan.return_end_time &&
+        plan.status == PlanStatus::SUCCESS &&
+        !liquidity_market_exists(plan)) {
+        _create_liquidity(plan);
+    }
+}
 
 void investrwa::delplan(const uint64_t& plan_id) {
     require_auth(_gstate.admin);
