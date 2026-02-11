@@ -85,6 +85,17 @@ TBL plan_buyback_t {
     EOSLIB_SERIALIZE(plan_buyback_t,(plan_id)(total_buyback)(used_buyback)(total_voucher)(max_slippage)(updated_at))
 };
 
+//self: self
+TBL whitelist_t {
+    name            account;
+    time_point_sec  created_at;
+
+    uint64_t primary_key() const { return account.value; }
+    typedef eosio::multi_index<"whitelist"_n, whitelist_t> idx_t;
+
+    EOSLIB_SERIALIZE(whitelist_t, (account)(created_at))
+};
+
 
 
 } // namespace rwafi

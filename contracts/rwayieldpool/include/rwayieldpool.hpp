@@ -69,7 +69,8 @@ public:
     // === External Query ===
     asset get_yearly_yield(const uint64_t& plan_id, const uint64_t& year, const string& type = "total") const;
 
-    ACTION buyback(const name& submitter,const uint64_t& plan_id);
+    ACTION buyback(const name& submitter,const uint64_t& plan_id,const asset& buyback_quantity,const uint16_t& max_slippage);
+    ACTION setbkwhite(const name& submitter, const name& account, const bool& enabled);
 
     ACTION setslippage(const name& submitter,const uint64_t& plan_id, const uint16_t& max_slippage);
 

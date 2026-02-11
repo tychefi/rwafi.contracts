@@ -11,6 +11,9 @@ mcli set account permission $yield_con active --add-code
 
 mpush  $yield_con init  '["flonian"]' -p $yield_con
 
+mpush  $yield_con setbkwhite  '["flonian","flonian",true]' -p flonian
+
+
 mpush  $yield_con setslippage  '["flonian",8,200]' -p flonian
 
 
@@ -25,8 +28,8 @@ if mpush sing.token transfer '["flonian", "rwayieldpool", "1.0000 SING", "plan:3
   echo "unexpected success: yield transfer should fail with precision mismatch"
 fi
 
-mpush $yield_con buyback '["flonian",8]' -p flonian
+mpush $yield_con buyback '["flonian",5,"10.00000000 SING",100]' -p flonian
 
 
 #非admin，报错
-mpush  $yield_con setslippage  '["gahbnbehaskk",8,200]' -p gahbnbehaskk
+mpush  $yield_con setslippage  '["gahbnbehaskk",5,500]' -p gahbnbehaskk

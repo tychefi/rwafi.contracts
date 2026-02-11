@@ -18,6 +18,26 @@
     act.send(user, sym1, contract1, sym2, contract2, liq_sym); \
 }
 
+#define SWAPSETTPCONF(contract, admin, tpcode, redeem_flag, sys_fee_receiver, split_id, extra_buy_fee_ratio, extra_sell_fee_ratio, extra_fee_receiver, whitelist) \
+{ \
+    eosio::action( \
+        permission_level{admin, active_perm}, \
+        contract, \
+        "settpconf"_n, \
+        std::make_tuple( \
+            admin, \
+            tpcode, \
+            redeem_flag, \
+            sys_fee_receiver, \
+            split_id, \
+            extra_buy_fee_ratio, \
+            extra_sell_fee_ratio, \
+            extra_fee_receiver, \
+            whitelist \
+        ) \
+    ).send(); \
+}
+
 using std::chrono::system_clock;
 using namespace wasm;
 using namespace eosio;
@@ -314,6 +334,18 @@ void rwaverse::endraisegain(const name& caller, const uint64_t& plan_id) {
         plan.status == PlanStatus::SUCCESS &&
         !liquidity_market_exists(plan)) {
         _create_liquidity(plan);
+        SWAPSETTPCONF(
+            SWAP_POOL,
+            get_self(),
+            flon::flonswap::pool_symbol(plan.receipt_symbol, SING_SYM),
+            true,
+            get_self(),
+            (uint64_t)1,
+            (int16_t)30,
+            (int16_t)30,
+            get_self(),
+            std::set<name>{}
+        );
     }
 }
 
@@ -360,6 +392,18 @@ void rwaverse::refreshstat(const name& submitter,const uint64_t& plan_id){
         plan.status == PlanStatus::SUCCESS &&
         !liquidity_market_exists(plan)) {
         _create_liquidity(plan);
+        SWAPSETTPCONF(
+            SWAP_POOL,
+            get_self(),
+            flon::flonswap::pool_symbol(plan.receipt_symbol, SING_SYM),
+            true,
+            get_self(),
+            (uint64_t)1,
+            (int16_t)0,
+            (int16_t)0,
+            get_self(),
+            std::set<name>{}
+        );
     }
 }
 
@@ -396,6 +440,18 @@ void rwaverse::batchrefresh(const name& submitter, const std::vector<uint64_t>& 
             plan.status == PlanStatus::SUCCESS &&
             !liquidity_market_exists(plan)) {
             _create_liquidity(plan);
+            SWAPSETTPCONF(
+                SWAP_POOL,
+                get_self(),
+                flon::flonswap::pool_symbol(plan.receipt_symbol, SING_SYM),
+                true,
+                get_self(),
+                (uint64_t)1,
+                (int16_t)0,
+                (int16_t)0,
+                get_self(),
+                std::set<name>{}
+            );
         }
     }
 }
@@ -739,6 +795,7 @@ void rwaverse::_create_liquidity(fundplan_t& plan) {
         //        ", liq_sym=" + lp_symbol_str);
         SWAPCREATE(SWAP_POOL,_self,plan.receipt_symbol, plan.receipt_asset_contract,SING_SYM, SING_BANK,symbol_code(lp_symbol_str) );
     }
+
     // CHECKC(false, err::PARAM_ERROR, "tpcode=" + tpcode.to_string());
     rwaverse::liquidity_action mine{ get_self(), { get_self(), "active"_n } };
     mine.send(plan.id,tpcode);

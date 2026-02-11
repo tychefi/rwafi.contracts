@@ -11,12 +11,11 @@
 #include <rwaguarapool/rwaguarapooldb.hpp>
 #include <flon.swap/flon.swap.db.hpp>
 #include <rwastakepool/rwastakepooldb.hpp>
+#include <rwaverse.io/rwaverse.hpp>
 
 using namespace eosio;
 using namespace rwafi;
 using namespace flon;
-
-static constexpr eosio::name active_perm{"active"_n};
 
 static uint64_t current_period_yyyymm() {
     time_t t = (time_t) current_time_point().sec_since_epoch();
@@ -25,33 +24,49 @@ static uint64_t current_period_yyyymm() {
 }
 
 static void refresh_plan_status(const name& submitter, uint64_t plan_id) {
-    rwaverse::refreshstat_action act{ get_self(), { {get_self(), "active"_n} } };
-    act.send(submitter,plan_id);
-
-
+    rwafi::rwaverse::refreshstat_action act{
+        INVEST_POOL,
+        { {submitter, "active"_n} }
+    };
+    act.send(submitter, plan_id);
 }
 
-int64_t calc_min_received(const asset& input, const asset& in_pool, const asset& out_pool, uint16_t slippage_bp)
+int64_t calc_min_received(const asset& input,
+                         const asset& in_pool,
+                         const asset& out_pool,
+                         uint16_t slippage_bp,
+                         uint16_t sys_fee_ratio,
+                         uint16_t extra_fee_ratio)
 {
-    CHECKC(in_pool.amount > 0 && out_pool.amount > 0, err::PARAM_ERROR, "invalid pool amounts");
-    CHECKC(slippage_bp <= 10000, err::PARAM_ERROR, "invalid slippage");
+    CHECKC(in_pool.amount > 0 && out_pool.amount > 0, ::err::PARAM_ERROR, "invalid pool amounts");
+    CHECKC(slippage_bp <= 10000, ::err::PARAM_ERROR, "invalid slippage");
+    CHECKC(sys_fee_ratio <= 10000, ::err::PARAM_ERROR, "invalid sys fee");
+    CHECKC(extra_fee_ratio <= 10000, ::err::PARAM_ERROR, "invalid extra fee");
 
-    uint128_t numerator = (uint128_t)input.amount * (uint128_t)out_pool.amount;
-    uint128_t denom = (uint128_t)in_pool.amount;
+    uint32_t total_fee_ratio = (uint32_t)sys_fee_ratio + (uint32_t)extra_fee_ratio;
+    CHECKC(total_fee_ratio < 10000, ::err::PARAM_ERROR, "total fee too large");
+
+    uint128_t effective_in = (uint128_t)input.amount * (uint128_t)(10000 - total_fee_ratio) / (uint128_t)10000;
+    CHECKC(effective_in > 0, ::err::PARAM_ERROR, "effective input too small");
+
+    // AMM constant-product estimate: out = dx' * y / (x + dx')
+    uint128_t numerator = effective_in * (uint128_t)out_pool.amount;
+    uint128_t denom = (uint128_t)in_pool.amount + effective_in;
+    CHECKC(denom > 0, ::err::PARAM_ERROR, "invalid denominator");
     uint128_t out = numerator / denom;
     out = out * (uint128_t)(10000 - slippage_bp) / 10000;
 
-    CHECKC(out <= std::numeric_limits<int64_t>::max(), err::PARAM_ERROR, "min amount overflow");
+    CHECKC(out <= std::numeric_limits<int64_t>::max(), ::err::PARAM_ERROR, "min amount overflow");
     return (int64_t)out;
 }
 
 string build_swap_memo(const extended_asset& input,const name& pair_name,uint16_t slippage_bp,const name& swap_contract)
 {
-    CHECKC(slippage_bp <= 10000, err::PARAM_ERROR, "invalid slippage");
+    CHECKC(slippage_bp <= 10000, ::err::PARAM_ERROR, "invalid slippage");
 
     flon::market_t::idx_t markets(swap_contract, swap_contract.value);
     auto itr = markets.find(pair_name.value);
-    CHECKC(itr != markets.end(), err::RECORD_NOT_FOUND, "swap market not found");
+    CHECKC(itr != markets.end(), ::err::RECORD_NOT_FOUND, "swap market not found");
 
     extended_asset left = itr->left_pool_quant;
     extended_asset right = itr->right_pool_quant;
@@ -64,12 +79,23 @@ string build_swap_memo(const extended_asset& input,const name& pair_name,uint16_
         (input.contract == right.contract &&
          input.quantity.symbol == right.quantity.symbol);
 
-    CHECKC(is_left_input || is_right_input, err::SYMBOL_MISMATCH, "input not in pair");
+    CHECKC(is_left_input || is_right_input, ::err::SYMBOL_MISMATCH, "input not in pair");
 
     extended_asset in_pool  = is_left_input ? left  : right;
     extended_asset out_pool = is_left_input ? right : left;
 
-    int64_t min_amt = calc_min_received(input.quantity, in_pool.quantity, out_pool.quantity, slippage_bp);
+    uint16_t extra_fee_ratio = is_left_input
+        ? (uint16_t)std::max<int16_t>(0, itr->sell_fee_ratio)
+        : (uint16_t)std::max<int16_t>(0, itr->buy_fee_ratio);
+
+    int64_t min_amt = calc_min_received(
+        input.quantity,
+        in_pool.quantity,
+        out_pool.quantity,
+        slippage_bp,
+        itr->sys_fee_ratio,
+        extra_fee_ratio
+    );
 
     return string("swap:") + asset(min_amt, out_pool.quantity.symbol).to_string()
            + ":" + pair_name.to_string();
@@ -90,7 +116,7 @@ name rwayieldpool::find_pair_by_symbols(const symbol& in_sym,const symbol& out_s
         }
     }
 
-    CHECKC(false, err::RECORD_NOT_FOUND,
+    CHECKC(false, ::err::RECORD_NOT_FOUND,
            "swap pair not found for symbols: "
            + in_sym.code().to_string() + " <-> " + out_sym.code().to_string());
     return name{0};
@@ -107,14 +133,22 @@ void rwayieldpool::notify(const name& contract,
 
 void rwayieldpool::init(const name& admin) {
     require_auth(get_self());
-    CHECKC(is_account(admin), err::ACCOUNT_INVALID, "invalid admin account");
+    CHECKC(is_account(admin), ::err::ACCOUNT_INVALID, "invalid admin account");
     _gstate.admin = admin;
     _global.set(_gstate, get_self());
+
+    whitelist_t::idx_t wl(get_self(), get_self().value);
+    if (wl.find(admin.value) == wl.end()) {
+        wl.emplace(get_self(), [&](auto& row) {
+            row.account = admin;
+            row.created_at = time_point_sec(current_time_point());
+        });
+    }
 }
 
 void rwayieldpool::updateconfig(const name& key, const uint8_t& value) {
     require_auth(_gstate.admin);
-    CHECKC(_gstate.yield_split_conf.count(key), err::PARAM_ERROR, "invalid yield key");
+    CHECKC(_gstate.yield_split_conf.count(key), ::err::PARAM_ERROR, "invalid yield key");
     _gstate.yield_split_conf[key] = value;
     _global.set(_gstate, get_self());
 }
@@ -122,45 +156,54 @@ void rwayieldpool::updateconfig(const name& key, const uint8_t& value) {
 void rwayieldpool::on_transfer(const name& from, const name& to,const asset& quantity, const string& memo)
 {
     if (from == get_self() || to != get_self()) return;
-    CHECKC(quantity.amount > 0, err::NOT_POSITIVE, "quantity must be positive");
+    CHECKC(quantity.amount > 0, ::err::NOT_POSITIVE, "quantity must be positive");
     CHECKC(quantity.symbol.precision() == SING_SYM.precision(),
-           err::INVALID_FORMAT, "precision mismatch");
+           ::err::INVALID_FORMAT, "precision mismatch");
 
     auto parts = split(memo, ":");
     CHECKC(parts.size() == 2 && parts[0] == "plan",
-           err::INVALID_FORMAT, "memo must be plan:<id>");
+           ::err::INVALID_FORMAT, "memo must be plan:<id>");
 
     uint64_t plan_id = std::stoull(parts[1]);
     refresh_plan_status( get_self(), plan_id);
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
-    CHECKC(p != plans.end(), err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(p != plans.end(), ::err::RECORD_NOT_FOUND, "plan not found");
 
     CHECKC(p->goal_quantity.symbol == quantity.symbol,
-           err::SYMBOL_MISMATCH, "symbol mismatch");
+           ::err::SYMBOL_MISMATCH, "symbol mismatch");
 
     const name bank = get_first_receiver();
     _perform_distribution(bank, quantity, plan_id);
 }
 //未分配的那一部分收益，进行回购
-void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id)
+void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id,const asset& buyback_quantity,const uint16_t& max_slippage)
 {
     require_auth(submitter);
+
+    whitelist_t::idx_t wl(get_self(), get_self().value);
+    CHECKC(wl.find(submitter.value) != wl.end(), ::err::NO_AUTH, "submitter not in whitelist");
+
     refresh_plan_status( get_self(), plan_id);
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
-    CHECKC(p != plans.end(), err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(p->status == "success"_n || p->status == "completed"_n, err::STATUS_ERROR, "plan not in success/completed state");
+    CHECKC(p != plans.end(), ::err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(p->status == "success"_n || p->status == "completed"_n, ::err::STATUS_ERROR, "plan not in success/completed state");
 
     plan_buyback_t::pl_tbl tbl(get_self(), get_self().value);
     auto it = tbl.find(plan_id);
-    CHECKC(it != tbl.end(), err::RECORD_NOT_FOUND,
+    CHECKC(it != tbl.end(), ::err::RECORD_NOT_FOUND,
            "planbuyback record missing");
 
     asset remaining = it->remaining();
-    CHECKC(remaining.amount > 0, err::INCORRECT_AMOUNT, "no buyback balance");
+    CHECKC(remaining.amount > 0, ::err::INCORRECT_AMOUNT, "no buyback balance");
+    CHECKC(max_slippage <= 2000, ::err::PARAM_ERROR, "slippage too large");
+    CHECKC(max_slippage <= it->max_slippage, ::err::PARAM_ERROR, "slippage exceeds configured max");
+    CHECKC(buyback_quantity.amount > 0, ::err::NOT_POSITIVE, "buyback quantity must be positive");
+    CHECKC(buyback_quantity.symbol == remaining.symbol, ::err::SYMBOL_MISMATCH, "buyback symbol mismatch");
+    CHECKC(buyback_quantity.amount <= remaining.amount, ::err::INCORRECT_AMOUNT, "buyback quantity exceeds remaining balance");
 
     symbol sing = p->goal_quantity.symbol;
     symbol voucher = p->receipt_symbol;
@@ -169,33 +212,55 @@ void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id)
     name pair = find_pair_by_symbols(sing, voucher, SWAP_POOL);
 
     string memo = build_swap_memo(
-        extended_asset(remaining, bank),
+        extended_asset(buyback_quantity, bank),
         pair,
-        it->max_slippage,
+        max_slippage,
         SWAP_POOL
     );
-
-    TRANSFER(bank, SWAP_POOL, remaining, memo);
+    // check(false, "memo: " + memo);
+    TRANSFER(bank, SWAP_POOL, buyback_quantity, memo);
 
     tbl.modify(it, same_payer, [&](auto& row){
-        row.used_buyback += remaining;
+        row.used_buyback += buyback_quantity;
         row.updated_at = time_point_sec(current_time_point());
     });
+}
+
+void rwayieldpool::setbkwhite(const name& submitter, const name& account, const bool& enabled)
+{
+    const bool self_auth = has_auth(get_self());
+    const bool admin_auth = (submitter == _gstate.admin) && has_auth(submitter);
+    CHECKC(self_auth || admin_auth, ::err::NO_AUTH, "missing authority: contract self or admin required");
+    CHECKC(is_account(account), ::err::ACCOUNT_INVALID, "invalid whitelist account");
+
+    whitelist_t::idx_t wl(get_self(), get_self().value);
+    auto itr = wl.find(account.value);
+
+    if (enabled) {
+        CHECKC(itr == wl.end(), ::err::PARAM_ERROR, "account already in whitelist");
+        wl.emplace(get_self(), [&](auto& row) {
+            row.account = account;
+            row.created_at = time_point_sec(current_time_point());
+        });
+    } else {
+        CHECKC(itr != wl.end(), ::err::RECORD_NOT_FOUND, "whitelist account not found");
+        wl.erase(itr);
+    }
 }
 
 void rwayieldpool::setslippage(const name& submitter,const uint64_t& plan_id,const uint16_t& max_slippage)
 {
     require_auth(submitter);
-    CHECKC(submitter == _gstate.admin, err::NO_AUTH,
+    CHECKC(submitter == _gstate.admin, ::err::NO_AUTH,
            "only admin can update slippage");
 
-    CHECKC(max_slippage <= 2000, err::PARAM_ERROR,
+    CHECKC(max_slippage <= 2000, ::err::PARAM_ERROR,
            "slippage too large");
 
     plan_buyback_t::pl_tbl tbl(get_self(), get_self().value);
     auto it = tbl.find(plan_id);
 
-    CHECKC(it != tbl.end(), err::RECORD_NOT_FOUND,
+    CHECKC(it != tbl.end(), ::err::RECORD_NOT_FOUND,
            "planbuyback not found");
 
     tbl.modify(it, submitter, [&](auto& row){
@@ -235,18 +300,18 @@ double rwayieldpool::_get_coverage_ratio(const uint64_t& plan_id){
 //如果stake中计划总量是0的话，分红划给swap
 void rwayieldpool::_perform_distribution(const name& bank,const asset& total,const uint64_t& plan_id)
 {
-    CHECKC(total.amount > 0,    err::NOT_POSITIVE, "zero total");
+    CHECKC(total.amount > 0,    ::err::NOT_POSITIVE, "zero total");
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
 
     auto p = plans.find(plan_id);
-    CHECKC(p != plans.end(),  err::RECORD_NOT_FOUND, "plan not found");
-    CHECKC(p->status == PlanStatus::SUCCESS || p->status == PlanStatus::COMPLETED, err::INVALID_FORMAT, "plan not in yield stage");
-    CHECKC(time_point_sec(current_time_point()) >= p->end_time, err::INVALID_STATUS,"yield not started yet");
-    CHECKC(total.symbol == p->goal_quantity.symbol,   err::SYMBOL_MISMATCH, "symbol mismatch");
+    CHECKC(p != plans.end(),  ::err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(p->status == PlanStatus::SUCCESS || p->status == PlanStatus::COMPLETED, ::err::INVALID_FORMAT, "plan not in yield stage");
+    CHECKC(time_point_sec(current_time_point()) >= p->end_time, ::err::INVALID_STATUS,"yield not started yet");
+    CHECKC(total.symbol == p->goal_quantity.symbol,   ::err::SYMBOL_MISMATCH, "symbol mismatch");
 
     auto& cfg = _gstate.yield_split_conf;
-    CHECKC(cfg.count(STAKE_POOL) &&cfg.count(GUARANTY_POOL) &&cfg.count(SWAP_POOL),err::PARAM_ERROR, "yield config missing keys");
+    CHECKC(cfg.count(STAKE_POOL) &&cfg.count(GUARANTY_POOL) &&cfg.count(SWAP_POOL),::err::PARAM_ERROR, "yield config missing keys");
 
     double stake_pct    = cfg[STAKE_POOL];
     double guaranty_pct = cfg[GUARANTY_POOL] * _get_coverage_ratio(plan_id);
@@ -268,7 +333,7 @@ void rwayieldpool::_perform_distribution(const name& bank,const asset& total,con
     // === 没人 stake 时，stake 份额并入 swap ===
     stake_plan_t::tbl_t stakeplans(STAKE_POOL, STAKE_POOL.value);
     auto sitr = stakeplans.find(plan_id);
-    CHECKC(sitr != stakeplans.end(),err::RECORD_NOT_FOUND, "stake plan not found");
+    CHECKC(sitr != stakeplans.end(),::err::RECORD_NOT_FOUND, "stake plan not found");
     if (sitr->total_staked.amount == 0 && stake.amount > 0) {
         swap += stake;
         stake.amount = 0;
@@ -349,7 +414,7 @@ void rwayieldpool::_log_yield(const uint64_t& plan_id,const asset& total,const a
 asset rwayieldpool::_calc_yearly_yield_core(const uint64_t& plan_id,const uint64_t& year,const string& type) const
 {
     yield_log_t::idx_t logs(get_self(), plan_id);
-    CHECKC(logs.begin() != logs.end(), err::RECORD_NOT_FOUND,
+    CHECKC(logs.begin() != logs.end(), ::err::RECORD_NOT_FOUND,
            "no yield logs");
 
     uint64_t total = 0;
@@ -385,21 +450,21 @@ void rwayieldpool::recordyield(const uint64_t& plan_id,const asset&    total_yie
     } else {
         require_auth(GUARANTY_POOL);
     }
-    CHECKC(total_yield.amount > 0, err::NOT_POSITIVE, "yield must be positive");
+    CHECKC(total_yield.amount > 0, ::err::NOT_POSITIVE, "yield must be positive");
     CHECKC(total_yield.symbol.precision() == SING_SYM.precision(),
-           err::INVALID_FORMAT, "precision mismatch");
+           ::err::INVALID_FORMAT, "precision mismatch");
     refresh_plan_status( get_self(), plan_id);
 
     // 1. 读取 plan（只读 rwaverse.io）
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
-    CHECKC(p != plans.end(), err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(p != plans.end(), ::err::RECORD_NOT_FOUND, "plan not found");
 
     CHECKC(p->status == PlanStatus::SUCCESS || p->status == PlanStatus::COMPLETED,
-           err::INVALID_STATUS, "plan not in yield stage");
+           ::err::INVALID_STATUS, "plan not in yield stage");
 
     CHECKC(total_yield.symbol == p->goal_quantity.symbol,
-           err::SYMBOL_MISMATCH, "symbol mismatch");
+           ::err::SYMBOL_MISMATCH, "symbol mismatch");
 
     // 2. 计算 period（UTC YYYYMM）
     const uint64_t period = []() {
