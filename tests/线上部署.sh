@@ -12,7 +12,7 @@ mpush $invest_con init '["flonian"]' -p $invest_con
 mpush $invest_con addtoken '["sing.token","8,SING"]' -p $invest_con
 
 
-guaranty_con=rwaguarapool
+guaranty_con=rwaguardpool
 mreg flon $guaranty_con flonian
 mtran flonian $guaranty_con "100 FLON"
 mset $guaranty_con rwaguarapool
