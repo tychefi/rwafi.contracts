@@ -15,7 +15,7 @@ mpush $invest_con addtoken '["sing.token","8,SING"]' -p $invest_con
 guaranty_con=rwaguardpool
 mreg flon $guaranty_con flonian
 mtran flonian $guaranty_con "100 FLON"
-mset $guaranty_con rwaguardpool
+mset $guaranty_con rwaguarapool
 mcli set account permission $guaranty_con active --add-code
 
 mpush   $guaranty_con init  '["flonian"]' -p $guaranty_con
