@@ -12,10 +12,10 @@ mpush $invest_con init '["flonian"]' -p $invest_con
 mpush $invest_con addtoken '["sing.token","8,SING"]' -p $invest_con
 
 
-guaranty_con=rwaguarapool
+guaranty_con=rwaguardpool
 mreg flon $guaranty_con flonian
 mtran flonian $guaranty_con "100 FLON"
-mset $guaranty_con rwaguarapool
+mset $guaranty_con rwaguardpool
 mcli set account permission $guaranty_con active --add-code
 
 mpush   $guaranty_con init  '["flonian"]' -p $guaranty_con
@@ -53,5 +53,5 @@ mpush $invest_con setoracle '["flonian", true]' -p $invest_con
 #合约刷新需要
 mpush $invest_con setoracle '["rwastakepool", true]' -p $invest_con
 mpush $invest_con setoracle '["rwayieldpool", true]' -p $invest_con
-mpush $invest_con setoracle '["rwaguarapool", true]' -p $invest_con
+mpush $invest_con setoracle '["rwaguardpool", true]' -p $invest_con
 
