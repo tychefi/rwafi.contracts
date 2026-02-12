@@ -61,14 +61,9 @@ TBL yield_log_t {
 //self: self
 TBL plan_buyback_t {
     uint64_t    plan_id;               // PK
-
     asset       total_buyback;         // 累计 buyback_yield（从收益分配累积）
     asset       used_buyback;          // 已用于回购的 SING 数量
-
-    asset       total_voucher;         // 累计回购到的凭证资产
-
-    uint16_t    max_slippage = 100;    // 1% = 100 bp
-
+    asset       total_voucher;         // 累计回购到的凭证资
     time_point_sec updated_at;
 
     uint64_t primary_key() const { return plan_id; }
@@ -82,7 +77,7 @@ TBL plan_buyback_t {
     }
     typedef eosio::multi_index<"planbuyback"_n, plan_buyback_t> pl_tbl;
 
-    EOSLIB_SERIALIZE(plan_buyback_t,(plan_id)(total_buyback)(used_buyback)(total_voucher)(max_slippage)(updated_at))
+    EOSLIB_SERIALIZE(plan_buyback_t,(plan_id)(total_buyback)(used_buyback)(total_voucher)(updated_at))
 };
 
 } // namespace rwafi

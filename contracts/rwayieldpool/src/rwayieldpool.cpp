@@ -184,13 +184,10 @@ void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id,const a
 
     plan_buyback_t::pl_tbl tbl(get_self(), get_self().value);
     auto it = tbl.find(plan_id);
-    CHECKC(it != tbl.end(), ::err::RECORD_NOT_FOUND,
-           "planbuyback record missing");
+    CHECKC(it != tbl.end(), ::err::RECORD_NOT_FOUND,"planbuyback record missing");
 
     asset remaining = it->remaining();
     CHECKC(remaining.amount > 0, ::err::INCORRECT_AMOUNT, "no buyback balance");
-    CHECKC(max_slippage <= 2000, ::err::PARAM_ERROR, "slippage too large");
-    CHECKC(max_slippage <= it->max_slippage, ::err::PARAM_ERROR, "slippage exceeds configured max");
     CHECKC(buyback_quantity.amount > 0, ::err::NOT_POSITIVE, "buyback quantity must be positive");
     CHECKC(buyback_quantity.symbol == remaining.symbol, ::err::SYMBOL_MISMATCH, "buyback symbol mismatch");
     CHECKC(buyback_quantity.amount <= remaining.amount, ::err::INCORRECT_AMOUNT, "buyback quantity exceeds remaining balance");
@@ -212,27 +209,6 @@ void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id,const a
 
     tbl.modify(it, same_payer, [&](auto& row){
         row.used_buyback += buyback_quantity;
-        row.updated_at = time_point_sec(current_time_point());
-    });
-}
-
-void rwayieldpool::setslippage(const name& submitter,const uint64_t& plan_id,const uint16_t& max_slippage)
-{
-    require_auth(submitter);
-    CHECKC(submitter == _gstate.admin, ::err::NO_AUTH,
-           "only admin can update slippage");
-
-    CHECKC(max_slippage <= 2000, ::err::PARAM_ERROR,
-           "slippage too large");
-
-    plan_buyback_t::pl_tbl tbl(get_self(), get_self().value);
-    auto it = tbl.find(plan_id);
-
-    CHECKC(it != tbl.end(), ::err::RECORD_NOT_FOUND,
-           "planbuyback not found");
-
-    tbl.modify(it, submitter, [&](auto& row){
-        row.max_slippage = max_slippage;
         row.updated_at = time_point_sec(current_time_point());
     });
 }
@@ -326,7 +302,6 @@ void rwayieldpool::_perform_distribution(const name& bank,const asset& total,con
                 row.total_buyback = swap;
                 row.used_buyback  = zero;
                 row.total_voucher = zero;
-                row.max_slippage  = 100; // 1%
                 row.updated_at    = time_point_sec(current_time_point());
             });
         } else {
@@ -469,3 +444,4 @@ void rwayieldpool::recordyield(const uint64_t& plan_id,const asset&    total_yie
         });
     }
 }
+

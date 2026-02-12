@@ -71,9 +71,8 @@ public:
 
     ACTION buyback(const name& submitter,const uint64_t& plan_id,const asset& buyback_quantity,const uint16_t& max_slippage);
 
-    ACTION setslippage(const name& submitter,const uint64_t& plan_id, const uint16_t& max_slippage);
-
     ACTION recordyield(const uint64_t& plan_id,const asset&    total_yield);
+
     using recordyield_action            = eosio::action_wrapper<"recordyield"_n, &rwayieldpool::recordyield>;
     using notify_action                 = eosio::action_wrapper<"notify"_n, &rwayieldpool::notify>;
 
