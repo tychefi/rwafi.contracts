@@ -36,7 +36,6 @@ mset $yield_con rwayieldpool
 mcli set account permission $yield_con active --add-code
 
 mpush  $yield_con init  '["flonian"]' -p $yield_con
-mpush  $yield_con setslippage  '["flonian",8,200]' -p flonian
 
 
 rwafi_token=rwa.vtoken

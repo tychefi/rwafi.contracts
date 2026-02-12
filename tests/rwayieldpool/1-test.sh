@@ -30,3 +30,6 @@ mpush $yield_con buyback '["flonian",5,"10.00000000 SING",100]' -p flonian
 
 #非admin，报错
 mpush  $yield_con setslippage  '["gahbnbehaskk",5,500]' -p gahbnbehaskk
+yield_con=rwayieldpool
+mpush  $yield_con delbuyback  '[1]' -p $yield_con
+
