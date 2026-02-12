@@ -55,9 +55,9 @@ NTBL("globals") global_t {
     name            yield_contract      = YIELD_POOL;
     name            guaranty_contract   = GUARANTY_POOL;
     uint64_t        last_plan_id        = 0;
-    std::set<name>  oracles;
+    std::set<name>  whitelists;
 
-    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guaranty_contract)(last_plan_id)(oracles) )
+    EOSLIB_SERIALIZE( global_t, (admin)(stake_contract)(yield_contract)(guaranty_contract)(last_plan_id)(whitelists) )
 };
 typedef eosio::singleton< "globals"_n, global_t > global_singleton;
 

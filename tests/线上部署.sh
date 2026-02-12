@@ -49,9 +49,9 @@ mpush flon.swap settkbanks   "[[\"flon.token\",\"flon.mtoken\",\"sing.token\",\"
 mpush flon.swap  addlpcreator '["rwaverse.io"]' -p swap.admin -p flonian
 
 
-mpush $invest_con setoracle '["flonian", true]' -p $invest_con
+mpush $invest_con setwhitelist '["flonian", true]' -p $invest_con
 #合约刷新需要
-mpush $invest_con setoracle '["rwastakepool", true]' -p $invest_con
-mpush $invest_con setoracle '["rwayieldpool", true]' -p $invest_con
-mpush $invest_con setoracle '["rwaguarapool", true]' -p $invest_con
+mpush $invest_con setwhitelist '["rwastakepool", true]' -p $invest_con
+mpush $invest_con setwhitelist '["rwayieldpool", true]' -p $invest_con
+mpush $invest_con setwhitelist '["rwaguarapool", true]' -p $invest_con
 

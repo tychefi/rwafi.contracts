@@ -12,10 +12,10 @@ mcli set account permission $invest_con active --add-code
 mpush $invest_con init '["flonian"]' -p $invest_con
 mpush $invest_con addtoken '["sing.token","8,SING"]' -p $invest_con
 
-mpush $invest_con setoracle '["flonian", true]' -p $invest_con
-mpush $invest_con setoracle '["rwastakepool", true]' -p $invest_con
-mpush $invest_con setoracle '["rwayieldpool", true]' -p $invest_con
-mpush $invest_con setoracle '["rwaguarapool", true]' -p $invest_con
+mpush $invest_con setwhitelist '["flonian", true]' -p $invest_con
+mpush $invest_con setwhitelist '["rwastakepool", true]' -p $invest_con
+mpush $invest_con setwhitelist '["rwayieldpool", true]' -p $invest_con
+mpush $invest_con setwhitelist '["rwaguarapool", true]' -p $invest_con
 
 
 # mpush $invest_con deltoken '["8,SING"]' -p $invest_con
@@ -93,7 +93,7 @@ mpush sing.token transfer '["flonian", "rwaverse.io", "600.00000000 SING", "plan
 mpush sing.token transfer '["mywallet2", "rwaverse.io", "4000.00000000 SING", "plan:53"]' -p mywallet2
 
 
-mpush $invest_con setoracle '["gahbnbehaskk", true]' -p $invest_con
+mpush $invest_con setwhitelist '["gahbnbehaskk", true]' -p $invest_con
 mpush $invest_con refreshstat '["gahbnbehaskk",76]'  -p gahbnbehaskk
 
 mpush $invest_con batchrefresh '["gahbnbehaskk",[66,59,61]]'  -p gahbnbehaskk

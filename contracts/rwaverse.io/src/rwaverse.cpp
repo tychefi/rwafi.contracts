@@ -97,8 +97,8 @@ bool liquidity_market_exists(const fundplan_t& plan) {
     return markets.find(tpcode.value) != markets.end();
 }
 
-bool is_oracle(const global_t& gstate, const name& account) {
-    return gstate.oracles.find(account) != gstate.oracles.end();
+bool is_whitelisted(const global_t& gstate, const name& account) {
+    return gstate.whitelists.find(account) != gstate.whitelists.end();
 }
 
 } // namespace
@@ -364,7 +364,7 @@ void rwaverse::delplan(const uint64_t& plan_id) {
 
 void rwaverse::refreshstat(const name& submitter,const uint64_t& plan_id){
     require_auth(submitter);
-    CHECKC(is_oracle(_gstate, submitter), err::NO_AUTH, "submitter not in oracle list");
+    CHECKC(is_whitelisted(_gstate, submitter), err::NO_AUTH, "submitter not in whitelist");
 
     fundplan_t plan(plan_id);
     CHECKC(_db.get(plan), err::RECORD_NOT_FOUND, "plan not found");
@@ -409,7 +409,7 @@ void rwaverse::refreshstat(const name& submitter,const uint64_t& plan_id){
 
 void rwaverse::batchrefresh(const name& submitter, const std::vector<uint64_t>& plan_ids, const uint64_t& now_ts) {
     require_auth(submitter);
-    // CHECKC(is_oracle(_gstate, submitter), err::NO_AUTH, "submitter not in oracle list");
+    // CHECKC(is_whitelisted(_gstate, submitter), err::NO_AUTH, "submitter not in whitelist");
     CHECKC(!plan_ids.empty(), err::PARAM_ERROR, "plan_ids empty");
 
     const time_point_sec now = time_point_sec(now_ts);
@@ -502,20 +502,20 @@ void rwaverse::withdraw(const name& caller, const uint64_t& plan_id, const name&
 
 }
 
-void rwaverse::setoracle(const name& account, const bool& enabled) {
+void rwaverse::setwhitelist(const name& account, const bool& enabled) {
     CHECKC(_gstate.admin.value != 0, err::RECORD_NOT_FOUND, "admin not initialized");
     require_auth(get_self());
-    CHECKC(account.value != 0,  err::ACCOUNT_INVALID, "oracle account cannot be empty");
-    CHECKC(is_account(account), err::ACCOUNT_INVALID, "oracle account not exist");
+    CHECKC(account.value != 0,  err::ACCOUNT_INVALID, "whitelist account cannot be empty");
+    CHECKC(is_account(account), err::ACCOUNT_INVALID, "whitelist account not exist");
 
-    auto it = _gstate.oracles.find(account);
+    auto it = _gstate.whitelists.find(account);
     if (enabled) {
-        CHECKC(it == _gstate.oracles.end(), err::RECORD_EXISTS, "oracle already exists");
-        _gstate.oracles.insert(account);
+        CHECKC(it == _gstate.whitelists.end(), err::RECORD_EXISTS, "account already in whitelist");
+        _gstate.whitelists.insert(account);
         _global.set(_gstate, get_self());
     } else {
-        if (it != _gstate.oracles.end()) {
-            _gstate.oracles.erase(it);
+        if (it != _gstate.whitelists.end()) {
+            _gstate.whitelists.erase(it);
             _global.set(_gstate, get_self());
         }
     }
