@@ -136,14 +136,6 @@ void rwayieldpool::init(const name& admin) {
     CHECKC(is_account(admin), ::err::ACCOUNT_INVALID, "invalid admin account");
     _gstate.admin = admin;
     _global.set(_gstate, get_self());
-
-    whitelist_t::idx_t wl(get_self(), get_self().value);
-    if (wl.find(admin.value) == wl.end()) {
-        wl.emplace(get_self(), [&](auto& row) {
-            row.account = admin;
-            row.created_at = time_point_sec(current_time_point());
-        });
-    }
 }
 
 void rwayieldpool::updateconfig(const name& key, const uint8_t& value) {
@@ -182,14 +174,12 @@ void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id,const a
 {
     require_auth(submitter);
 
-    whitelist_t::idx_t wl(get_self(), get_self().value);
-    CHECKC(wl.find(submitter.value) != wl.end(), ::err::NO_AUTH, "submitter not in whitelist");
-
     refresh_plan_status( get_self(), plan_id);
 
     fundplan_t::idx_t plans(INVEST_POOL, INVEST_POOL.value);
     auto p = plans.find(plan_id);
     CHECKC(p != plans.end(), ::err::RECORD_NOT_FOUND, "plan not found");
+    CHECKC(p->creator == submitter, ::err::NO_AUTH, "only plan creator can buy back");
     CHECKC(p->status == "success"_n || p->status == "completed"_n, ::err::STATUS_ERROR, "plan not in success/completed state");
 
     plan_buyback_t::pl_tbl tbl(get_self(), get_self().value);
@@ -224,28 +214,6 @@ void rwayieldpool::buyback(const name& submitter,const uint64_t& plan_id,const a
         row.used_buyback += buyback_quantity;
         row.updated_at = time_point_sec(current_time_point());
     });
-}
-
-void rwayieldpool::setbkwhite(const name& submitter, const name& account, const bool& enabled)
-{
-    const bool self_auth = has_auth(get_self());
-    const bool admin_auth = (submitter == _gstate.admin) && has_auth(submitter);
-    CHECKC(self_auth || admin_auth, ::err::NO_AUTH, "missing authority: contract self or admin required");
-    CHECKC(is_account(account), ::err::ACCOUNT_INVALID, "invalid whitelist account");
-
-    whitelist_t::idx_t wl(get_self(), get_self().value);
-    auto itr = wl.find(account.value);
-
-    if (enabled) {
-        CHECKC(itr == wl.end(), ::err::PARAM_ERROR, "account already in whitelist");
-        wl.emplace(get_self(), [&](auto& row) {
-            row.account = account;
-            row.created_at = time_point_sec(current_time_point());
-        });
-    } else {
-        CHECKC(itr != wl.end(), ::err::RECORD_NOT_FOUND, "whitelist account not found");
-        wl.erase(itr);
-    }
 }
 
 void rwayieldpool::setslippage(const name& submitter,const uint64_t& plan_id,const uint16_t& max_slippage)

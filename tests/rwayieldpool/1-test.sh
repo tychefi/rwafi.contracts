@@ -11,9 +11,6 @@ mcli set account permission $yield_con active --add-code
 
 mpush  $yield_con init  '["flonian"]' -p $yield_con
 
-mpush  $yield_con setbkwhite  '["flonian","flonian",true]' -p flonian
-
-
 mpush  $yield_con setslippage  '["flonian",8,200]' -p flonian
 
 

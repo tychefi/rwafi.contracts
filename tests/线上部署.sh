@@ -56,7 +56,3 @@ mpush $invest_con setoracle '["rwastakepool", true]' -p $invest_con
 mpush $invest_con setoracle '["rwayieldpool", true]' -p $invest_con
 mpush $invest_con setoracle '["rwaguarapool", true]' -p $invest_con
 
-#设置回购的白名单
-white_user=rwa.vtoken
-mpush $yield_con setbkwhite "[\"flonian\",\"${white_user}\",true]" -p flonian
-
